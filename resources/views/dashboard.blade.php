@@ -1,168 +1,116 @@
 @extends('layouts.app')
 
-@section('title', 'لوحة التحكم')
+@section('title', 'الرئيسية')
 
 @section('content')
-<div class="space-y-6">
-    <div class="rounded-[32px] border border-slate-200/70 bg-gradient-to-br from-slate-950 to-slate-900 p-6 shadow-[0_30px_100px_-50px_rgba(15,23,42,0.75)] text-white">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+<!-- حاوية مستقلة تماماً لمنع تداخل أسلوب Breeze القديم -->
+<div class="w-full flex flex-col gap-6 text-right" dir="rtl">
+
+    <!-- 1. صندوق الترحيب العريض والوقت اللحظي المميز -->
+    <div class="w-full rounded-[24px] bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md shadow-inner">
+                <i data-lucide="user" class="h-6 w-6 text-white"></i>
+            </div>
             <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-300">{{ $viewMode === 'admin' ? 'لوحة الإدارة' : 'الملف الشخصي' }}</p>
-                <h1 class="mt-2 text-4xl font-black">مرحباً، {{ auth()->user()->name ?? 'الموظف' }}</h1>
-                <p class="mt-2 max-w-2xl text-sm text-slate-300">{{ $viewMode === 'admin' ? 'إدارة الموارد البشرية بسهولة من لوحة التحكم.' : 'تابع حالة الحضور، الرواتب، والطلبات من لوحة التحكم المركزية.' }}</p>
+                <h3 class="text-xl font-black">مرحباً، {{ auth()->user()->name ?? 'micheal' }}!</h3>
+                <p class="text-xs text-blue-100 mt-0.5 font-medium">نتمنى لك يوماً موفقاً في عملك</p>
             </div>
-            <div class="flex items-center gap-4 rounded-[28px] bg-white/10 p-4">
-                <div class="rounded-full border border-white/20 bg-white/10 p-4 text-slate-100">
-                    <i data-lucide="{{ $viewMode === 'admin' ? 'shield' : 'user' }}" class="h-6 w-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-300">البريد الإلكتروني</p>
-                    <p class="text-lg font-semibold">{{ auth()->user()->email ?? 'غير متوفر' }}</p>
-                </div>
+        </div>
+
+        <!-- عداد الوقت الجانبي المتناسق -->
+        <div class="rounded-xl bg-white/10 p-3 backdrop-blur-md border border-white/5 flex items-center gap-3 w-full md:w-auto justify-center">
+            <div class="text-right">
+                <p class="text-[10px] text-blue-200 uppercase font-bold tracking-wider">الوقت الحالي</p>
+                <p class="text-xl font-black tracking-wide mt-0.5">{{ now()->format('H:i') }} <span class="text-xs font-normal">ص</span></p>
+            </div>
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white">
+                <i data-lucide="clock" class="h-5 w-5"></i>
             </div>
         </div>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        @php($stats = $viewMode === 'admin' 
-            ? [
-                ['label' => 'إجمالي الموظفين', 'value' => $employeeCount ?? 0, 'icon' => 'users', 'color' => 'from-cyan-500 to-blue-500'],
-                ['label' => 'المناوذج', 'value' => $shiftCount ?? 0, 'icon' => 'clock', 'color' => 'from-emerald-500 to-lime-500'],
-                ['label' => 'الطلبات المعلقة', 'value' => $pendingRequests ?? 0, 'icon' => 'alert-circle', 'color' => 'from-amber-500 to-orange-500'],
-                ['label' => 'متأخر اليوم', 'value' => $lateMinutes ?? 0, 'suffix' => 'دقيقة', 'icon' => 'timer', 'color' => 'from-violet-500 to-fuchsia-500'],
-            ]
-            : [
-                ['label' => 'الحضور اليوم', 'value' => $attendanceToday ?? 0, 'icon' => 'check-circle', 'color' => 'from-cyan-500 to-blue-500'],
-                ['label' => 'رصيد الإجازات', 'value' => $vacationBalance ?? 0, 'suffix' => 'يوم', 'icon' => 'calendar', 'color' => 'from-emerald-500 to-lime-500'],
-                ['label' => 'الطلبات المعلقة', 'value' => $pendingRequests ?? 0, 'icon' => 'clock', 'color' => 'from-amber-500 to-orange-500'],
-                ['label' => 'آخر راتب', 'value' => ($recentPayrolls?->first()?->net_salary ?? 0) ? number_format((float) $recentPayrolls->first()->net_salary, 2) . ' د.ع' : '0.00 د.ع', 'icon' => 'dollar-sign', 'color' => 'from-violet-500 to-fuchsia-500'],
-            ])
-        @foreach($stats as $stat)
-            <div class="rounded-[28px] border border-slate-200/70 bg-white/90 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
-                <div class="flex items-center justify-between gap-4">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-500">{{ $stat['label'] }}</p>
-                        <p class="mt-4 text-3xl font-black text-slate-900">{{ $stat['value'] }}{{ $stat['suffix'] ?? '' }}</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br {{ $stat['color'] }} text-white">
-                        <i data-lucide="{{ $stat['icon'] }}" class="h-5 w-5"></i>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
+    <!-- 2. شبكة بطاقات المؤشرات الأربعة الهندسية -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 w-full">
 
-    @if($viewMode === 'admin')
-    <div class="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-        <div class="rounded-[32px] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-500">الطلبات المعلقة</p>
-                    <h2 class="text-2xl font-black text-slate-900">طلبات تحتاج موافقة</h2>
+        <!-- بطاقة رصيد الإجازات -->
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-4 shadow-sm transition hover:shadow-md flex flex-col justify-between min-h-[130px]">
+            <div class="flex items-start justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                    <i data-lucide="calendar" class="h-5 w-5"></i>
                 </div>
-                <a href="{{ route('requests.index') }}" class="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900">عرض كل الطلبات</a>
+                <p class="text-xs font-bold text-slate-400">رصيد الإجازات</p>
             </div>
-            <div class="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50">
-                <table class="min-w-full text-right text-sm">
-                    <thead class="bg-slate-100 text-slate-600">
-                        <tr>
-                            <th class="px-5 py-4 font-semibold">الموظف</th>
-                            <th class="px-5 py-4 font-semibold">النوع</th>
-                            <th class="px-5 py-4 font-semibold">الحالة</th>
-                            <th class="px-5 py-4 font-semibold">التاريخ</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
-                        @forelse($pendingTransactions ?? [] as $transaction)
-                            <tr class="transition hover:bg-slate-50">
-                                <td class="px-5 py-4 text-slate-900">{{ $transaction->employee->user->name ?? '—' }}</td>
-                                <td class="px-5 py-4 text-slate-600">{{ $transaction->transaction_type }}</td>
-                                <td class="px-5 py-4"><span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">{{ $transaction->status }}</span></td>
-                                <td class="px-5 py-4 text-slate-600">{{ $transaction->created_at->format('Y-m-d') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-5 py-10 text-center text-slate-500">لا توجد طلبات معلقة.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @else
-    <div class="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-        <div class="rounded-[32px] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-slate-500">سجل الدوام</p>
-                    <h2 class="text-2xl font-black text-slate-900">أحدث الحضور الخاص بك</h2>
-                </div>
-                <a href="{{ route('my.attendance') }}" class="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900">عرض كل السجلات</a>
-            </div>
-            <div class="mt-6 overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50">
-                <table class="min-w-full text-right text-sm">
-                    <thead class="bg-slate-100 text-slate-600">
-                        <tr>
-                            <th class="px-5 py-4 font-semibold">التاريخ</th>
-                            <th class="px-5 py-4 font-semibold">دخول</th>
-                            <th class="px-5 py-4 font-semibold">تأخير</th>
-                            <th class="px-5 py-4 font-semibold">الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
-                        @forelse($recentAttendance ?? [] as $log)
-                            <tr class="transition hover:bg-slate-50">
-                                <td class="px-5 py-4 text-slate-900">{{ $log->log_date }}</td>
-                                <td class="px-5 py-4 text-slate-600">{{ $log->check_in ? $log->check_in->format('H:i') : '—' }}</td>
-                                <td class="px-5 py-4 text-slate-600">{{ $log->late_minutes }} د</td>
-                                <td class="px-5 py-4"><span class="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">{{ $log->status }}</span></td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-5 py-10 text-center text-slate-500">لم تقم بعد بأي حركة دوام.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="mt-4 text-right">
+                <h4 class="text-xl font-black text-slate-900">30 يوم</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">من أصل 30 يوم</p>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <div class="rounded-[32px] border border-slate-200/70 bg-slate-950 p-6 text-white shadow-[0_25px_80px_-35px_rgba(15,23,42,0.3)]">
-                <p class="text-sm font-semibold text-slate-400">خدمة الموظف</p>
-                <h2 class="mt-2 text-2xl font-black">إجراء سريع للطلبات</h2>
-                <p class="mt-3 text-sm text-slate-300">تقدم بطلب جديد أو راجع مستنداتك الخاصة بسهولة وسرعة.</p>
-                <div class="mt-6 grid gap-3">
-                    <a href="{{ route('my.requests.create') }}" class="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">تقديم طلب جديد</a>
-                    <a href="{{ route('my.documents') }}" class="rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">عرض مستنداتي</a>
+        <!-- بطاقة الراتب الأساسي -->
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-4 shadow-sm transition hover:shadow-md flex flex-col justify-between min-h-[130px]">
+            <div class="flex items-start justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <i data-lucide="dollar-sign" class="h-5 w-5"></i>
                 </div>
+                <p class="text-xs font-bold text-slate-400">الراتب الأساسي</p>
             </div>
-
-            <div class="rounded-[32px] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-500">آخر الرواتب</p>
-                        <h2 class="text-xl font-black text-slate-900">المعالجة الأخيرة</h2>
-                    </div>
-                    <a href="{{ route('payroll.index') }}" class="text-sm font-semibold text-blue-600">عرض الرواتب</a>
-                </div>
-                <div class="mt-4 space-y-3">
-                    @forelse($recentPayrolls ?? [] as $payroll)
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex items-center justify-between">
-                                <span class="font-semibold text-slate-900">{{ $payroll->salary_month }}</span>
-                                <span class="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700">{{ $payroll->payment_status }}</span>
-                            </div>
-                            <p class="mt-2 text-sm text-slate-600">صافي الراتب: {{ number_format((float) $payroll->net_salary, 2) }} د.ع</p>
-                        </div>
-                    @empty
-                        <p class="text-sm text-slate-500">لا توجد كشوف رواتب حديثة.</p>
-                    @endforelse
-                </div>
+            <div class="mt-4 text-right">
+                <h4 class="text-xl font-black text-slate-900">{{ number_format(auth()->user()->employee->base_salary ?? 0) }}</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">ريال سعودي</p>
             </div>
         </div>
+
+        <!-- بطاقة أيام الحضور -->
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-4 shadow-sm transition hover:shadow-md flex flex-col justify-between min-h-[130px]">
+            <div class="flex items-start justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <i data-lucide="check-square" class="h-5 w-5"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400">أيام الحضور</p>
+            </div>
+            <div class="mt-4 text-right">
+                <h4 class="text-xl font-black text-slate-900">0</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">هذا الأسبوع</p>
+            </div>
+        </div>
+
+        <!-- بطاقة الطلبات المعلقة -->
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-4 shadow-sm transition hover:shadow-md flex flex-col justify-between min-h-[130px]">
+            <div class="flex items-start justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                    <i data-lucide="alert-circle" class="h-5 w-5"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400">الطلبات المعلقة</p>
+            </div>
+            <div class="mt-4 text-right">
+                <h4 class="text-xl font-black text-slate-900">0</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">طلب بانتظار الموافقة</p>
+            </div>
+        </div>
+
     </div>
-    @endif
+
+    <!-- 3. النوافذ السفلية المفصلة للبيانات الحركية -->
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 w-full">
+
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-5 shadow-sm">
+            <h4 class="text-sm font-bold text-slate-800 mb-4">رصيد الإجازات بالتفصيل</h4>
+            <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                <span class="text-xs font-bold text-slate-700">0 يوم</span>
+                <span class="text-xs text-slate-400 font-medium">الرصيد المستخدم حتى الآن</span>
+            </div>
+        </div>
+
+        <div class="rounded-[22px] border border-slate-200/60 bg-white p-5 shadow-sm">
+            <h4 class="text-sm font-bold text-slate-800 mb-4">سجل الدوام الأخير</h4>
+            <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                <span class="text-xs font-bold text-slate-700">0 حركة</span>
+                <span class="text-xs text-slate-400 font-medium">عرض كافة التحركات اليومية الحية</span>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 @endsection
