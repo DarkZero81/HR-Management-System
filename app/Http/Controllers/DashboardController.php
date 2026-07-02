@@ -32,12 +32,17 @@ class DashboardController extends Controller
                     ->where('log_date', $today)
                     ->latest('check_in')
                     ->take(6)
-                    ->get(),
+                    ->get()
+                    ->map(function($log) {
+                        $log->check_in = $log->check_in ? \Carbon\Carbon::parse($log->check_in) : null;
+                        return $log;
+                    }),
                 'pendingTransactions' => HrTransaction::query()->with('employee.user')
                     ->where('status', 'pending')
                     ->latest()
                     ->take(4)
                     ->get(),
+                'recentPayrolls' => PayrollOrder::query()->latest('salary_month')->take(4)->get(),
             ]);
         }
 
