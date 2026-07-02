@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\PayrollOrder;
 use App\Models\Employee;
 use App\Models\AttendanceLog;

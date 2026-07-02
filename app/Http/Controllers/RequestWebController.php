@@ -6,12 +6,16 @@ use App\Models\HrTransaction;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class RequestWebController extends Controller
 {
     public function index(): View
     {
-        $transactions = HrTransaction::with(['employee.user', 'approver'])->paginate(15);
+        $transactions = HrTransaction::with(['employee.user', 'approver'])
+            ->latest()
+            ->paginate(15);
+
         return view('requests.index', compact('transactions'));
     }
 
@@ -29,7 +33,27 @@ class RequestWebController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
+        $validated['employee_id'] = Auth::user()->employee?->id;
+        $validated['status'] = 'pending';
+        $validated['financial_impact'] = 0;
+
         HrTransaction::create($validated);
-        return redirect()->route('requests.index')->with('success', 'Request submitted');
+
+        return redirect()->route('my.requests.index')->with('success', 'تم إرسال الطلب بنجاح وجرى إرساله إلى الإدارة للمراجعة.');
+    }
+
+    public function updateStatus(Request $request, string $id): RedirectResponse
+    {
+        $request->validate([
+            'status' => ['required', 'in:approved,rejected'],
+        ]);
+
+        $transaction = HrTransaction::findOrFail($id);
+        $transaction->update([
+            'status' => $request->status,
+            'approved_by' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'تم تحديث حالة الطلب بنجاح.');
     }
 }
