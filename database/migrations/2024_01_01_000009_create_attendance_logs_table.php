@@ -10,15 +10,20 @@ return new class extends Migration
     {
         Schema::create('attendance_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->references('id')->on('employees')->onDelete('cascade');
-            $table->foreignId('device_id')->nullable()->references('id')->on('attendance_devices')->onDelete('set null');
-            $table->date('log_date');
-            $table->timestamp('check_in')->nullable();
-            $table->timestamp('check_out')->nullable();
-            $table->integer('late_minutes')->default(0);
-            $table->integer('overtime_minutes')->default(0);
+            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            // ربط السجل بالجهاز التقني لمعرفة مصدر البصمة، وتكون القيمة null في حال حذف الجهاز
+            $table->foreignId('device_id')->nullable()->constrained('attendance_devices')->onDelete('set null');
+
+            $table->date('log_date'); // تاريخ يوم الحضور
+            $table->timestamp('check_in')->nullable(); // وقت الدخول الفعلي
+            $table->timestamp('check_out')->nullable(); // وقت الانصراف الفعلي
+            $table->integer('late_minutes')->default(0); // دقائق التأخير المحسوبة برمجياً مقارنة بالوردية
+            $table->integer('overtime_minutes')->default(0); // دقائق العمل الإضافي المعتمدة
             $table->enum('status', ['present', 'absent', 'late', 'holiday'])->default('absent');
             $table->timestamps();
+
+            // إضافة مفتاح مركب فريد لمنع تكرار سجل الحضور لنفس الموظف في نفس اليوم
+            $table->unique(['employee_id', 'log_date']);
         });
     }
 

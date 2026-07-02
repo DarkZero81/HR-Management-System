@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Database\Factories\AuditLogFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AuditLog extends Model
 {
-    use HasFactory;
+    // تعطيل الـ timestamps الافتراضية لأننا نستخدم حقل performed_at مخصص في المايجريشن
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',
@@ -18,16 +17,18 @@ class AuditLog extends Model
         'record_id',
         'old_values',
         'new_values',
-        'performed_at',
+        'performed_at'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'performed_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'old_values' => 'array', // يحول الـ JSON في قاعدة البيانات إلى Array برمجياً
+        'new_values' => 'array',
+        'performed_at' => 'datetime'
+    ];
 
+    /**
+     * علاقة سجل العملية بالمستخدم الذي قام بها.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

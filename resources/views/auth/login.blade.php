@@ -1,4 +1,6 @@
 <div class="flex h-[700px] w-full">
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <div class="w-full hidden md:inline-block">
         <img class="h-full" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/leftSideImage.png" alt="leftSideImage">
     </div>
@@ -24,7 +26,7 @@
                 <svg width="16" height="11" viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M0 .55.571 0H15.43l.57.55v9.9l-.571.55H.57L0 10.45zm1.143 1.138V9.9h13.714V1.69l-6.503 4.8h-.697zM13.749 1.1H2.25L8 5.356z" fill="#6B7280"/>
                 </svg>
-                <input type="email" placeholder="Email id" class="bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="email" value="{{ old('email') }}" autofocus autocomplete="username">                 
+                <input type="email" placeholder="Email id" class="bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="email" value="{{ old('email') }}" autofocus autocomplete="username">
             </div>
             <x-input-error :messages="$errors->get('email')" class="mt-2 self-start" />
 

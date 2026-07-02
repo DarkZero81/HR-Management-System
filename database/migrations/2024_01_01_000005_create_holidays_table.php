@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('holiday_name', 150);
             $table->date('start_date');
             $table->date('end_date');
-            $table->tinyInteger('is_recurring')->default(0);
+            $table->tinyInteger('is_recurring')->default(0); // 1 = تتكرر سنوياً مثل الأعياد الثابتة
             $table->timestamps();
         });
     }

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\AttendanceDeviceFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AttendanceDevice extends Model
 {
@@ -15,16 +14,16 @@ class AttendanceDevice extends Model
         'device_name',
         'ip_address',
         'status',
-        'last_sync',
+        'last_sync'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'last_sync' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'last_sync' => 'datetime'
+    ];
 
+    /**
+     * علاقة الجهاز بسجلات الحضور اليومية التي تم سحبها من خلاله.
+     */
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class, 'device_id');

@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\AttendanceLogFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AttendanceLog extends Model
 {
@@ -19,23 +18,28 @@ class AttendanceLog extends Model
         'check_out',
         'late_minutes',
         'overtime_minutes',
-        'status',
+        'status'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'log_date' => 'date',
-            'check_in' => 'datetime',
-            'check_out' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'log_date' => 'date',
+        'check_in' => 'datetime',
+        'check_out' => 'datetime',
+        'late_minutes' => 'integer',
+        'overtime_minutes' => 'integer'
+    ];
 
+    /**
+     * علاقة سجل الحضور بالموظف.
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+    /**
+     * علاقة سجل الحضور بجهاز البصمة الذي سُحبت منه الحركة.
+     */
     public function device(): BelongsTo
     {
         return $this->belongsTo(AttendanceDevice::class, 'device_id');

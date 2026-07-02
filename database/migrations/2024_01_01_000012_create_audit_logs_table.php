@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->references('id')->on('users')->onDelete('set null');
-            $table->enum('action_type', ['INSERT', 'UPDATE', 'DELETE'])->default('INSERT');
-            $table->string('table_name', 50);
-            $table->integer('record_id');
-            $table->text('old_values')->nullable();
-            $table->text('new_values')->nullable();
-            $table->timestamp('performed_at')->useCurrent();
-            $table->timestamps();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null'); // من قام بالحركة
+            $table->enum('action_type', ['INSERT', 'UPDATE', 'DELETE']); // نوع العملية
+            $table->string('table_name', 50); // اسم الجدول المتأثر
+            $table->unsignedBigInteger('record_id'); // رقم السجل المتأثر
+            $table->text('old_values')->nullable(); // البيانات القديمة قبل التعديل (تخزن كـ JSON)
+            $table->text('new_values')->nullable(); // البيانات الجديدة بعد التعديل (تخزن كـ JSON)
+            $table->timestamp('performed_at')->useCurrent(); // وقت العملية
         });
     }
 

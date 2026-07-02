@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('shift_name', 100);
             $table->time('start_time');
             $table->time('end_time');
-            $table->integer('grace_period_minutes')->default(15);
+            $table->integer('grace_period_minutes')->default(15); // فترة السماح الافتراضية بالدقائق
             $table->timestamps();
         });
     }

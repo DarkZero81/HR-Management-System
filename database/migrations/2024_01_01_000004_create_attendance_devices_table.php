@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('attendance_devices', function (Blueprint $table) {
             $table->id();
             $table->string('device_name', 100);
-            $table->string('ip_address', 45);
+            $table->string('ip_address', 45); // يدعم IPv4 و IPv6
             $table->enum('status', ['online', 'offline'])->default('offline');
-            $table->timestamp('last_sync')->nullable();
+            $table->timestamp('last_sync')->nullable(); // وقت آخر سحب ناجح للحركات
             $table->timestamps();
         });
     }

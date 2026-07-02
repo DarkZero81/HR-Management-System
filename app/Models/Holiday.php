@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Database\Factories\HolidayFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Holiday extends Model
 {
@@ -14,15 +13,12 @@ class Holiday extends Model
         'holiday_name',
         'start_date',
         'end_date',
-        'is_recurring',
+        'is_recurring'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'start_date' => 'date',
-            'end_date' => 'date',
-            'is_recurring' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'is_recurring' => 'integer'
+    ];
 }

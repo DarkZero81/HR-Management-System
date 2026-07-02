@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\RolePermissionFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RolePermission extends Model
 {
@@ -15,9 +14,12 @@ class RolePermission extends Model
 
     protected $fillable = [
         'role_name',
-        'description',
+        'description'
     ];
 
+    /**
+     * علاقة الصلاحية مع مستخدمي النظام.
+     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'role_id');

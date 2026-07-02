@@ -10,11 +10,12 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            // علاقة مع الموظف، ويحذف السجل تلقائياً في حال حذف ملف الموظف
+            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
             $table->enum('document_type', ['identity', 'passport', 'contract', 'health_certificate']);
             $table->string('document_number', 100);
-            $table->date('expiry_date');
-            $table->string('file_path');
+            $table->date('expiry_date'); // تاريخ انتهاء الوثيقة لمراقبة الصلاحية
+            $table->string('file_path', 255); // مسار تخزين الملف السحابي أو المحلي
             $table->timestamps();
         });
     }

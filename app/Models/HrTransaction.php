@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use Database\Factories\HrTransactionFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class HrTransaction extends Model
 {
     use HasFactory;
+
+    protected $table = 'hr_transactions';
 
     protected $fillable = [
         'employee_id',
@@ -19,23 +20,26 @@ class HrTransaction extends Model
         'description',
         'financial_impact',
         'status',
-        'approved_by',
+        'approved_by'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'start_date_time' => 'datetime',
-            'end_date_time' => 'datetime',
-            'financial_impact' => 'decimal:2',
-        ];
-    }
+    protected $casts = [
+        'start_date_time' => 'datetime',
+        'end_date_time' => 'datetime',
+        'financial_impact' => 'decimal:2'
+    ];
 
+    /**
+     * علاقة الحركة أو الطلب بالموظف مقدم الطلب.
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+    /**
+     * علاقة الطلب بالمستخدم (المدير أو الـ HR) المسؤول عن اعتماده أو رفضه.
+     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

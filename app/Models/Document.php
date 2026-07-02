@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\DocumentFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Document extends Model
 {
@@ -16,16 +15,16 @@ class Document extends Model
         'document_type',
         'document_number',
         'expiry_date',
-        'file_path',
+        'file_path'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'expiry_date' => 'date',
-        ];
-    }
+    protected $casts = [
+        'expiry_date' => 'date'
+    ];
 
+    /**
+     * علاقة الوثيقة بالموظف التابعة له.
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');

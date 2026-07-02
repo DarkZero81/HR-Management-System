@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\HrTransaction;
 use App\Models\Employee;
 use App\Models\User;
-use App\Models\HrTransaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Carbon\Carbon;
 
 class HrTransactionFactory extends Factory
 {
@@ -13,18 +14,20 @@ class HrTransactionFactory extends Factory
 
     public function definition(): array
     {
-        $startDate = now()->subDays(fake()->numberBetween(10, 60));
-        $endDate = (clone $startDate)->addDays(fake()->numberBetween(1, 5));
+        $type = $this->faker->randomElement(['leave', 'permission', 'promotion', 'penalty', 'transfer']);
+        $status = $this->faker->randomElement(['pending', 'approved', 'rejected']);
+        $startDate = Carbon::parse($this->faker->dateTimeBetween('now', '+1 month'));
+        $endDate = (clone $startDate)->addDays($this->faker->numberBetween(1, 5));
 
         return [
-            'employee_id' => Employee::inRandomOrder()->first()?->id ?? 1,
-            'transaction_type' => fake()->randomElement(['leave', 'permission', 'promotion', 'penalty', 'transfer']),
+            'employee_id' => Employee::inRandomOrder()->first()?->id ?? Employee::factory(),
+            'transaction_type' => $type,
             'start_date_time' => $startDate,
-            'end_date_time' => $endDate,
-            'description' => fake()->sentence(),
-            'financial_impact' => fake()->randomFloat(2, 0, 500),
-            'status' => fake()->randomElement(['pending', 'approved', 'rejected']),
-            'approved_by' => null,
+            'end_date_time' => $type === 'permission' ? (clone $startDate)->addHours(2) : $endDate, // الإذن يكون ساعاتي
+            'description' => $this->faker->sentence(),
+            'financial_impact' => $type === 'penalty' ? $this->faker->randomFloat(2, 10000, 50000) : ($type === 'promotion' ? $this->faker->randomFloat(2, 50000, 200000) : 0.00),
+            'status' => $status,
+            'approved_by' => $status !== 'pending' ? User::whereHas('role', function($q){ $q->whereIn('role_name', ['admin', 'manager', 'hr']); })->inRandomOrder()->first()?->id : null,
         ];
     }
 }

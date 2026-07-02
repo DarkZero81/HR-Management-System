@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Database\Factories\ShiftFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Shift extends Model
 {
@@ -15,17 +14,16 @@ class Shift extends Model
         'shift_name',
         'start_time',
         'end_time',
-        'grace_period_minutes',
+        'grace_period_minutes'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'start_time' => 'datetime:H:i:s',
-            'end_time' => 'datetime:H:i:s',
-        ];
-    }
+    protected $casts = [
+        'grace_period_minutes' => 'integer'
+    ];
 
+    /**
+     * علاقة خطة الدوام (الوردية) بالموظفين المدرجين تحتها.
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'shift_id');

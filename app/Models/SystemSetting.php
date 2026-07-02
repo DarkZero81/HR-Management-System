@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Database\Factories\SystemSettingFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SystemSetting extends Model
 {
@@ -12,6 +11,6 @@ class SystemSetting extends Model
 
     protected $fillable = [
         'setting_key',
-        'setting_value',
+        'setting_value'
     ];
 }

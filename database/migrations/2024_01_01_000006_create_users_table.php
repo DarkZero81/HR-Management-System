@@ -12,8 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('email', 191)->unique();
             $table->string('password');
-            $table->foreignId('role_id')->references('id')->on('roles_permissions')->onDelete('restrict');
-            $table->tinyInteger('is_active')->default(1);
+            $table->foreignId('role_id')->constrained('roles_permissions')->cascadeOnDelete();
+            $table->tinyInteger('is_active')->default(1); // 1 = نشط، 0 = معطل
+            $table->rememberToken();
             $table->timestamps();
         });
     }
