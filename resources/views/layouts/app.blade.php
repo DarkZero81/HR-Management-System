@@ -39,6 +39,13 @@
                         <span>{{ $item['label'] }}</span>
                     </a>
                 @endforeach
+
+                @if(in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr', 'manager'], true))
+                    <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-900 hover:text-white {{ request()->routeIs('reports.index') ? 'bg-slate-900 text-white shadow-lg' : '' }}">
+                        <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                        <span>التقارير</span>
+                    </a>
+                @endif
             </nav>
 
             <div class="mt-8 rounded-[24px] border border-blue-100 bg-gradient-to-br from-blue-600 to-indigo-700 p-4 text-white shadow-xl">

@@ -10,13 +10,24 @@ use Illuminate\Support\Facades\Auth;
 
 class RequestWebController extends Controller
 {
-    public function index(): View
+    public function adminIndex(): View
     {
         $transactions = HrTransaction::with(['employee.user', 'approver'])
             ->latest()
             ->paginate(15);
 
-        return view('requests.index', compact('transactions'));
+        return view('requests.index', compact('transactions'))->with('viewMode', 'admin');
+    }
+
+    public function index(): View
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        $transactions = HrTransaction::with(['employee.user', 'approver'])
+            ->where('employee_id', $employeeId)
+            ->latest()
+            ->paginate(15);
+
+        return view('requests.index', compact('transactions'))->with('viewMode', 'employee');
     }
 
     public function create(): View

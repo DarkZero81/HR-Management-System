@@ -28,10 +28,13 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('shifts', ShiftWebController::class);
         Route::resource('holidays', HolidayWebController::class);
         Route::get('/attendance', [AttendanceWebController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance/check-in', [AttendanceWebController::class, 'store'])->name('attendance.checkin');
         Route::get('/devices', [DeviceWebController::class, 'index'])->name('devices.index');
         Route::get('/documents', [DocumentWebController::class, 'index'])->name('documents.index');
+        Route::get('/requests', [RequestWebController::class, 'adminIndex'])->name('requests.index');
         Route::get('/payroll', [PayrollWebController::class, 'index'])->name('payroll.index');
         Route::post('/payroll/generate', [PayrollWebController::class, 'store'])->name('payroll.generate');
+        Route::get('/reports', [DashboardController::class, 'reports'])->name('reports.index');
         Route::patch('/requests/{id}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
     });
 

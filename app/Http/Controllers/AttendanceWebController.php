@@ -6,6 +6,7 @@ use App\Models\AttendanceLog;
 use App\Models\Employee;
 use App\Models\AttendanceDevice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -36,13 +37,24 @@ class AttendanceWebController extends Controller
         return view('attendance.index', compact('logs', 'devices'));
     }
 
+    public function myAttendance(Request $request)
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        $logs = AttendanceLog::with(['device'])
+            ->where('employee_id', $employeeId)
+            ->latest('log_date')
+            ->paginate(10);
+
+        return view('attendance.index', compact('logs'));
+    }
+
     /**
      * محاكاة الـ API أو العملية البرمجية لتسجيل الحضور (Check-In) واحتساب التأخير تلقائياً.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|exists|exists:employees,id',
+            'employee_id' => 'required|exists:employees,id',
             'device_id' => 'nullable|exists:attendance_devices,id',
         ]);
 

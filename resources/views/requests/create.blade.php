@@ -2,7 +2,7 @@
 @section('title', 'New Request')
 @section('content')
 <h2 class="text-2xl font-bold mb-4">New HR Request</h2>
-<form method="POST" action="{{ route('requests.store') }}" class="bg-white p-6 rounded shadow">
+<form method="POST" action="{{ route('my.requests.store') }}" class="bg-white p-6 rounded shadow">
     @csrf
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div><label class="block mb-1">Type</label><select name="transaction_type" class="border p-2 w-full" required>
