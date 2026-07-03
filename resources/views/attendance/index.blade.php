@@ -30,7 +30,7 @@
             ['label' => 'إجمالي التأخير', 'value' => $logs->sum('late_minutes') . ' د', 'icon' => 'timer', 'gradient' => 'from-violet-500 to-fuchsia-500', 'bg' => 'bg-violet-50'],
         ])
         @foreach($statCards as $card)
-        <div class="rounded-[28px] border border-slate-200/70 bg-white/90 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.12)]">
+        <div class="rounded-[28px] border border-slate-200/70 bg-white/90 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.12)] w-75 h-50">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-semibold text-slate-500">{{ $card['label'] }}</p>

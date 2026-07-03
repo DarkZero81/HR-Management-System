@@ -43,42 +43,8 @@
             <button class="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20">طباعة القسائم</button>
         </div>
 
-        <div class="mt-4 overflow-x-auto">
-            <table class="min-w-full divide-y divide-white/10 text-sm text-slate-200">
-                <thead class="bg-white/5 text-right text-slate-300">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">الموظف</th>
-                        <th class="px-6 py-4 font-semibold">البدلات</th>
-                        <th class="px-6 py-4 font-semibold">الخصومات</th>
-                        <th class="px-6 py-4 font-semibold">الصافي</th>
-                        <th class="px-6 py-4 font-semibold">الحالة</th>
-                        <th class="px-6 py-4 font-semibold">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/10 bg-slate-950/80">
-                    @forelse($payrolls as $payroll)
-                        <tr class="transition hover:bg-white/5">
-                            <td class="px-6 py-5">
-                                <p class="font-semibold text-white">{{ $payroll->employee->full_name ?? '—' }}</p>
-                                <p class="mt-1 text-xs text-slate-400">{{ $payroll->employee->national_id ?? '' }}</p>
-                            </td>
-                            <td class="px-6 py-5 text-emerald-400">{{ number_format((float) $payroll->allowances, 2) }} د.ع</td>
-                            <td class="px-6 py-5 text-rose-400">{{ number_format((float) $payroll->deductions, 2) }} د.ع</td>
-                            <td class="px-6 py-5 text-sky-300">{{ number_format((float) $payroll->net_salary, 2) }} د.ع</td>
-                            <td class="px-6 py-5">
-                                <span class="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">{{ $payroll->payment_status }}</span>
-                            </td>
-                            <td class="px-6 py-5">
-                                <button class="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-2 text-sm font-semibold text-blue-300 transition hover:bg-blue-500/20">عرض</button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-400">لا توجد بيانات رواتب لهذا الشهر بعد.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="mt-4">
+            @livewire('payroll-viewer', ['month' => $month ?? now()->format('Y-m')])
         </div>
     </div>
 </div>

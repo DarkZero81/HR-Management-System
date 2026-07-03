@@ -74,14 +74,7 @@
                     <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{{ $transactions->where('status', 'pending')->count() }} معلقة</span>
                 </div>
                 <div class="mt-6 grid gap-3">
-                    <div class="rounded-3xl bg-white/10 p-4">
-                        <p class="text-sm text-slate-300">عدد الطلبات الكلي</p>
-                        <p class="mt-2 text-2xl font-black text-white">{{ $transactions->total() }}</p>
-                    </div>
-                    <div class="rounded-3xl bg-white/10 p-4">
-                        <p class="text-sm text-slate-300">طلبات الموافقة</p>
-                        <p class="mt-2 text-2xl font-black text-white">{{ $transactions->where('status', 'approved')->count() }}</p>
-                    </div>
+                    @livewire('requests-list')
                 </div>
             </div>
 

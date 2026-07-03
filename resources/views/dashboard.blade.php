@@ -28,6 +28,9 @@
                 <i data-lucide="clock" class="h-5 w-5"></i>
             </div>
         </div>
+        <div class="hidden md:block">
+            @livewire('attendance-button')
+        </div>
     </div>
 
     <!-- 2. شبكة بطاقات المؤشرات الأربعة الهندسية -->

@@ -6,30 +6,29 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'HR System'))</title>
 
-    <!-- الخطوط وأدوات التصميم المستقرة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.468.0/lucide.min.css">
-
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
-<body class=" m-0">
+<body class="h-full bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_35%),linear-gradient(135deg,_#f8fbff_0%,_#eef4ff_100%)] font-['Cairo'] text-slate-800 antialiased flex items-center justify-center ">
 
     <!-- حاوية النظام المركزية المرنة -->
-    <div class="w-full max-w-7xl flex flex-col lg:flex-row gap-4 min-h-[92vh] items-stretch">
+    <div class="w-full h-full flex flex-col lg:flex-row gap-4 min-h-[92vh] items-stretch">
 
         <!-- 1. شريط القائمة الجانبي (Sleek Dark Sidebar) -->
-        <aside class="ml-5 w-50 lg:w-72  bg-slate-950/95 p-5 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.45)] backdrop-blur-xl text-slate-200 flex flex-col justify-between shrink-0">
+        <aside class="w-50 lg:w-72 bg-slate-950/95 p-5 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.45)] backdrop-blur-xl text-slate-200 flex flex-col justify-between shrink-0">
             <div>
                 <!-- الشعار والهوية -->
                 <div class="flex items-center justify-between lg:block border-b border-white/5 pb-4">
                     <div>
                         <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400">HR Engine</p>
                         <h1 class="mt-0.5 text-xl font-black text-white tracking-tight">نظام الموارد البشرية</h1>
-                    </div>
+                    ‍</div>
                     <div class="mt-2 inline-block rounded-xl bg-blue-600/30 border border-blue-500/20 px-2.5 py-1 text-[11px] font-bold text-blue-400">الإصدار الاحترافي</div>
                 </div>
 
@@ -117,6 +116,8 @@
     </div>
 
     <!-- تفعيل مكتبة أيقونات Lucide بشكل آمن ومتوافق -->
+    <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
+    @livewireScripts
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {

@@ -11,10 +11,7 @@
                 <h1 class="mt-2 text-3xl font-black text-slate-900">الوثائق والمستندات الرسمية</h1>
                 <p class="mt-2 text-sm text-slate-600">قم برفع وحفظ الأوراق الرسمية للاحتفاظ بها ومشاركتها مع الإدارة.</p>
             </div>
-            <a href="#" class="inline-flex items-center justify-center rounded-2xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-700">
-                <i data-lucide="upload-cloud" class="ml-2 h-4 w-4"></i>
-                رفع وثيقة جديدة
-            </a>
+            @livewire('document-uploader')
         </div>
     </div>
 
