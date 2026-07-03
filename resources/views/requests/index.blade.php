@@ -4,28 +4,28 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="rounded-[32px] border border-slate-200/70 bg-gradient-to-br from-slate-950 to-slate-900 p-6 text-white shadow-[0_25px_90px_-35px_rgba(15,23,42,0.45)]">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الإجازات والطلبات</p>
-                <h1 class="mt-2 text-3xl font-black">قدم طلبك بسرعة</h1>
-                <p class="mt-2 max-w-2xl text-sm text-slate-300">أنشئ طلبات الإجازة، الإذن، أو النقل واطّلع على حالة الطلبات السابقة.</p>
+    <section class="rounded-[32px] bg-gradient-to-r from-slate-950 to-slate-900 p-6 text-white shadow-2xl shadow-slate-950/20">
+        <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div class="space-y-3 text-right">
+                <p class="text-sm uppercase tracking-[0.35em] text-slate-400">الإجازات والطلبات</p>
+                <h1 class="text-3xl font-black">قدم طلبك بسهولة</h1>
+                <p class="text-sm text-slate-300">أنشئ طلبات الإجازة، الإذن، أو النقل وتابع حالتها من لوحة واحدة.</p>
             </div>
-            <a href="{{ route('my.requests.create') }}" class="inline-flex items-center justify-center rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-600">
+            <a href="{{ route('my.requests.create') }}" class="inline-flex items-center rounded-3xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600">
                 <i data-lucide="plus" class="ml-2 h-4 w-4"></i>
                 طلب جديد
             </a>
         </div>
-    </div>
+    </section>
 
-    <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div class="rounded-[32px] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
+    <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[32px] bg-white border border-slate-200/70 p-6 shadow-sm">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-slate-500">إنشاء طلب</p>
-                    <h2 class="text-2xl font-black text-slate-900">بوابة الموظف</h2>
+                    <p class="text-sm font-semibold text-slate-500">بوابة الطلبات</p>
+                    <h2 class="text-2xl font-black text-slate-900">أنشئ طلبك الآن</h2>
                 </div>
-                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">سريعة وسهلة</span>
+                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">سهل وسريع</span>
             </div>
 
             <form action="{{ route('my.requests.store') }}" method="POST" class="mt-6 space-y-5">
@@ -65,20 +65,20 @@
         </div>
 
         <div class="space-y-6">
-            <div class="rounded-[32px] border border-slate-200/70 bg-slate-950 p-6 text-white shadow-[0_25px_90px_-35px_rgba(15,23,42,0.35)]">
-                <div class="flex items-center justify-between">
+            <div class="rounded-[32px] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/20">
+                <div class="flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-sm font-semibold text-slate-400">المراجعة</p>
-                        <h2 class="text-2xl font-black">طلبات الانتظار</h2>
+                        <p class="text-sm uppercase tracking-[0.35em] text-slate-400">طلبات الانتظار</p>
+                        <h2 class="text-2xl font-black">المراجعة السريعة</h2>
                     </div>
                     <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{{ $transactions->where('status', 'pending')->count() }} معلقة</span>
                 </div>
-                <div class="mt-6 grid gap-3">
+                <div class="mt-6 space-y-3">
                     @livewire('requests-list')
                 </div>
             </div>
 
-            <div class="rounded-[32px] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.12)] backdrop-blur">
+            <div class="rounded-[32px] bg-white border border-slate-200/70 p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                     <p class="text-sm font-semibold text-slate-500">سجل الطلبات</p>
                     <a href="{{ route('requests.index') }}" class="text-sm font-semibold text-blue-600">عرض الكل</a>
@@ -105,6 +105,6 @@
                 <div class="mt-4">{{ $transactions->links() }}</div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 @endsection
