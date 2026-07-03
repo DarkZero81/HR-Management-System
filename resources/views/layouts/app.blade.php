@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
+
 </head>
 <body class="min-h-screen bg-slate-100 font-['Cairo'] text-slate-900 antialiased">
 
@@ -88,7 +88,6 @@
 
     <!-- تفعيل مكتبة أيقونات Lucide بشكل آمن ومتوافق -->
     <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
-    @livewireScripts
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
