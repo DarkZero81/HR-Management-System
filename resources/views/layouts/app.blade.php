@@ -15,7 +15,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="h-full bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_35%),linear-gradient(135deg,_#f8fbff_0%,_#eef4ff_100%)] font-['Cairo'] text-slate-800 antialiased flex items-center justify-center ">
+<body class="min-h-screen bg-slate-100 font-['Cairo'] text-slate-900 antialiased">
 
     <!-- حاوية النظام المركزية المرنة -->
     <div class="w-full h-full flex flex-col lg:flex-row gap-4 min-h-[92vh] items-stretch">
@@ -78,41 +78,12 @@
             </div>
         </aside>
 
-        <!-- 2. حاوية العرض الرئيسية (Modern Glassmorphic Content Area) -->
-        <div class="flex-1 rounded-[30px] border border-white/80 bg-white/75 p-5 shadow-[0_30px_90px_-30px_rgba(15,23,42,0.15)] backdrop-blur-xl flex flex-col justify-between">
-
-            <div class="w-full">
-                <!-- شريط العنوان الأعلى المتناسق -->
-                <header class="flex flex-col gap-4 rounded-[24px] border border-slate-200/50 bg-white/90 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">لوحة القيادة</p>
-                        <h2 class="text-xl font-black text-slate-900 mt-0.5">@yield('title', 'لوحة التحكم')</h2>
-                    </div>
-                    <div class="flex items-center gap-2.5">
-                        <button class="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 transition hover:bg-slate-50 relative">
-                            <i data-lucide="bell" class="h-4 w-4"></i>
-                            <span class="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-                        </button>
-
-                        <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-1.5">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-700 text-xs">
-                                {{ strtoupper(substr(auth()->user()->email ?? 'U', 0, 1)) }}
-                            </div>
-                            <div class="text-right hidden sm:block">
-                                <p class="text-xs font-bold text-slate-900 leading-none">{{ auth()->user()->employee->first_name ?? 'مساعد' }}</p>
-                                <p class="text-[10px] text-slate-400 font-semibold mt-1">{{ optional(auth()->user()->role)->role_name ?? 'أدمن' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <!-- محتوى الـ Blade الفرعي المخطط له سلفاً -->
-                <main class="mt-5">
-                    @yield('content')
-                </main>
+        <!-- 2. حاوية العرض الرئيسية -->
+        <main class="flex-1 overflow-y-auto p-6">
+            <div class="max-w-[1600px] mx-auto space-y-6">
+                @yield('content')
             </div>
-
-        </div>
+        </main>
     </div>
 
     <!-- تفعيل مكتبة أيقونات Lucide بشكل آمن ومتوافق -->
