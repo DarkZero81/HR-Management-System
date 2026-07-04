@@ -19,48 +19,63 @@
     </section>
 
     <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div class="rounded-[32px] bg-white border border-slate-200/70 p-6 shadow-sm">
+        <div class="rounded-[32px] border border-white/10 bg-slate-900/70 p-6 shadow-sm">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-slate-500">بوابة الطلبات</p>
-                    <h2 class="text-2xl font-black text-slate-900">أنشئ طلبك الآن</h2>
+                    <p class="text-sm font-semibold text-slate-400">بوابة الطلبات</p>
+                    <h2 class="text-2xl font-black text-white">أنشئ طلبك الآن</h2>
                 </div>
-                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">سهل وسريع</span>
+                <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-slate-300">سهل وسريع</span>
             </div>
 
             <form action="{{ route('my.requests.store') }}" method="POST" class="mt-6 space-y-5">
                 @csrf
                 <div class="grid gap-4 md:grid-cols-2">
-                    <label class="block">
-                        <span class="text-sm font-semibold text-slate-700">نوع الطلب</span>
-                        <select name="transaction_type" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200">
-                            <option value="leave">إجازة</option>
-                            <option value="permission">إذن</option>
-                            <option value="promotion">ترقية</option>
-                            <option value="penalty">عقوبة</option>
-                            <option value="transfer">نقل</option>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">نوع الطلب</label>
+                        <select name="transaction_type" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('transaction_type') border-rose-400 @enderror" required>
+                            @foreach($transaction_types as $type)
+                                <option value="{{ $type }}" {{ old('transaction_type') == $type ? 'selected' : '' }}>{{ match($type) { 'leave' => 'إجازة', 'permission' => 'إذن', 'promotion' => 'ترقية', 'penalty' => 'عقوبة', 'transfer' => 'نقل' } }}</option>
+                            @endforeach
                         </select>
-                    </label>
-                    <label class="block">
-                        <span class="text-sm font-semibold text-slate-700">التأثير المالي</span>
-                        <input type="number" step="0.01" name="financial_impact" value="0" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200" />
-                    </label>
+                        @error('transaction_type')
+                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">التأثير المالي</label>
+                        <input type="number" step="0.01" name="financial_impact" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('financial_impact') border-rose-400 @enderror" value="{{ old('financial_impact', 0) }}">
+                        @error('financial_impact')
+                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
                 <div class="grid gap-4 md:grid-cols-2">
-                    <label class="block">
-                        <span class="text-sm font-semibold text-slate-700">تاريخ البداية</span>
-                        <input type="datetime-local" name="start_date_time" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200" />
-                    </label>
-                    <label class="block">
-                        <span class="text-sm font-semibold text-slate-700">تاريخ النهاية</span>
-                        <input type="datetime-local" name="end_date_time" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200" />
-                    </label>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ البداية</label>
+                        <input type="datetime-local" name="start_date_time" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('start_date_time') border-rose-400 @enderror" value="{{ old('start_date_time') }}" required>
+                        @error('start_date_time')
+                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ النهاية</label>
+                        <input type="datetime-local" name="end_date_time" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('end_date_time') border-rose-400 @enderror" value="{{ old('end_date_time') }}" required>
+                        @error('end_date_time')
+                            <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
-                <label class="block">
-                    <span class="text-sm font-semibold text-slate-700">ملاحظات الطلب</span>
-                    <textarea name="description" rows="4" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200" placeholder="اكتب سبب الطلب أو التفاصيل الإضافية..."></textarea>
-                </label>
-                <button type="submit" class="rounded-3xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-900">إرسال الطلب</button>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">ملاحظات الطلب</label>
+                    <textarea name="description" rows="4" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('description') border-rose-400 @enderror" placeholder="اكتب سبب الطلب أو التفاصيل الإضافية...">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <button type="submit" class="rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+                    إرسال الطلب
+                </button>
             </form>
         </div>
 
@@ -85,8 +100,13 @@
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="status" value="approved">
-                                <button type="submit" class="rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-300">قبول</button>
-                                <button type="submit" formaction="{{ route('requests.update_status', $transaction) }}" formmethod="POST" class="rounded-full bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300" onclick="this.previousElementSibling.value='rejected'">رفض</button>
+                                <button type="submit" class="rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/25 transition">قبول</button>
+                            </form>
+                            <form action="{{ route('requests.update_status', $transaction) }}" method="POST" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="rounded-full bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/25 transition">رفض</button>
                             </form>
                         </div>
                     @empty
@@ -95,28 +115,30 @@
                 </div>
             </div>
 
-            <div class="rounded-[32px] bg-white border border-slate-200/70 p-6 shadow-sm">
+            <div class="rounded-[32px] border border-white/10 bg-slate-900/70 p-6 shadow-sm">
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-semibold text-slate-500">سجل الطلبات</p>
-                    <a href="{{ route('requests.index') }}" class="text-sm font-semibold text-blue-600">عرض الكل</a>
+                    <p class="text-sm font-semibold text-slate-400">سجل الطلبات</p>
+                    @if(in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr', 'manager'], true))
+                        <a href="{{ route('requests.index') }}" class="text-sm font-semibold text-cyan-300 hover:text-cyan-200 transition">عرض الكل</a>
+                    @endif
                 </div>
                 <div class="mt-5 space-y-4">
                     @forelse($transactions as $transaction)
-                        <div class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                        <div class="rounded-[24px] border border-white/10 bg-white/5 p-4">
                             <div class="flex items-center justify-between gap-3">
                                 <div>
-                                    <p class="font-semibold text-slate-900">{{ $transaction->employee->full_name ?? '—' }}</p>
-                                    <p class="mt-1 text-sm text-slate-500">{{ $transaction->description ?? 'طلب جديد' }}</p>
+                                    <p class="font-semibold text-white">{{ $transaction->employee->full_name ?? '—' }}</p>
+                                    <p class="mt-1 text-sm text-slate-400">{{ $transaction->description ?? 'طلب جديد' }}</p>
                                 </div>
-                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">{{ $transaction->status }}</span>
+                                <span class="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">{{ $transaction->status }}</span>
                             </div>
-                            <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-600">
-                                <span class="rounded-full bg-white px-3 py-1">النوع: {{ $transaction->transaction_type }}</span>
-                                <span class="rounded-full bg-white px-3 py-1">{{ $transaction->start_date_time?->format('Y-m-d') ?? 'غير محدد' }}</span>
+                            <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-300">
+                                <span class="rounded-full bg-white/5 px-3 py-1">النوع: {{ $transaction->transaction_type }}</span>
+                                <span class="rounded-full bg-white/5 px-3 py-1">{{ $transaction->start_date_time?->format('Y-m-d') ?? 'غير محدد' }}</span>
                             </div>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-500">لا توجد طلبات حالياً.</p>
+                        <p class="text-sm text-slate-400">لا توجد طلبات حالياً.</p>
                     @endforelse
                 </div>
                 <div class="mt-4">{{ $transactions->links() }}</div>

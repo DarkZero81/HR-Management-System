@@ -108,10 +108,15 @@
                 <p class="mt-3 text-sm text-slate-600">اضغط على الزر لتسجيل الحضور مباشرةً.</p>
                 <form action="{{ route('attendance.checkin') }}" method="POST" class="mt-5">
                     @csrf
-                    <button type="submit" class="w-full rounded-3xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-95">
-                        <i data-lucide="log-in" class="inline-block h-4 w-4 align-middle"></i>
-                        <span class="mr-2">تسجيل الحضور</span>
-                    </button>
+                    <input type="hidden" name="employee_id" value="{{ auth()->user()?->employee?->id }}">
+                    @if(auth()->user()?->employee?->id)
+                        <button type="submit" class="w-full rounded-3xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-95">
+                            <i data-lucide="log-in" class="inline-block h-4 w-4 align-middle"></i>
+                            <span class="mr-2">تسجيل الحضور</span>
+                        </button>
+                    @else
+                        <p class="text-xs text-amber-300 mt-2">لا يوجد ملف موظف مرتبط بهذا الحساب.</p>
+                    @endif
                 </form>
             </div>
             <div class="rounded-[28px] border border-slate-200/70 bg-slate-50 p-5">

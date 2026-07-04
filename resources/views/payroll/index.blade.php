@@ -14,6 +14,9 @@
             <form action="{{ route('payroll.generate') }}" method="POST" class="flex flex-col gap-3 rounded-[28px] border border-slate-200/70 bg-slate-950 p-4 text-white shadow-xl sm:flex-row sm:items-center">
                 @csrf
                 <input type="month" name="salary_month" value="{{ $month ?? now()->format('Y-m') }}" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500" />
+                @error('salary_month')
+                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                @enderror
                 <button type="submit" class="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600">تشغيل المحرك</button>
             </form>
         </div>
@@ -43,7 +46,10 @@
                 <p class="text-sm uppercase tracking-[0.35em] text-slate-400">كشف الشهر</p>
                 <h2 class="mt-2 text-2xl font-black">{{ $month ?? now()->format('Y-m') }}</h2>
             </div>
-            <button class="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20">طباعة القسائم</button>
+            <button onclick="window.print()" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20">
+                <i data-lucide="printer" class="inline-block h-4 w-4 align-middle ml-1"></i>
+                طباعة القسائم
+            </button>
         </div>
 
         <div class="mt-5 rounded-[28px] bg-slate-900/80 p-4">

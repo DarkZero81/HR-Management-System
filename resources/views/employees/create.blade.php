@@ -1,17 +1,76 @@
 @extends('layouts.app')
-@section('title', 'Add Employee')
+
+@section('title', 'إضافة موظف جديد')
+
 @section('content')
-<h2 class="text-2xl font-bold mb-4">Add Employee</h2>
-<form method="POST" action="{{ route('employees.store') }}" class="bg-white p-6 rounded shadow">
-    @csrf
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block">First Name</label><input type="text" name="first_name" class="border p-2 w-full" required></div>
-        <div><label class="block">Last Name</label><input type="text" name="last_name" class="border p-2 w-full" required></div>
-        <div><label class="block">National ID</label><input type="text" name="national_id" class="border p-2 w-full" required></div>
-        <div><label class="block">Phone</label><input type="text" name="phone" class="border p-2 w-full"></div>
-        <div><label class="block">Base Salary</label><input type="number" step="0.01" name="base_salary" class="border p-2 w-full" required></div>
-        <div><label class="block">Join Date</label><input type="date" name="join_date" class="border p-2 w-full" required></div>
+<div class="space-y-6">
+    <div class="rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الموظفين</p>
+                <h2 class="mt-2 text-3xl font-black text-white">إضافة موظف جديد</h2>
+                <p class="mt-2 text-sm text-slate-400">أدخل بيانات الموظف الأساسية لإنشاء ملفه الوظيفي.</p>
+            </div>
+            <a href="{{ route('employees.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10">
+                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                رجوع
+            </a>
+        </div>
+
+        <form method="POST" action="{{ route('employees.store') }}" class="mt-6 max-w-3xl space-y-5">
+            @csrf
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الاسم الأول</label>
+                    <input type="text" name="first_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('first_name') border-rose-400 @enderror" value="{{ old('first_name') }}" required>
+                    @error('first_name')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الاسم الأخير</label>
+                    <input type="text" name="last_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('last_name') border-rose-400 @enderror" value="{{ old('last_name') }}" required>
+                    @error('last_name')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الرقم الوطني</label>
+                    <input type="text" name="national_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('national_id') border-rose-400 @enderror" value="{{ old('national_id') }}" required>
+                    @error('national_id')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الهاتف</label>
+                    <input type="text" name="phone" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('phone') border-rose-400 @enderror" value="{{ old('phone') }}">
+                    @error('phone')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الراتب الأساسي</label>
+                    <input type="number" step="0.01" name="base_salary" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('base_salary') border-rose-400 @enderror" value="{{ old('base_salary') }}" required>
+                    @error('base_salary')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ التعيين</label>
+                    <input type="date" name="join_date" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('join_date') border-rose-400 @enderror" value="{{ old('join_date') }}" required>
+                    @error('join_date')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <button type="submit" class="rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+                حفظ الموظف
+            </button>
+        </form>
     </div>
-    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Save</button>
-</form>
+</div>
 @endsection

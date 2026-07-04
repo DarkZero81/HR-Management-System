@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
 
 </head>
 <body class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_32%),linear-gradient(135deg,_#020617_0%,_#0f172a_45%,_#111827_100%)] font-['Cairo'] text-slate-100 antialiased">
-    <div class=" flex min-h-screen flex-col gap-4 p-3 lg:flex-row lg:p-4">
+    <div class="flex min-h-screen flex-col gap-4 p-3 lg:flex-row lg:p-4">
         <aside class="w-50 shrink-0 rounded-[32px] border border-white/10 bg-slate-950/80 p-4 shadow-[0_25px_80px_-35px_rgba(8,15,30,0.8)] backdrop-blur-2xl lg:w-72 lg:p-5">
             <div class="flex items-center justify-between border-b border-white/10 pb-4 lg:block">
                 <div>
@@ -42,14 +42,55 @@
                 @endforeach
 
                 @if(in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr', 'manager'], true))
-                    <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('reports.index') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                        <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
-                        <span>التقارير الإدارية</span>
-                    </a>
+                    <div class="pt-4 mt-4 border-t border-white/10">
+                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الإدارة</p>
+                        <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('reports.index') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                            <span>التقارير الإدارية</span>
+                        </a>
+                    </div>
+                @endif
+
+                @if(in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr'], true))
+                    <div class="pt-4 mt-4 border-t border-white/10">
+                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">إدارة النظام</p>
+                        <a href="{{ route('employees.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('employees.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="users" class="h-4 w-4"></i>
+                            <span>إدارة الموظفين</span>
+                        </a>
+                        <a href="{{ route('shifts.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('shifts.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="clock" class="h-4 w-4"></i>
+                            <span>الورديات</span>
+                        </a>
+                        <a href="{{ route('holidays.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('holidays.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="calendar-days" class="h-4 w-4"></i>
+                            <span>الإجازات</span>
+                        </a>
+                        <a href="{{ route('requests.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('requests.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="clipboard-list" class="h-4 w-4"></i>
+                            <span>الطلبات</span>
+                        </a>
+                        <a href="{{ route('devices.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('devices.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="monitor" class="h-4 w-4"></i>
+                            <span>الأجهزة</span>
+                        </a>
+                        <a href="{{ route('documents.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('documents.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="folder-open" class="h-4 w-4"></i>
+                            <span>الوثائق</span>
+                        </a>
+                        <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('attendance.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="user-check" class="h-4 w-4"></i>
+                            <span>سجل الحضور</span>
+                        </a>
+                        <a href="{{ route('payroll.index') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('payroll.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                            <i data-lucide="banknote" class="h-4 w-4"></i>
+                            <span>الرواتب</span>
+                        </a>
+                    </div>
                 @endif
             </nav>
 
-            <div class="mt-8 space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-4">
+            <div class="mt-auto space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-4">
                 <div class="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 to-slate-800 p-3">
                     <p class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.32em] text-slate-300">
                         <span class="h-2 w-2 rounded-full bg-emerald-500"></span> مركز التحكم الآمن
@@ -87,6 +128,11 @@
             </div>
         </main>
     </div>
+
+    <footer class="flex flex-col md:flex-row gap-3 items-center justify-around w-full py-4 text-sm bg-slate-800 text-white/70">
+        <p>Copyright © 2025 PrebuiltUI. All rights reservered.</p>
+
+    </footer>
 
     <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>

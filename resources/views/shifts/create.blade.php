@@ -1,18 +1,58 @@
 @extends('layouts.app')
-@section('title', 'Create Shift')
+
+@section('title', 'إضافة وردية جديدة')
+
 @section('content')
-<h2 class="text-2xl font-bold mb-4">Create Shift</h2>
-<form method="POST" action="{{ route('shifts.store') }}" class="bg-white p-6 rounded shadow">
-    @csrf
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block mb-1">Shift Name</label><input type="text" name="shift_name" class="border p-2 w-full" required></div>
-        <div><label class="block mb-1">Start Time</label><input type="time" name="start_time" class="border p-2 w-full" required></div>
-        <div><label class="block mb-1">End Time</label><input type="time" name="end_time" class="border p-2 w-full" required></div>
-        <div><label class="block mb-1">Grace Period (minutes)</label><input type="number" name="grace_period_minutes" class="border p-2 w-full" value="0"></div>
+<div class="space-y-6">
+    <div class="rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الورديات</p>
+                <h2 class="mt-2 text-3xl font-black text-white">إضافة وردية جديدة</h2>
+                <p class="mt-2 text-sm text-slate-400">حدد مواعيد العمل وفترة السماح للتأخير.</p>
+            </div>
+            <a href="{{ route('shifts.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10">
+                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                رجوع
+            </a>
+        </div>
+
+        <form method="POST" action="{{ route('shifts.store') }}" class="mt-6 max-w-2xl space-y-5">
+            @csrf
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">اسم الوردية</label>
+                <input type="text" name="shift_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('shift_name') border-rose-400 @enderror" value="{{ old('shift_name') }}" required>
+                @error('shift_name')
+                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">وقت البداية</label>
+                    <input type="time" name="start_time" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('start_time') border-rose-400 @enderror" value="{{ old('start_time') }}" required>
+                    @error('start_time')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">وقت النهاية</label>
+                    <input type="time" name="end_time" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('end_time') border-rose-400 @enderror" value="{{ old('end_time') }}" required>
+                    @error('end_time')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">فترة السماح للتأخير (دقيقة)</label>
+                <input type="number" name="grace_period_minutes" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('grace_period_minutes') border-rose-400 @enderror" value="{{ old('grace_period_minutes', 0) }}" min="0">
+                @error('grace_period_minutes')
+                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                @enderror
+            </div>
+            <button type="submit" class="rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+                حفظ الوردية
+            </button>
+        </form>
     </div>
-    <div class="flex gap-2 mt-4">
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
-        <a href="{{ route('shifts.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</a>
-    </div>
-</form>
+</div>
 @endsection

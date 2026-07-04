@@ -13,12 +13,20 @@ class RequestWebController extends Controller
 {
     public function index(): View
     {
+        // ====== التعديل هنا ======
+        // أضفنا تعريف أنواع الطلبات لاستخدامها في الفلتر
+        $transaction_types = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
+        // ====== نهاية التعديل ======
+
         $transactions = HrTransaction::query()
             ->with(['employee.user'])
             ->latest()
             ->paginate(10);
 
-        return view('requests.index', compact('transactions'));
+        // ====== التعديل هنا ======
+        // أضفنا $transaction_types إلى compact
+        return view('requests.index', compact('transactions', 'transaction_types'));
+        // ====== نهاية التعديل ======
     }
 
     public function create(): View
@@ -68,12 +76,20 @@ class RequestWebController extends Controller
 
     public function adminIndex(): View
     {
+        // ====== التعديل هنا ======
+        // أضفنا تعريف أنواع الطلبات لاستخدامها في الفلتر
+        $transaction_types = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
+        // ====== نهاية التعديل ======
+
         $transactions = HrTransaction::query()
             ->with(['employee.user', 'approver'])
             ->latest()
             ->paginate(15);
 
-        return view('requests.index', compact('transactions'));
+        // ====== التعديل هنا ======
+        // أضفنا $transaction_types إلى compact
+        return view('requests.index', compact('transactions', 'transaction_types'));
+        // ====== نهاية التعديل ======
     }
 
     public function updateStatus(Request $request, int $id): RedirectResponse
