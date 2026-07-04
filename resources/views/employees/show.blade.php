@@ -88,8 +88,8 @@
                     <span class="font-semibold text-white">{{ $employee->resign_date?->format('d F Y') ?? '—' }}</span>
                 </div>
                 <div class="flex justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <span class="text-slate-400">الحالة</span>
-                    <span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">نشط</span>
+                    <span class="text-slate-400">القسم</span>
+                    <span class="font-semibold text-white">{{ $employee->department->name ?? '—' }}</span>
                 </div>
             </div>
         </div>

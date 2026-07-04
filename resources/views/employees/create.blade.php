@@ -53,6 +53,32 @@
             </div>
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">القسم</label>
+                    <select name="department_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('department_id') border-rose-400 @enderror">
+                        <option value="">بدون قسم</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('department_id')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">الوردية</label>
+                    <select name="shift_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('shift_id') border-rose-400 @enderror">
+                        <option value="">بدون وردية</option>
+                        @foreach($shifts as $shift)
+                            <option value="{{ $shift->id }}" {{ old('shift_id') == $shift->id ? 'selected' : '' }}>{{ $shift->shift_name }}</option>
+                        @endforeach
+                    </select>
+                    @error('shift_id')
+                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">الراتب الأساسي</label>
                     <input type="number" step="0.01" name="base_salary" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('base_salary') border-rose-400 @enderror" value="{{ old('base_salary') }}" required>
                     @error('base_salary')

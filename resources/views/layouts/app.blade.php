@@ -130,8 +130,8 @@
     </div>
 
     <footer class="flex flex-col md:flex-row gap-3 items-center justify-around w-full py-4 text-sm bg-slate-800 text-white/70">
-        <p>Copyright © 2025 PrebuiltUI. All rights reservered.</p>
-
+        <p>Copyright © 2025 HR Engine. All rights reserved.</p>
+      
     </footer>
 
     <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
@@ -140,6 +140,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) {
                 window.lucide.createIcons();
+            }
+        });
+
+        document.querySelectorAll('form[method="POST"]').forEach(form => {
+            if (form.querySelector('input[name="_method"][value="DELETE"]')) {
+                form.onsubmit = function() {
+                    return confirm('هل أنت متأكد من تنفيذ هذا الإجراء؟ لا يمكن التراجع بعده.');
+                };
             }
         });
     </script>

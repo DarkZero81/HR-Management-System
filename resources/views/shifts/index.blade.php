@@ -40,7 +40,7 @@
                                     <a href="{{ route('shifts.edit', $shift) }}" class="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20">
                                         <i data-lucide="edit" class="h-3 w-3"></i>تعديل
                                     </a>
-                                    <form action="{{ route('shifts.destroy', $shift) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الوردية؟')">
+                                    <form action="{{ route('shifts.destroy', $shift) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-3 py-1.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">

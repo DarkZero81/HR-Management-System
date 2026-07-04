@@ -22,9 +22,17 @@
                 <h3 class="text-xl font-black text-white">الأقسام التشغيلية</h3>
                 <p class="text-sm text-slate-400">تصفّح الموظفين حسب الدور أو الوردية أو الراتب.</p>
             </div>
-            <form method="GET" class="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/50 px-3 py-2">
-                <i data-lucide="search" class="h-4 w-4 text-slate-400"></i>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو الهوية" class="w-56 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500" />
+            <form method="GET" class="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-950/50 px-3 py-2">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="search" class="h-4 w-4 text-slate-400"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو الهوية" class="w-56 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500" />
+                </div>
+                <select name="department_id" class="rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-400">
+                    <option value="">كل الأقسام</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                    @endforeach
+                </select>
                 <button class="rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-md">بحث</button>
             </form>
         </div>
@@ -67,7 +75,7 @@
                                     <a href="{{ route('employees.edit', $employee) }}" class="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20">
                                         <i data-lucide="edit" class="h-3 w-3"></i>تعديل
                                     </a>
-                                    <form action="{{ route('employees.destroy', $employee) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الموظف؟')">
+                                    <form action="{{ route('employees.destroy', $employee) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-3 py-1.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">

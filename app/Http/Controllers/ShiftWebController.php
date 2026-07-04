@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shift;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class ShiftWebController extends Controller
 {
@@ -29,8 +31,18 @@ class ShiftWebController extends Controller
             'grace_period_minutes' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        Shift::create($validated);
-        return redirect()->route('shifts.index')->with('success', 'Shift created');
+        $shift = Shift::create($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'create',
+            'table_name' => 'shifts',
+            'record_id' => $shift->id,
+            'new_values' => $shift->toArray(),
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('shifts.index')->with('success', 'تم إنشاء الوردية بنجاح');
     }
 
     public function edit(Shift $shift): View
@@ -47,13 +59,36 @@ class ShiftWebController extends Controller
             'grace_period_minutes' => ['nullable', 'integer', 'min:0'],
         ]);
 
+        $oldValues = $shift->toArray();
         $shift->update($validated);
-        return redirect()->route('shifts.index')->with('success', 'Shift updated');
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'update',
+            'table_name' => 'shifts',
+            'record_id' => $shift->id,
+            'old_values' => $oldValues,
+            'new_values' => $shift->fresh()->toArray(),
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('shifts.index')->with('success', 'تم تحديث الوردية بنجاح');
     }
 
     public function destroy(Shift $shift): RedirectResponse
     {
+        $shiftData = $shift->toArray();
         $shift->delete();
-        return redirect()->route('shifts.index')->with('success', 'Shift deleted');
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'delete',
+            'table_name' => 'shifts',
+            'record_id' => $shift->id,
+            'old_values' => $shiftData,
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('shifts.index')->with('success', 'تم حذف الوردية بنجاح');
     }
 }

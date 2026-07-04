@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class HolidayWebController extends Controller
 {
@@ -29,8 +31,18 @@ class HolidayWebController extends Controller
             'is_recurring' => ['sometimes', 'boolean'],
         ]);
 
-        Holiday::create($validated);
-        return redirect()->route('holidays.index')->with('success', 'Holiday created');
+        $holiday = Holiday::create($validated);
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'create',
+            'table_name' => 'holidays',
+            'record_id' => $holiday->id,
+            'new_values' => $holiday->toArray(),
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('holidays.index')->with('success', 'تم إنشاء الإجازة بنجاح');
     }
 
     public function edit(Holiday $holiday): View
@@ -47,13 +59,36 @@ class HolidayWebController extends Controller
             'is_recurring' => ['sometimes', 'boolean'],
         ]);
 
+        $oldValues = $holiday->toArray();
         $holiday->update($validated);
-        return redirect()->route('holidays.index')->with('success', 'Holiday updated');
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'update',
+            'table_name' => 'holidays',
+            'record_id' => $holiday->id,
+            'old_values' => $oldValues,
+            'new_values' => $holiday->fresh()->toArray(),
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('holidays.index')->with('success', 'تم تحديث الإجازة بنجاح');
     }
 
     public function destroy(Holiday $holiday): RedirectResponse
     {
+        $holidayData = $holiday->toArray();
         $holiday->delete();
-        return redirect()->route('holidays.index')->with('success', 'Holiday deleted');
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'delete',
+            'table_name' => 'holidays',
+            'record_id' => $holiday->id,
+            'old_values' => $holidayData,
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('holidays.index')->with('success', 'تم حذف الإجازة بنجاح');
     }
 }
