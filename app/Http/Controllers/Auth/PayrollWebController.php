@@ -59,8 +59,9 @@ class PayrollWebController extends Controller
 
                 // 4. حساب خصم التأخيرات التشغيلية برمجياً من جدول الدوام
                 // محاكاة بشرية: لنفترض أن دقيقة التأخير تحسب بقيمة مادية مستقطعة (مثلاً: الراتب الأساسي تقسيم 30 يوم تقسيم 8 ساعات تقسيم 60 دقيقة)
-                $totalLateMinutes = AttendanceLog::query()->where('employee_id', $employee->id)
-                    ->where('log_date', 'LIKE', $month . '%')
+                $totalLateMinutes = AttendanceLog::query()
+                    ->where('employee_id', $employee->id)
+                    ->whereBetween('log_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
                     ->sum('late_minutes');
 
                 $hourlyRate = ($baseSalary / 30) / 8;

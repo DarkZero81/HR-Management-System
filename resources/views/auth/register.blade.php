@@ -1,12 +1,15 @@
-<div class="flex h-[700px] w-full">
-        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-    <div class="w-full hidden md:inline-block">
-        <img class="h-full" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/leftSideImage.png" alt="leftSideImage">
-    </div>
 
-    <div class="w-full flex flex-col items-center justify-center">
-        <form class="md:w-96 w-80 flex flex-col items-center justify-center" id="registerForm" method="POST" action="{{ route('register') }}">
+{{--  --}}
+<div class="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50">
+    <div class="flex flex-1 items-center justify-center p-4">
+        <div class="w-full max-w-5xl rounded-[32px] border border-slate-200/70 bg-white/80 p-2 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.15)] backdrop-blur-xl lg:flex lg:p-0">
+            <div class="w-full rounded-l-[28px] lg:block lg:w-1/2">
+                <img class="h-full w-full rounded-l-[28px] object-cover" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/leftSideImage.png" alt="leftSideImage">
+            </div>
+            <div class="flex w-full flex-col items-center justify-center p-8 lg:w-1/2">
+            <form class="md:w-96 w-80 flex flex-col items-center justify-center" id="registerForm" method="POST" action="{{ route('register') }}">
             @csrf
 
             <h2 class="text-4xl text-gray-900 font-medium">Create account</h2>
@@ -61,5 +64,7 @@
 
             <p class="text-gray-500/90 text-sm mt-4">Already have an account? <a class="text-indigo-400 hover:underline" href="{{ route('login') }}">Sign in</a></p>
         </form>
+            </div>
+        </div>
     </div>
 </div>

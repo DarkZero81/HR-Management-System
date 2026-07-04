@@ -34,8 +34,9 @@
                 </div>
                 <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">سريع وآمن</span>
             </div>
-            <div class="mt-6">
-                @livewire('document-uploader')
+            <div class="mt-6 rounded-[24px] border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+                <p class="font-semibold text-slate-900">إدارة المستندات</p>
+                <p class="mt-2">يمكن رفع المستندات لاحقاً من خلال واجهة إدارة الوثائق أو من خلال مطور الواجهة الذي سيكمل التكامل مع نظام التخزين.</p>
             </div>
         </div>
 

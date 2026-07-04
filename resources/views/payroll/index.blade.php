@@ -22,7 +22,7 @@
     <section class="grid gap-4 lg:grid-cols-3">
         <div class="rounded-[28px] bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white shadow-lg shadow-cyan-500/10">
             <p class="text-sm uppercase tracking-[0.35em] text-cyan-100">الراتب الأساسي</p>
-            <p class="mt-4 text-3xl font-black">{{ $payrolls->sum('base_salary') ? number_format($payrolls->sum('base_salary'), 2) . ' د.ع' : '0.00 د.ع' }}</p>
+            <p class="mt-4 text-3xl font-black">{{ ($totalBase = $payrolls->sum(fn($p) => $p->employee?->base_salary ?? 0)) ? number_format($totalBase, 2) . ' د.ع' : '0.00 د.ع' }}</p>
             <p class="mt-3 text-sm text-cyan-100/80">إجمالي الشهر</p>
         </div>
         <div class="rounded-[28px] bg-gradient-to-r from-slate-900 to-slate-700 p-6 text-white shadow-lg shadow-slate-900/10">
@@ -47,7 +47,34 @@
         </div>
 
         <div class="mt-5 rounded-[28px] bg-slate-900/80 p-4">
-            @livewire('payroll-viewer', ['month' => $month ?? now()->format('Y-m')])
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-right text-sm text-slate-300">
+                    <thead class="bg-slate-800 text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">الموظف</th>
+                            <th class="px-4 py-3 font-semibold">الراتب الأساسي</th>
+                            <th class="px-4 py-3 font-semibold">البدلات</th>
+                            <th class="px-4 py-3 font-semibold">الخصومات</th>
+                            <th class="px-4 py-3 font-semibold">الصافي</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                        @forelse($payrolls as $payroll)
+                            <tr class="hover:bg-slate-800/80">
+                                <td class="px-4 py-3 font-semibold text-white">{{ $payroll->employee?->full_name ?? '—' }}</td>
+                                <td class="px-4 py-3">{{ number_format((float) ($payroll->employee?->base_salary ?? 0), 2) }}</td>
+                                <td class="px-4 py-3">{{ number_format((float) ($payroll->allowances ?? 0), 2) }}</td>
+                                <td class="px-4 py-3">{{ number_format((float) ($payroll->deductions ?? 0), 2) }}</td>
+                                <td class="px-4 py-3 font-semibold text-cyan-300">{{ number_format((float) ($payroll->net_salary ?? 0), 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-6 text-center text-slate-400">لا توجد كشوف رواتب لهذا الشهر بعد.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 </div>

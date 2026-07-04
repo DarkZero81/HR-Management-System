@@ -74,7 +74,24 @@
                     <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white">{{ $transactions->where('status', 'pending')->count() }} معلقة</span>
                 </div>
                 <div class="mt-6 space-y-3">
-                    @livewire('requests-list')
+                    @forelse($transactions->where('status', 'pending')->take(5) as $transaction)
+                        <div class="rounded-[24px] border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="font-semibold text-white">{{ $transaction->employee?->full_name ?? '—' }}</span>
+                                <span class="rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-300">{{ $transaction->status }}</span>
+                            </div>
+                            <p class="mt-2 text-slate-400">{{ $transaction->description ?? 'طلب جديد' }}</p>
+                            <form action="{{ route('requests.update_status', $transaction) }}" method="POST" class="mt-3 flex flex-wrap gap-2">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="approved">
+                                <button type="submit" class="rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-300">قبول</button>
+                                <button type="submit" formaction="{{ route('requests.update_status', $transaction) }}" formmethod="POST" class="rounded-full bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300" onclick="this.previousElementSibling.value='rejected'">رفض</button>
+                            </form>
+                        </div>
+                    @empty
+                        <p class="text-sm text-slate-400">لا توجد طلبات معلقة حالياً.</p>
+                    @endforelse
                 </div>
             </div>
 

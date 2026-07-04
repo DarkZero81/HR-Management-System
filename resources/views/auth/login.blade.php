@@ -1,3 +1,4 @@
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <div class="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50">
     <div class="flex flex-1 items-center justify-center p-4">
         <div class="w-full max-w-5xl rounded-[32px] border border-slate-200/70 bg-white/80 p-2 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.15)] backdrop-blur-xl lg:flex lg:p-0">
