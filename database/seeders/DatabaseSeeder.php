@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            DepartmentSeeder::class, // تم إضافة الأقسام هنا لتُنفذ أولاً قبل الموظفين والمستخدمين
             RolePermissionSeeder::class,
             SystemSettingSeeder::class,
             ShiftSeeder::class,

@@ -10,13 +10,11 @@ class Department extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    protected $fillable = ['name', 'description'];
 
+    // علاقة القسم بالموظفين (القسم الواحد يحتوي على الكثير من الموظفين)
     public function employees(): HasMany
     {
-        return $this->hasMany(Employee::class, 'department_id');
+        return $this->hasMany(Employee::class);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AttendanceDeviceController;
 use App\Http\Controllers\Api\AttendanceLogController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DepartmentApiController; // Imported the new department controller
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\HolidayController;
@@ -15,7 +16,10 @@ use App\Http\Controllers\Api\SystemSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Public routes
 Route::post('/login', [AuthController::class, 'login']);
+
+// Protected routes
 Route::middleware(\Illuminate\Auth\Middleware\Authenticate::class)->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -36,6 +40,8 @@ Route::middleware(\Illuminate\Auth\Middleware\Authenticate::class)->group(functi
     Route::patch('/devices/{id}/toggle-status', [AttendanceDeviceController::class, 'toggleStatus']);
 
     Route::apiResource('holidays', HolidayController::class);
+
+    Route::apiResource('departments', DepartmentApiController::class); // Added the department resource routes
 
     Route::apiResource('employees', EmployeeController::class);
 

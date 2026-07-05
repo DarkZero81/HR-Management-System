@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->unique()->constrained('users')->onDelete('set null');
             // علاقة مع الوردية، ونستخدم restrict لمنع حذف وردية إذا كان هناك موظفون مسجلون عليها
             $table->foreignId('shift_id')->nullable()->constrained('shifts')->onDelete('restrict');
+$table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
 
             $table->string('first_name', 50);
             $table->string('last_name', 50);

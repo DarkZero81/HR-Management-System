@@ -10,22 +10,14 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
+            $table->string('name')->unique(); // اسم القسم (مثل: الموارد البشرية، المحاسبة)
+            $table->text('description')->nullable(); // وصف القسم
             $table->timestamps();
-        });
-
-        Schema::table('employees', function (Blueprint $table) {
-            $table->foreignId('department_id')->nullable()->after('shift_id')->constrained()->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::table('employees', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('department_id');
-        });
-
         Schema::dropIfExists('departments');
     }
 };

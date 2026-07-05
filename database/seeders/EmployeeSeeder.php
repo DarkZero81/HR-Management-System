@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Employee;
 use App\Models\Shift;
 use App\Models\User;
+use App\Models\Department; // استدعاء موديل الأقسام
 use Illuminate\Database\Seeder;
 
 class EmployeeSeeder extends Seeder
@@ -12,12 +13,14 @@ class EmployeeSeeder extends Seeder
     public function run(): void
     {
         $shifts = Shift::all();
+        $departments = Department::all(); // جلب كافة الأقسام المتاحة
         $users = User::where('email', '!=', 'admin@hr.com')->get();
 
         foreach ($users as $user) {
             Employee::create([
                 'user_id' => $user->id,
                 'shift_id' => $shifts->random()->id,
+                'department_id' => $departments->isNotEmpty() ? $departments->random()->id : null, // ربط الموظف بقسم عشوائي
                 'first_name' => fake()->firstName(),
                 'last_name' => fake()->lastName(),
                 'national_id' => 'NID' . fake()->unique()->numberBetween(1000000, 9999999),

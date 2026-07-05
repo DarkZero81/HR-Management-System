@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\AuditLog;
 use App\Models\Department;
 use App\Models\Shift;
+use App\Models\User; // تم الاستدعاء لربط حساب المستخدم بالملف الوظيفي
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -45,12 +46,17 @@ class EmployeeWebController extends Controller
     {
         $departments = Department::orderBy('name')->get();
         $shifts = Shift::orderBy('shift_name')->get();
-        return view('employees.create', compact('departments', 'shifts'));
+
+        // جلب المستخدمين الذين ليس لديهم ملف موظف مرتبط بعد لمنع الازدواجية
+        $users = User::whereDoesntHave('employee')->get();
+
+        return view('employees.create', compact('departments', 'shifts', 'users'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'user_id'            => ['required', 'exists:users,id', 'unique:employees,user_id'], // حقل إجباري لربط النظام بالموظف
             'first_name'         => ['required', 'string', 'max:50'],
             'last_name'          => ['required', 'string', 'max:50'],
             'national_id'        => ['required', 'string', 'max:50', 'unique:employees,national_id'],
@@ -65,12 +71,14 @@ class EmployeeWebController extends Controller
 
         $employee = Employee::create($validated);
 
+        // تصحيح: تحويل المصفوفة إلى JSON string لتفادي تضارب دمج البيانات في قاعدة البيانات
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'create',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'new_values'  => $employee->toArray(),
+            'old_values'  => null,
+            'new_values'  => json_encode($employee->toArray(), JSON_UNESCAPED_UNICODE),
             'performed_at'=> now(),
         ]);
 
@@ -86,7 +94,6 @@ class EmployeeWebController extends Controller
 
     public function update(Request $request, Employee $employee): RedirectResponse
     {
-        // استثناء المعرف الحالي لمنع انهيار التحقق عند الحفظ بدون تغيير الهوية الوطنية
         $validated = $request->validate([
             'first_name'         => ['required', 'string', 'max:50'],
             'last_name'          => ['required', 'string', 'max:50'],
@@ -104,13 +111,14 @@ class EmployeeWebController extends Controller
         $oldValues = $employee->toArray();
         $employee->update($validated);
 
+        // تصحيح: تحويل المصفوفات إلى مسارات نصوص JSON آمنة للتخزين داخل حقول الـ TEXT/JSON
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'update',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => $oldValues,
-            'new_values'  => $employee->fresh()->toArray(),
+            'old_values'  => json_encode($oldValues, JSON_UNESCAPED_UNICODE),
+            'new_values'  => json_encode($employee->fresh()->toArray(), JSON_UNESCAPED_UNICODE),
             'performed_at'=> now(),
         ]);
 
@@ -127,15 +135,22 @@ class EmployeeWebController extends Controller
             return redirect()->route('employees.index')->with('error', 'لا يمكن حذف الموظف لارتباطه بسجلات رواتب أو حضور تاريخية في قاعدة البيانات، يفضل تعيين تاريخ استقالة بدلاً من الحذف.');
         }
 
+        // تصحيح: تشفير مصفوفة الحذف لتخزينها نصياً بشكل سليم
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'delete',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => $employeeData,
+            'old_values'  => json_encode($employeeData, JSON_UNESCAPED_UNICODE),
+            'new_values'  => null,
             'performed_at'=> now(),
         ]);
 
         return redirect()->route('employees.index')->with('success', 'تم حذف ملف الموظف نهائياً من النظام.');
+    }
+
+    public function show(Employee $employee): View
+    {
+        return view('employees.show', compact('employee'));
     }
 }
