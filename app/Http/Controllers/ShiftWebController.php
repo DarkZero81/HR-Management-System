@@ -13,7 +13,7 @@ class ShiftWebController extends Controller
 {
     public function index(): View
     {
-        $shifts = Shift::orderBy('shift_name')->paginate(15);
+        $shifts = Shift::orderBy('shift_name')->paginate(8);
         return view('shifts.index', compact('shifts'));
     }
 

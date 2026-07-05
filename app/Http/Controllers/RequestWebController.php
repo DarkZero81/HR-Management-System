@@ -29,7 +29,7 @@ class RequestWebController extends Controller
             ->with(['employee.user', 'approver'])
             ->when(! $isAdmin, fn ($q) => $q->where('employee_id', $employee?->id))
             ->latest()
-            ->paginate($isAdmin ? 15 : 10);
+            ->paginate($isAdmin ? 8 : 3);
 
         return view('requests.index', [
             'transactions' => $transactions,

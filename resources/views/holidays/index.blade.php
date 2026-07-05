@@ -4,65 +4,75 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الإجازات</p>
-            <h2 class="mt-2 text-3xl font-black text-white">قائمة الإجازات</h2>
-            <p class="mt-2 text-sm text-slate-400">إدارة الإجازات الرسمية والتقويم السنوي.</p>
+            <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الإجازات</p>
+            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">قائمة الإجازات</h1>
+            <p class="text-sm text-slate-400 mt-1">إدارة الإجازات الرسمية والتقويم السنوي.</p>
         </div>
-        <a href="{{ route('holidays.create') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
-            <i data-lucide="plus" class="h-4 w-4"></i>
-            إضافة إجازة جديدة
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">الملف الشخصي</span>
+            </a>
+            <a href="{{ route('holidays.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-semibold shadow-lg transition-all">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">إضافة إجازة</span>
+            </a>
+        </div>
     </div>
 
-    <div class="overflow-hidden rounded-[28px] border border-white/10 bg-slate-900/60 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-white/10 text-right text-sm">
-                <thead class="bg-slate-950/50 text-slate-300">
+            <table class="w-full">
+                <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-5 py-4 font-semibold">اسم الإجازة</th>
-                        <th class="px-5 py-4 font-semibold">تاريخ البداية</th>
-                        <th class="px-5 py-4 font-semibold">تاريخ النهاية</th>
-                        <th class="px-5 py-4 font-semibold">متكررة</th>
-                        <th class="px-5 py-4 font-semibold">الإجراءات</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">اسم الإجازة</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">تاريخ البداية</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">تاريخ النهاية</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">متكررة</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10 bg-slate-900/70">
+                <tbody class="divide-y divide-slate-100">
                     @forelse($holidays as $holiday)
-                        <tr class="transition hover:bg-slate-800/70">
-                            <td class="px-5 py-4 font-semibold text-white">{{ $holiday->holiday_name }}</td>
-                            <td class="px-5 py-4 text-slate-300">{{ $holiday->start_date?->format('Y-m-d') ?? '—' }}</td>
-                            <td class="px-5 py-4 text-slate-300">{{ $holiday->end_date?->format('Y-m-d') ?? '—' }}</td>
-                            <td class="px-5 py-4">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-slate-800 font-semibold">{{ $holiday->holiday_name }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $holiday->start_date?->format('Y-m-d') ?? '—' }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $holiday->end_date?->format('Y-m-d') ?? '—' }}</td>
+                            <td class="px-6 py-4">
                                 @if($holiday->is_recurring)
-                                    <span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">نعم</span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">نعم</span>
                                 @else
-                                    <span class="rounded-full bg-slate-500/15 px-3 py-1 text-xs font-semibold text-slate-300">لا</span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">لا</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('holidays.edit', $holiday) }}" class="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20">
-                                        <i data-lucide="edit" class="h-3 w-3"></i>تعديل
+                                    <a href="{{ route('holidays.edit', $holiday) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors" title="تعديل">
+                                        <i data-lucide="edit" class="w-4 h-4"></i>
                                     </a>
-                                    <form action="{{ route('holidays.destroy', $holiday) }}" method="POST">
+                                    <form action="{{ route('holidays.destroy', $holiday) }}" method="POST" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذه الإجازة؟')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-3 py-1.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">
-                                            <i data-lucide="trash-2" class="h-3 w-3"></i>حذف
+                                        <button type="submit" class="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition-colors" title="حذف">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">لا توجد إجازات مسجلة حتى الآن.</td></tr>
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">لا توجد إجازات مسجلة حتى الآن.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="border-t border-white/10 px-6 py-4">{{ $holidays->links() }}</div>
+        <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
+            {{ $holidays->links() }}
+        </div>
     </div>
 </div>
 @endsection

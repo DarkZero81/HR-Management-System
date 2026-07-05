@@ -4,52 +4,62 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الأجهزة</p>
-            <h2 class="mt-2 text-3xl font-black text-white">أجهزة البصمة والحضور</h2>
-            <p class="mt-2 text-sm text-slate-400">إدارة أجهزة تسجيل الحضور المرتبطة بالنظام.</p>
+            <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الأجهزة</p>
+            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">أجهزة البصمة والحضور</h1>
+            <p class="text-sm text-slate-400 mt-1">إدارة أجهزة تسجيل الحضور المرتبطة بالنظام.</p>
         </div>
-        {{-- TODO: إضافة صفحة إنشاء جهاز جديد --}}
-        <span class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg opacity-75">
-            <i data-lucide="plus" class="h-4 w-4"></i>
-            إضافة جهاز (قريباً)
-        </span>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">الملف الشخصي</span>
+            </a>
+            <span class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-medium cursor-not-allowed" title="قريباً">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">إضافة جهاز</span>
+            </span>
+        </div>
     </div>
 
-    <div class="overflow-hidden rounded-[28px] border border-white/10 bg-slate-900/60 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-white/10 text-right text-sm">
-                <thead class="bg-slate-950/50 text-slate-300">
+            <table class="w-full">
+                <thead class="bg-slate-50">
                     <tr>
-                        <th class="px-5 py-4 font-semibold">اسم الجهاز</th>
-                        <th class="px-5 py-4 font-semibold">عنوان IP</th>
-                        <th class="px-5 py-4 font-semibold">الحالة</th>
-                        <th class="px-5 py-4 font-semibold">الإجراءات</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">اسم الجهاز</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">عنوان IP</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">الحالة</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">الإجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10 bg-slate-900/70">
+                <tbody class="divide-y divide-slate-100">
                     @forelse($devices as $device)
-                        <tr class="transition hover:bg-slate-800/70">
-                            <td class="px-5 py-4 font-semibold text-white">{{ $device->device_name }}</td>
-                            <td class="px-5 py-4 text-slate-300">{{ $device->ip_address ?? '—' }}</td>
-                            <td class="px-5 py-4">
-                                <span class="rounded-full {{ $device->status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300' }} px-3 py-1 text-xs font-semibold">
-                                    {{ $device->status === 'active' ? 'نشط' : 'متوقف' }}
-                                </span>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-slate-800 font-semibold">{{ $device->device_name }}</td>
+                            <td class="px-6 py-4 text-slate-600 font-mono text-sm">{{ $device->ip_address ?? '—' }}</td>
+                            <td class="px-6 py-4">
+                                @if($device->status === 'active')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">نشط</span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700">متوقف</span>
+                                @endif
                             </td>
-                            <td class="px-5 py-4">
-                                {{-- TODO: أزرار تعديل/حذف تتطلب إضافة DeviceWebController CRUD --}}
+                            <td class="px-6 py-4">
                                 <span class="text-xs text-slate-500">إجراءات غير متاحة حالياً</span>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-5 py-8 text-center text-slate-400">لا توجد أجهزة مسجلة حتى الآن.</td></tr>
+                        <tr>
+                            <td colspan="4" class="px-6 py-10 text-center text-slate-500">لا توجد أجهزة مسجلة حتى الآن.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="border-t border-white/10 px-6 py-4">{{ $devices->links() }}</div>
+        <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
+            {{ $devices->links() }}
+        </div>
     </div>
 </div>
 @endsection

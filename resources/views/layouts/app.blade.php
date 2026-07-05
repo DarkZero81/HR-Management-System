@@ -1,196 +1,519 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+{{--
+============================================================
+ملف التخطيط الرئيسي (Master Layout)
+============================================================
+هذا هو ملف الـ Layout الأساسي للتطبيق. يحتوي على:
+1. هيكل الصفحة الأساسي (HTML, Head, Body)
+2. الشريط الجانبي (Sidebar) مع قوائم التنقل
+3. الرأس الثابت للهواتف (Mobile Header)
+4. المحتوى الرئيسي مع عرض رسائل النجاح/الخطأ
+5. الفوتر (Footer)
+6. نظام الثيم (داكن/فاتح)
+7. التحكم بالقوائم المنسدلة والإشعارات
+--}}
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
+    {{-- ==========================================
+    البيانات الوصفية الأساسية (Meta Tags)
+    ========================================== --}}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- CSRF Token لأمان النماذج وطلبات AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'HR System'))</title>
+    {{-- عنوان الصفحة: يأتي من الـ View الفرعي أو الاسم الافتراضي --}}
+    <title>@yield('title', config('app.name', 'HR Engine'))</title>
 
+    {{-- ==========================================
+    روابط الخطوط والإطارات (Fonts & Frameworks)
+    ========================================== --}}
+    {{-- خط Tajawal المناسب للغة العربية --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    {{-- مكتبة الأيقونات Lucide --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.468.0/lucide.min.css">
+    {{-- Tailwind CSS via CDN (للنماذج الأولية) --}}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
+    {{-- ==========================================
+    الملفات المحلية (Vite)
+    ========================================== --}}
+    {{-- تجميع وتحميل ملفات CSS و JavaScript الخاصة بالمشروع --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
 </head>
+<body class="min-h-screen antialiased" dir="rtl">
 
-<body
-    class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_32%),linear-gradient(135deg,_#020617_0%,_#0f172a_45%,_#111827_100%)] font-['Cairo'] text-slate-100 antialiased">
-    <div class="flex min-h-screen flex-col gap-4 p-3 lg:flex-row lg:p-4">
-        <aside
-            class="w-50 shrink-0 rounded-[32px] border border-white/10 bg-slate-950/80 p-4 shadow-[0_25px_80px_-35px_rgba(8,15,30,0.8)] backdrop-blur-2xl lg:w-72 lg:p-5">
-            <div class="flex items-center justify-between border-b border-white/10 pb-4 lg:block">
-                <div>
-                    <p class="text-[10px] font-black uppercase tracking-[0.35em] text-slate-400">HR Engine</p>
-                    <h1 class="mt-1 text-xl font-black text-white">نظام الموارد البشرية</h1>
+    {{-- ==========================================
+    رأس الصفحة للأجهزة المحمولة (Mobile Header)
+    ========================================== --}}
+    <header class="lg:hidden fixed top-0 right-0 left-0 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4">
+        <div class="flex items-center gap-3">
+            {{-- زر فتح القائمة الجانبية --}}
+            <button id="mobileMenuToggle" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors">
+                <i data-lucide="menu" class="w-5 h-5 text-white"></i>
+            </button>
+            <div>
+                <p class="text-sm font-black text-white">HR Engine</p>
+                <p class="text-[10px] text-slate-400">نظام الموارد البشرية</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            {{-- زر تبديل الثيم في الموبايل --}}
+            <button id="themeToggleMobile" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors">
+                <i data-lucide="sun" class="w-4 h-4 text-amber-400 theme-icon-dark hidden"></i>
+                <i data-lucide="moon" class="w-4 h-4 text-slate-300 theme-icon-light hidden"></i>
+                <span class="text-xs font-bold text-white" id="themeLabelMobile">داكن</span>
+            </button>
+        </div>
+    </header>
+
+    {{-- ==========================================
+    طبقة الخلفية المعتمة (Overlay) للقائمة الجانبية
+    ========================================== --}}
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <div class="flex min-h-screen">
+        {{-- ==========================================
+        القائمة الجانبية (Sidebar)
+        ========================================== --}}
+        <aside id="sidebar" class="fixed top-0 right-0 h-full w-72 bg-gradient-to-b from-slate-900 to-slate-800 text-white z-50 transform translate-x-full lg:translate-x-0 transition-transform duration-300">
+            {{-- منطقة الشعار --}}
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center shadow-lg">
+                            <i data-lucide="briefcase" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg text-white">HR Engine</h1>
+                            <p class="text-xs text-slate-400">نظام الموارد البشرية</p>
+                        </div>
+                    </div>
+                    {{-- زر إغلاق القائمة للهواتف --}}
+                    <button id="closeSidebarMobile" class="lg:hidden p-2 rounded-xl hover:bg-slate-700/50 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-300"></i>
+                    </button>
                 </div>
-                <div
-                    class="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold text-cyan-300">
-                    Dark UI</div>
             </div>
 
-            <nav class="mt-6 space-y-1.5">
-                @php($nav = [['label' => 'الرئيسية', 'route' => 'dashboard', 'icon' => 'home'], ['label' => 'الأقسام الإدارية', 'route' => 'departments.index', 'icon' => 'building'], ['label' => 'الدوام والحضور', 'route' => 'attendance.index', 'icon' => 'clock'], ['label' => 'الإجازات والطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar'], ['label' => 'الوثائق', 'route' => 'my.documents', 'icon' => 'file-text'], ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'dollar-sign']])
+            {{-- ==========================================
+            قائمة التنقل (Navigation)
+            ========================================== --}}
+            <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                                    {{-- تعريف عناصر القائمة الأساسية --}}
+
+                @php
+                    $nav = [
+                        ['label' => 'الرئيسية', 'route' => 'dashboard', 'icon' => 'home', 'roles' => ['all']],
+                        ['label' => 'الدوام والحضور', 'route' => 'attendance.index', 'icon' => 'clock', 'roles' => ['all']],
+                        ['label' => 'الإجازات والطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar', 'roles' => ['employee', 'admin', 'hr', 'manager']],
+                        ['label' => 'الوثائق', 'route' => 'my.documents', 'icon' => 'file-text', 'roles' => ['employee', 'admin', 'hr', 'manager']],
+                        ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'banknote', 'roles' => ['all']],
+                        ['label' => 'الأقسام', 'route' => 'departments.index', 'icon' => 'building', 'roles' => ['all']],
+                    ];
+
+                    $userRole = optional(auth()->user()->role)->role_name;
+                @endphp
+                    {{-- تحديد دور المستخدم الحالي --}}
+
+                {{-- عرض عناصر القائمة حسب الصلاحيات --}}
                 @foreach ($nav as $item)
-                    <a href="{{ route($item['route']) }}"
-                        class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                        <i data-lucide="{{ $item['icon'] }}" class="h-4 w-4"></i>
-                        <span>{{ $item['label'] }}</span>
-                    </a>
+                    @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles']))
+                    @if($hasAccess)
+                        <a href="{{ route($item['route']) }}"
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5"></i>
+                            <span class="font-medium">{{ $item['label'] }}</span>
+                        </a>
+                    @endif
                 @endforeach
 
-                @if (in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr', 'manager'], true))
+                {{-- ==========================================
+                قسم الخدمة الذاتية (للموظفين)
+                ========================================== --}}
+                @if (in_array($userRole, ['employee', 'admin', 'hr', 'manager'], true))
                     <div class="pt-4 mt-4 border-t border-white/10">
-                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الإدارة
-                        </p>
-                        <a href="{{ route('reports.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('reports.index') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
-                            <span>التقارير الإدارية</span>
+                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الخدمة الذاتية</p>
+                        <a href="{{ route('my.requests.index') }}"
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('my.requests.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                            <span class="font-medium">إجازاتي</span>
+                        </a>
+                        <a href="{{ route('my.documents') }}"
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('my.documents') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span class="font-medium">وثائقي</span>
                         </a>
                     </div>
                 @endif
 
-                @if (in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr'], true))
+                {{-- ==========================================
+                قسم الإدارة (للمديرين والمشرفين)
+                ========================================== --}}
+                @if (in_array($userRole, ['admin', 'hr', 'manager'], true))
                     <div class="pt-4 mt-4 border-t border-white/10">
-                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">إدارة
-                            النظام</p>
-
+                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الإدارة</p>
+                        <a href="{{ route('reports.index') }}"
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="chart-bar" class="w-5 h-5"></i>
+                            <span class="font-medium">التقارير الإدارية</span>
+                        </a>
                         <a href="{{ route('employees.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('employees.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="users" class="h-4 w-4"></i>
-                            <span>إدارة الموظفين</span>
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('employees.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                            <span class="font-medium">إدارة الموظفين</span>
                         </a>
-
-                        <!-- زر إدارة الأقسام الإدارية -->
                         <a href="{{ route('departments.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('departments.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="building" class="h-4 w-4"></i>
-                            <span>الأقسام الإدارية</span>
+                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('departments.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                            <i data-lucide="building-2" class="w-5 h-5"></i>
+                            <span class="font-medium">الأقسام الإدارية</span>
                         </a>
-
-                        <a href="{{ route('shifts.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('shifts.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="clock" class="h-4 w-4"></i>
-                            <span>الورديات</span>
-                        </a>
-
-                        <a href="{{ route('holidays.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('holidays.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="calendar-days" class="h-4 w-4"></i>
-                            <span>الإجازات</span>
-                        </a>
-
-                        <a href="{{ route('requests.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('requests.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="clipboard-list" class="h-4 w-4"></i>
-                            <span>الطلبات</span>
-                        </a>
-
-                        <a href="{{ route('devices.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('devices.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="monitor" class="h-4 w-4"></i>
-                            <span>الأجهزة</span>
-                        </a>
-
-                        <a href="{{ route('documents.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('documents.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="folder-open" class="h-4 w-4"></i>
-                            <span>الوثائق</span>
-                        </a>
-
-                        <a href="{{ route('attendance.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('attendance.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="user-check" class="h-4 w-4"></i>
-                            <span>سجل الحضور</span>
-                        </a>
-
-                        <a href="{{ route('payroll.index') }}"
-                            class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ request()->routeIs('payroll.*') ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                            <i data-lucide="banknote" class="h-4 w-4"></i>
-                            <span>الرواتب</span>
-                        </a> <!-- تم إغلاق الوسم المكسور هنا بنجاح -->
                     </div>
                 @endif
             </nav>
 
+            {{-- ==========================================
+            المنطقة السفلية في القائمة (مستخدم + إشعارات + ثيم)
+            ========================================== --}}
+            <div class="p-4 border-t border-white/10 space-y-2">
+                {{-- زر تبديل الثيم --}}
+                <button id="themeToggle" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
+                    <i data-lucide="sun" class="w-5 h-5 theme-icon-dark hidden"></i>
+                    <i data-lucide="moon" class="w-5 h-5 theme-icon-light hidden"></i>
+                    <span class="font-medium" id="themeLabel">تبديل المظهر</span>
+                </button>
 
-
-            <div class="mt-auto space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-4">
-                <div class="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900 to-slate-800 p-3">
-                    <p
-                        class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.32em] text-slate-300">
-                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span> مركز التحكم الآمن
-                    </p>
-                    <p class="mt-2 text-[11px] leading-relaxed text-slate-400">تابع الحضور والطلبات والرواتب بواجهة
-                        حديثة ومناسبة للعمل العربي.</p>
+                {{-- ==========================================
+                قائمة الإشعارات (Notifications)
+                ========================================== --}}
+                @php($latestRequests = \App\Models\HrTransaction::query()->where('employee_id', auth()->user()?->employee?->id)->latest()->take(5)->get())
+                <div class="relative">
+                    <button id="notificationsToggle" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="font-medium">الإشعارات</span>
+                        @php($unread = $latestRequests->where('status', 'pending')->count())
+                        @if($unread > 0)
+                            <span class="mr-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unread }}</span>
+                        @endif
+                    </button>
+                    {{-- القائمة المنسدلة للإشعارات --}}
+                    <div id="notificationsDropdown" class="hidden absolute bottom-full left-0 w-72 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl mb-2 overflow-hidden z-50">
+                        <div class="p-3 border-b border-white/10">
+                            <p class="text-sm font-bold text-white">آخر الطلبات</p>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            @forelse($latestRequests as $req)
+                                <a href="{{ route('my.requests.index') }}" class="block px-4 py-3 hover:bg-slate-700/50 transition-colors border-b border-white/5 last:border-0">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-white">{{ match($req->transaction_type) { 'leave' => 'إجازة', 'permission' => 'إذن', 'promotion' => 'ترقية', 'penalty' => 'جزاء', 'transfer' => 'نقل', default => $req->transaction_type } }}</span>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full {{ $req->status === 'pending' ? 'bg-amber-500/20 text-amber-300' : ($req->status === 'approved' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300') }}">{{ $req->status }}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-1">{{ $req->start_date_time?->format('Y-m-d') ?? '—' }}</p>
+                                </a>
+                            @empty
+                                <div class="px-4 py-6 text-center text-slate-400 text-sm">لا توجد طلبات حالياً</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/60 p-3">
-                    <div
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 font-black text-white">
-                        {{ strtoupper(substr(auth()->user()->email ?? 'U', 0, 1)) }}
-                    </div>
-                    <div class="overflow-hidden">
-                        <p class="truncate text-sm font-black text-white">
-                            {{ auth()->user()->name ?? auth()->user()->email }}</p>
-                        <p class="mt-1 text-[11px] font-semibold text-slate-400">
-                            {{ optional(auth()->user()->role)->role_name ?? 'موظف' }}</p>
+                {{-- ==========================================
+                قائمة الملف الشخصي (Profile)
+                ========================================== --}}
+                <div class="relative">
+                    <button id="profileToggle" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+                            <span class="text-xs font-black text-white">{{ strtoupper(substr(auth()->user()->email ?? 'U', 0, 1)) }}</span>
+                        </div>
+                        <div class="flex-1 min-w-0 text-right">
+                            <p class="truncate text-sm font-black text-white">{{ auth()->user()->name ?? auth()->user()->email }}</p>
+                            <p class="text-[10px] font-semibold text-slate-400">{{ optional(auth()->user()->role)->role_name ?? 'موظف' }}</p>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+                    {{-- القائمة المنسدلة للملف الشخصي --}}
+                    <div id="profileDropdown" class="hidden absolute bottom-full left-0 w-64 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl mb-2 overflow-hidden z-50">
+                        <div class="p-3 border-b border-white/10">
+                            <p class="text-sm font-bold text-white">الملف الشخصي</p>
+                        </div>
+                        <div class="p-2">
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-700/50 transition-colors text-white">
+                                <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                                <span class="text-sm">بيانات الحساب</span>
+                            </a>
+                            <form method="POST" action="{{ route('logout') }}" class="mt-1">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-red-500/10 transition-colors text-red-400">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    <span class="text-sm">تسجيل الخروج</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <main
-            class="flex-1 overflow-y-auto rounded-[32px] border border-white/10 bg-slate-950/40 p-4 shadow-[0_20px_70px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl lg:p-6">
-            <div class="mx-auto max-w-[1600px] space-y-6">
-                @if (session('success'))
-                    <div
-                        class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200">
-                        {{ session('success') }}
-                    </div>
-                @endif
+        {{-- ==========================================
+        المحتوى الرئيسي (Main Content)
+        ========================================== --}}
+        <main class="flex-1 w-full lg:mr-72 pt-16 lg:pt-0">
+            <div class="p-4 md:p-6 lg:p-8">
+                <div class="mx-auto max-w-[1600px] space-y-6">
+                    {{-- عرض رسالة نجاح (Session Flash) --}}
+                    @if (session('success'))
+                        <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
-                @if (session('error'))
-                    <div
-                        class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200">
-                        {{ session('error') }}
-                    </div>
-                @endif
+                    {{-- عرض رسالة خطأ (Session Flash) --}}
+                    @if (session('error'))
+                        <div class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
-                @yield('content')
+                    {{-- هنا يتم حقن محتوى الصفحات الفرعية --}}
+                    @yield('content')
+                </div>
             </div>
         </main>
     </div>
 
-    <footer
-        class="flex flex-col md:flex-row gap-3 items-center justify-around w-full py-4 text-sm bg-slate-800 text-white/70">
-        <p>Copyright © 2025 HR Engine. All rights reserved.</p>
-
+    {{-- ==========================================
+    الفوتر (Footer) الثابت
+    ========================================== --}}
+    <footer class="bottom-0 left-0 right-0 lg:right-72 bg-slate-900/90 backdrop-blur-xl border-t border-white/10 py-3 px-4 z-30">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-2">
+            <p class="text-xs text-slate-400">Copyright © 2025 HR Engine. All rights reserved.</p>
+            <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">v1.0</span>
+            </div>
+        </div>
     </footer>
 
+    {{-- مسافة للفوتر الثابت في الموبايل --}}
+    <div class="h-12 lg:hidden"></div>
+
+    {{-- ==========================================
+    السكربتات الخارجية (Alpine.js & Lucide)
+    ========================================== --}}
     <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    {{-- ==========================================
+    السكربتات المخصصة للصفحة
+    ========================================== --}}
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
+            // ==========================================
+            // تهيئة أيقونات Lucide
+            // ==========================================
             if (window.lucide) {
                 window.lucide.createIcons();
             }
-        });
 
-        document.querySelectorAll('form[method="POST"]').forEach(form => {
-            if (form.querySelector('input[name="_method"][value="DELETE"]')) {
-                form.onsubmit = function() {
-                    return confirm('هل أنت متأكد من تنفيذ هذا الإجراء؟ لا يمكن التراجع بعده.');
-                };
+            // ==========================================
+            // نظام الثيمات (Light/Dark Mode)
+            // ==========================================
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+
+            /**
+             * تطبيق الثيم المحدد على الصفحة
+             * @param {string} theme - 'dark' أو 'light'
+             */
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+
+                const isDark = theme === 'dark';
+                // إظهار/إخفاء أيقونات الثيم
+                document.querySelectorAll('.theme-icon-dark').forEach(el => el.classList.toggle('hidden', !isDark));
+                document.querySelectorAll('.theme-icon-light').forEach(el => el.classList.toggle('hidden', isDark));
+
+                // تحديث النصوص
+                const themeLabel = document.getElementById('themeLabel');
+                const themeLabelMobile = document.getElementById('themeLabelMobile');
+                if (themeLabel) themeLabel.textContent = isDark ? 'تبديل المظهر' : 'تبديل المظهر';
+                if (themeLabelMobile) themeLabelMobile.textContent = isDark ? 'داكن' : 'فاتح';
             }
+
+            // تطبيق الثيم المحفوظ
+            applyTheme(savedTheme);
+
+            // أحداث أزرار تبديل الثيم (في الـ Sidebar و الـ Mobile Header)
+            document.getElementById('themeToggle')?.addEventListener('click', function() {
+                const current = html.getAttribute('data-theme');
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+
+            document.getElementById('themeToggleMobile')?.addEventListener('click', function() {
+                const current = html.getAttribute('data-theme');
+                applyTheme(current === 'dark' ? 'light' : 'dark');
+            });
+
+            // ==========================================
+            // التحكم في القائمة الجانبية للهواتف (Mobile Sidebar)
+            // ==========================================
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const toggleBtn = document.getElementById('mobileMenuToggle');
+            const closeBtn = document.getElementById('closeSidebarMobile');
+
+            /**
+             * فتح القائمة الجانبية
+             */
+            function openSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.remove('translate-x-full');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                }
+                document.body.classList.add('sidebar-open');
+            }
+
+            /**
+             * إغلاق القائمة الجانبية
+             */
+            function closeSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.add('translate-x-full');
+                if (overlay) {
+                    overlay.classList.add('hidden');
+                }
+                document.body.classList.remove('sidebar-open');
+            }
+
+            // فتح القائمة عند النقر على زر القائمة
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openSidebar();
+                });
+            }
+
+            // إغلاق القائمة عند النقر على زر الإغلاق
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeSidebar();
+                });
+            }
+
+            // إغلاق القائمة عند النقر على الـ Overlay
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeSidebar();
+                });
+            }
+
+            // إغلاق القائمة عند الضغط على زر الرجوع في المتصفح (History API)
+            window.addEventListener('popstate', function() {
+                if (window.innerWidth < 1024) {
+                    closeSidebar();
+                }
+            });
+
+            // إغلاق القائمة عند تغيير حجم النافذة إلى حجم أكبر من LG
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    closeSidebar();
+                }
+            });
+
+            // إغلاق القائمة تلقائياً بعد النقر على أي رابط داخلي (في الهواتف)
+            if (sidebar) {
+                sidebar.querySelectorAll('a').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth < 1024) {
+                            // نؤجل الإغلاق قليلاً للسماح بتوجيه الرابط
+                            setTimeout(closeSidebar, 150);
+                        }
+                    });
+                });
+            }
+
+            // ==========================================
+            // التحكم في قائمة الإشعارات (Notifications)
+            // ==========================================
+            const notificationsToggle = document.getElementById('notificationsToggle');
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+
+            if (notificationsToggle && notificationsDropdown) {
+                notificationsToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // إغلاق أي قوائم منسدلة مفتوحة أخرى
+                    document.querySelectorAll('.dropdown-open').forEach(function(el) {
+                        if (el !== notificationsDropdown) {
+                            el.classList.add('hidden');
+                        }
+                    });
+                    notificationsDropdown.classList.toggle('hidden');
+                    // إغلاق قائمة الملف الشخصي إذا كانت مفتوحة
+                    if (profileDropdown) {
+                        profileDropdown.classList.add('hidden');
+                    }
+                });
+            }
+
+            // ==========================================
+            // التحكم في قائمة الملف الشخصي (Profile)
+            // ==========================================
+            const profileToggle = document.getElementById('profileToggle');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('hidden');
+                    // إغلاق قائمة الإشعارات إذا كانت مفتوحة
+                    if (notificationsDropdown) {
+                        notificationsDropdown.classList.add('hidden');
+                    }
+                });
+            }
+
+            // ==========================================
+            // إغلاق القوائم المنسدلة عند النقر خارجها
+            // ==========================================
+            document.addEventListener('click', function(e) {
+                // إغلاق قائمة الإشعارات
+                if (notificationsToggle && notificationsDropdown) {
+                    if (!notificationsToggle.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                        notificationsDropdown.classList.add('hidden');
+                    }
+                }
+                // إغلاق قائمة الملف الشخصي
+                if (profileToggle && profileDropdown) {
+                    if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.add('hidden');
+                    }
+                }
+            });
+
+            // ==========================================
+            // تأكيد الحذف (Delete Confirmation)
+            // ==========================================
+            // إضافة تأكيد لكل نموذج يحوي DELETE method
+            document.querySelectorAll('form[method="POST"]').forEach(function(form) {
+                if (form.querySelector('input[name="_method"][value="DELETE"]')) {
+                    form.onsubmit = function() {
+                        return confirm('هل أنت متأكد من تنفيذ هذا الإجراء؟ لا يمكن التراجع بعده.');
+                    };
+                }
+            });
         });
     </script>
 </body>
-
 </html>

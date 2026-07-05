@@ -22,20 +22,20 @@
                         <p class="text-sm text-slate-500">أو تسجيل الدخول بالبريد</p>
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
-
-                    <div class="flex w-full items-center gap-2">
+                    {{-- enter email --}}
+                    <div class="flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
                         <i data-lucide="mail" class="h-4 w-4 text-slate-400"></i>
                         <input type="email" placeholder="البريد الإلكتروني" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="email" value="{{ old('email') }}" autofocus autocomplete="username">
                     </div>
                     <x-input-error :messages="$errors->get('email')" class="mt-2 self-start" />
-
-                    <div class="mt-4 flex w-full items-center gap-2">
+                    {{-- enter password --}}
+                    <div class="my-2 flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
                         <i data-lucide="lock" class="h-4 w-4 text-slate-400"></i>
                         <input type="password" placeholder="كلمة المرور" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="password" autocomplete="current-password">
                     </div>
                     <x-input-error :messages="$errors->get('password')" class="mt-2 self-start" />
-
-                    <div class="mt-4 flex w-full items-center justify-between text-slate-500">
+                    {{-- don't have account --}}
+                    <div class="mt-4 flex w-full items-center justify-between text-slate-500 ">
                         <label class="flex cursor-pointer items-center gap-2">
                             <input class="h-4 w-4" type="checkbox" id="checkbox" name="remember">
                             <span class="text-sm">تذكرني</span>

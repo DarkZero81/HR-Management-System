@@ -21,7 +21,7 @@ class PayrollWebController extends Controller
         $payrolls = PayrollOrder::with('employee')
             ->where('salary_month', $month)
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
 
         return view('payroll.index', compact('payrolls', 'month'));
     }

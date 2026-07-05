@@ -3,85 +3,147 @@
 @section('title', 'الرواتب')
 
 @section('content')
-<div class="space-y-6">
-    <section class="rounded-[32px] bg-white border border-slate-200/70 p-6 shadow-sm">
-        <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div class="space-y-3 text-right">
-                <p class="text-sm uppercase tracking-[0.35em] text-slate-500">الرواتب</p>
-                <h1 class="text-3xl font-black text-slate-900">إدارة كشوف الرواتب</h1>
-                <p class="text-sm text-slate-600">راجع كشوف الشهر، شغّل الحسابات، واطبع القسائم مباشرة من هنا.</p>
+    <div class="space-y-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الرواتب</p>
+                <h1 class="text-2xl md:text-3xl font-black text-white mt-1">إدارة كشوف الرواتب</h1>
+                <p class="text-sm text-slate-400 mt-1">راجع كشوف الشهر، شغّل الحسابات، واطبع القسائم مباشرة من هنا.</p>
             </div>
-            <form action="{{ route('payroll.generate') }}" method="POST" class="flex flex-col gap-3 rounded-[28px] border border-slate-200/70 bg-slate-950 p-4 text-white shadow-xl sm:flex-row sm:items-center">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('profile.edit') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">الملف الشخصي</span>
+                </a>
+                <button onclick="window.print()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-medium transition-all shadow-lg border-black/10">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">طباعة القسائم</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+            <form action="{{ route('payroll.generate') }}" method="POST"
+                class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 @csrf
-                <input type="month" name="salary_month" value="{{ $month ?? now()->format('Y-m') }}" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500" />
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">شهر الراتب</label>
+                    <input type="month" name="salary_month" value="{{ $month ?? now()->format('Y-m') }}"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-800">
+                </div>
                 @error('salary_month')
-                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
+                    <p class="text-red-500 text-sm">{{ $message }}</p>
                 @enderror
-                <button type="submit" class="rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600">تشغيل المحرك</button>
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 bg-blue-600 p-2 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg transition-all whitespace-nowrap">
+                        استعلام </button>
+                </div>
             </form>
         </div>
-    </section>
 
-    <section class="grid gap-4 lg:grid-cols-3">
-        <div class="rounded-[28px] bg-gradient-to-r from-blue-600 to-cyan-500 p-6 text-white shadow-lg shadow-cyan-500/10">
-            <p class="text-sm uppercase tracking-[0.35em] text-cyan-100">الراتب الأساسي</p>
-            <p class="mt-4 text-3xl font-black">{{ ($totalBase = $payrolls->sum(fn($p) => $p->employee?->base_salary ?? 0)) ? number_format($totalBase, 2) . ' د.ع' : '0.00 د.ع' }}</p>
-            <p class="mt-3 text-sm text-cyan-100/80">إجمالي الشهر</p>
-        </div>
-        <div class="rounded-[28px] bg-gradient-to-r from-slate-900 to-slate-700 p-6 text-white shadow-lg shadow-slate-900/10">
-            <p class="text-sm uppercase tracking-[0.35em] text-slate-300">صافي الراتب الأخير</p>
-            <p class="mt-4 text-3xl font-black">{{ $payrolls->first()?->net_salary ? number_format((float) $payrolls->first()->net_salary, 2) . ' د.ع' : '0.00 د.ع' }}</p>
-            <p class="mt-3 text-sm text-slate-300/80">آخر كشف</p>
-        </div>
-        <div class="rounded-[28px] bg-white border border-slate-200/70 p-6 shadow-sm">
-            <p class="text-sm font-semibold text-slate-500">عدد الكشوف</p>
-            <p class="mt-4 text-3xl font-black text-slate-900">{{ $payrolls->count() }} كشف</p>
-            <p class="mt-3 text-sm text-slate-500">من خلال النظام</p>
-        </div>
-    </section>
-
-    <section class="rounded-[32px] bg-slate-950 p-5 shadow-2xl shadow-slate-950/20 text-white">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-                <p class="text-sm uppercase tracking-[0.35em] text-slate-400">كشف الشهر</p>
-                <h2 class="mt-2 text-2xl font-black">{{ $month ?? now()->format('Y-m') }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="wallet" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium">إجمالي الشهر</span>
+                </div>
+                <p class="text-2xl font-bold text-slate-800">
+                    {{ ($totalBase = $payrolls->sum(fn($p) => $p->employee?->base_salary ?? 0)) ? number_format($totalBase, 2) . ' ل.س' : '0.00 ل.س' }}
+                </p>
+                <p class="text-sm text-slate-500 mt-2">الراتب الأساسي</p>
             </div>
-            <button onclick="window.print()" class="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold transition hover:bg-white/20">
-                <i data-lucide="printer" class="inline-block h-4 w-4 align-middle ml-1"></i>
-                طباعة القسائم
-            </button>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium">آخر كشف</span>
+                </div>
+                <p class="text-2xl font-bold text-slate-800">
+                    {{ $payrolls->first()?->net_salary ? number_format((float) $payrolls->first()->net_salary, 2) . ' ل.س' : '0.00 ل.س' }}
+                </p>
+                <p class="text-sm text-slate-500 mt-2">صافي الراتب</p>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-6 h-6 text-violet-600"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium">عدد الكشوف</span>
+                </div>
+                <p class="text-2xl font-bold text-slate-800">{{ $payrolls->count() }} كشف</p>
+                <p class="text-sm text-slate-500 mt-2">من خلال النظام</p>
+            </div>
         </div>
 
-        <div class="mt-5 rounded-[28px] bg-slate-900/80 p-4">
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">كشف الشهر</p>
+                        <h2 class="text-xl font-black text-slate-900 mt-1">{{ $month ?? now()->format('Y-m') }}</h2>
+                    </div>
+                </div>
+            </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-right text-sm text-slate-300">
-                    <thead class="bg-slate-800 text-slate-400">
+                <table class="w-full">
+                    <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-4 py-3 font-semibold">الموظف</th>
-                            <th class="px-4 py-3 font-semibold">الراتب الأساسي</th>
-                            <th class="px-4 py-3 font-semibold">البدلات</th>
-                            <th class="px-4 py-3 font-semibold">الخصومات</th>
-                            <th class="px-4 py-3 font-semibold">الصافي</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">الموظف</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">الراتب الأساسي</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">البدلات</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">الخصومات</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">صافي الراتب</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800">
+                    <tbody class="divide-y divide-slate-100">
                         @forelse($payrolls as $payroll)
-                            <tr class="hover:bg-slate-800/80">
-                                <td class="px-4 py-3 font-semibold text-white">{{ $payroll->employee?->full_name ?? '—' }}</td>
-                                <td class="px-4 py-3">{{ number_format((float) ($payroll->employee?->base_salary ?? 0), 2) }}</td>
-                                <td class="px-4 py-3">{{ number_format((float) ($payroll->allowances ?? 0), 2) }}</td>
-                                <td class="px-4 py-3">{{ number_format((float) ($payroll->deductions ?? 0), 2) }}</td>
-                                <td class="px-4 py-3 font-semibold text-cyan-300">{{ number_format((float) ($payroll->net_salary ?? 0), 2) }}</td>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                            {{ strtoupper(substr($payroll->employee?->first_name ?? 'U', 0, 1)) }}
+                                        </div>
+                                        <span
+                                            class="font-semibold text-slate-800">{{ $payroll->employee?->full_name ?? '—' }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600">{{ number_format($payroll->base_salary, 2) }} ل.س</td>
+                                <td class="px-6 py-4 text-emerald-600 font-semibold">
+                                    +{{ number_format($payroll->allowances, 2) }} ل.س</td>
+                                <td class="px-6 py-4 text-red-600 font-semibold">
+                                    -{{ number_format($payroll->deductions, 2) }} ل.س</td>
+                                <td class="px-6 py-4 text-slate-800 font-bold">{{ number_format($payroll->net_salary, 2) }}
+                                    ل.س</td>
+                                <td class="px-6 py-4">
+                                    <button onclick="window.print()"
+                                        class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors"
+                                        title="طباعة">
+                                        <i data-lucide="printer" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-6 text-center text-slate-400">لا توجد كشوف رواتب لهذا الشهر بعد.</td>
+                                <td colspan="6" class="px-6 py-10 text-center text-slate-500">لا توجد كشوف رواتب لهذا
+                                    الشهر.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+            <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
+                {{ $payrolls->links() }}
+            </div>
         </div>
-    </section>
-</div>
+    </div>
 @endsection

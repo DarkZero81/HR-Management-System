@@ -11,7 +11,7 @@
                 <h2 class="mt-2 text-3xl font-black text-slate-900">ملخص الأداء والتقارير التشغيلية</h2>
                 <p class="mt-2 text-sm text-slate-600">اطّلع على المؤشرات التشغيلية والمالية في مكان واحد.</p>
             </div>
-            <button class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">تصدير PDF</button>
+            <button class="rounded-2xl bg-blue-600 px-5 py-3 text-l p-3 font-semibold text-white transition hover:bg-blue-700">تصدير PDF</button>
         </div>
     </div>
 

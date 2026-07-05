@@ -13,7 +13,7 @@ class HolidayWebController extends Controller
 {
     public function index(): View
     {
-        $holidays = Holiday::orderBy('start_date', 'desc')->paginate(15);
+        $holidays = Holiday::orderBy('start_date', 'desc')->paginate(8);
         return view('holidays.index', compact('holidays'));
     }
 

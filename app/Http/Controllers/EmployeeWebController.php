@@ -37,7 +37,7 @@ class EmployeeWebController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $employees = $query->paginate(15);
+        $employees = $query->paginate(8);
         $departments = Department::orderBy('name')->get();
         return view('employees.index', compact('employees', 'departments'));
     }

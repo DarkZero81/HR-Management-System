@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Tajawal', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  html[data-theme="dark"] body {
+    @apply bg-slate-950 text-white;
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+html[data-theme="dark"] .bg-white {
+  background-color: #ffffff;
+}
+
+html[data-theme="dark"] .bg-slate-50 {
+  background-color: #f8fafc;
+}
+
+html[data-theme="dark"] .text-slate-800 {
+  color: #1e293b;
+}
+
+html[data-theme="dark"] .text-slate-700 {
+  color: #334155;
+}
+
+html[data-theme="dark"] .text-slate-600 {
+  color: #475569;
+}
+
+html[data-theme="dark"] .text-slate-500 {
+  color: #64748b;
+}
+
+html[data-theme="dark"] .border-slate-200 {
+  border-color: #e2e8f0;
+}
+
+html[data-theme="dark"] .border-slate-100 {
+  border-color: #f1f5f9;
+}
+
+html[data-theme="light"] body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .bg-white {
+  background-color: #ffffff;
+}
+
+html[data-theme="light"] .text-slate-800 {
+  color: #0f172a;
+}
+
+html[data-theme="light"] .text-slate-700 {
+  color: #1e293b;
+}
+
+html[data-theme="light"] .text-slate-600 {
+  color: #475569;
+}
+
+html[data-theme="light"] .text-slate-500 {
+  color: #64748b;
+}
+
+html[data-theme="light"] .border-slate-200 {
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .border-slate-100 {
+  border-color: #f1f5f9;
+}
+
+html[data-theme="light"] .bg-slate-50 {
+  background-color: #f8fafc;
+}
+
+/* Fix input text visibility in both themes */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color: #ffffff;
+}
+
+html[data-theme="light"] input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  color: #0f172a;
+}
+
+/* Smooth theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

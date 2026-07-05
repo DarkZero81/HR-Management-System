@@ -55,7 +55,7 @@
             </div>
             <div>
                 <label class="block text-sm font-semibold text-slate-300 mb-2">ملاحظات الطلب</label>
-                <textarea name="description" rows="4" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('description') border-rose-400 @enderror" placeholder="اكتب سبب الطلب أو التفاصيل الإضافية...">{{ old('description') }}</textarea>
+                <textarea name="description" rows="4" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-4 text-sm text-dark outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('description') border-rose-400 @enderror" placeholder="اكتب سبب الطلب أو التفاصيل الإضافية...">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
                 @enderror

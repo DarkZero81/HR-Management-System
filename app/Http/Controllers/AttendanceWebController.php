@@ -25,7 +25,7 @@ class AttendanceWebController extends Controller
             $query->where('status', $request->status);
         }
 
-        $logs = $query->latest()->paginate(15);
+        $logs = $query->latest()->paginate(8);
         $devices = AttendanceDevice::all();
 
         return view('attendance.index', compact('logs', 'devices'));
@@ -43,7 +43,7 @@ class AttendanceWebController extends Controller
         $logs = AttendanceLog::with(['device'])
             ->where('employee_id', $employee->id)
             ->latest('log_date')
-            ->paginate(15);
+            ->paginate(8);
 
         return view('attendance.my_index', compact('logs'));
     }
