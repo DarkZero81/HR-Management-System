@@ -60,6 +60,14 @@ class Employee extends Model
     }
 
     /**
+     * علاقة الموظف بالقسم التابع له.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
      * علاقة الموظف بالوثائق والأوراق الثابتة الخاصة به.
      */
     public function documents(): HasMany

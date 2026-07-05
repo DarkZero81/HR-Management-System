@@ -20,6 +20,15 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        $hrRole = RolePermission::where('role_name', 'hr')->first();
+
+        User::create([
+            'email' => 'hr@hr.com',
+            'password' => Hash::make('password'),
+            'role_id' => $hrRole->id,
+            'is_active' => true,
+        ]);
+
         $employeeRole = RolePermission::where('role_name', 'employee')->first();
 
         User::factory()->count(20)->create([

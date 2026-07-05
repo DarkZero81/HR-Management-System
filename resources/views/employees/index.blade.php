@@ -3,95 +3,120 @@
 @section('title', 'إدارة الموظفين')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur lg:flex-row lg:items-center lg:justify-between">
+<div class="space-y-6" dir="rtl">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">دليل الموظفين</p>
-            <h2 class="mt-2 text-3xl font-black text-white">قائمة شاملة للموظفين</h2>
-            <p class="mt-2 text-sm text-slate-400">تصفح الملف الشخصي، الحالة الوظيفية، والراتب الأساسي بكل وضوح وسلاسة.</p>
+            <h1 class="text-2xl font-black text-white">الملفات الوظيفية</h1>
+            <p class="text-sm text-slate-400">إدارة بيانات الموظفين، الرواتب، والأقسام المسجلة في النظام.</p>
         </div>
-        <a href="{{ route('employees.create') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
-            <i data-lucide="user-plus" class="h-4 w-4"></i>
-            إضافة موظف جديد
+        <a href="{{ route('employees.create') }}" class="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500">
+            إضافة موظف جديد +
         </a>
     </div>
 
-    <div class="overflow-hidden rounded-[28px] border border-white/10 bg-slate-900/60 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
-        <div class="flex flex-col gap-4 border-b border-white/10 px-6 py-5 md:flex-row md:items-center md:justify-between">
+    @if(session('success'))
+        <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-400">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm font-medium text-rose-400">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="rounded-[24px] border border-white/10 bg-slate-900/50 p-5">
+        <form action="{{ route('employees.index') }}" method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-                <h3 class="text-xl font-black text-white">الأقسام التشغيلية</h3>
-                <p class="text-sm text-slate-400">تصفّح الموظفين حسب الدور أو الوردية أو الراتب.</p>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">بحث نصي</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="الاسم، الكنية، أو الرقم الوطني..." class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
             </div>
-            <form method="GET" class="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-950/50 px-3 py-2">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="search" class="h-4 w-4 text-slate-400"></i>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث بالاسم أو الهوية" class="w-56 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-cyan-500" />
-                </div>
-                <select name="department_id" class="rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-400">
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">تصفية حسب القسم</label>
+                <select name="department_id" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
                     <option value="">كل الأقسام</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}" {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                     @endforeach
                 </select>
-                <button class="rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-md">بحث</button>
-            </form>
-        </div>
+            </div>
 
+            <div class="flex items-end gap-2">
+                <button type="submit" class="w-full rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-700">
+                    تطبيق الفلترة
+                </button>
+                @if(request()->has('search') || request()->has('department_id'))
+                    <a href="{{ route('employees.index') }}" class="rounded-xl bg-slate-950 border border-white/10 px-4 py-2.5 text-sm font-bold text-slate-400 transition hover:text-white">
+                        إعادة
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    <div class="overflow-hidden rounded-[24px] border border-white/10 bg-slate-950/40 shadow-xl">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-white/10 text-right text-sm">
-                <thead class="bg-slate-950/50 text-slate-300">
+            <table class="w-full border-collapse text-right text-sm">
+                <thead class="bg-slate-900/80 text-xs font-bold uppercase tracking-wider text-slate-400">
                     <tr>
-                        <th class="px-5 py-4 font-semibold">الموظف</th>
-                        <th class="px-5 py-4 font-semibold">البريد</th>
-                        <th class="px-5 py-4 font-semibold">الهاتف</th>
-                        <th class="px-5 py-4 font-semibold">الوردية</th>
-                        <th class="px-5 py-4 font-semibold">الراتب الأساسي</th>
-                        <th class="px-5 py-4 font-semibold">الحالة</th>
-                        <th class="px-5 py-4 font-semibold">الإجراءات</th>
+                        <th class="px-6 py-4">الموظف</th>
+                        <th class="px-6 py-4">الرقم الوطني</th>
+                        <th class="px-6 py-4">القسم والوردية</th>
+                        <th class="px-6 py-4">الراتب الأساسي</th>
+                        <th class="px-6 py-4">رصيد الإجازات</th>
+                        <th class="px-6 py-4">تاريخ التعيين</th>
+                        <th class="px-6 py-4 text-left">العمليات</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10 bg-slate-900/70">
+                <tbody class="divide-y divide-white/5 text-slate-300">
                     @forelse($employees as $employee)
-                        <tr class="transition hover:bg-slate-800/70">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-bold text-white">{{ strtoupper(substr($employee->first_name ?? 'E', 0, 1)) }}{{ strtoupper(substr($employee->last_name ?? 'M', 0, 1)) }}</div>
-                                    <div>
-                                        <p class="font-semibold text-white">{{ $employee->full_name }}</p>
-                                        <p class="text-xs text-slate-400">{{ $employee->national_id }}</p>
-                                    </div>
-                                </div>
+                        <tr class="transition hover:bg-white/[0.02]">
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-white">{{ $employee->full_name }}</div>
+                                <div class="text-xs text-slate-500">{{ $employee->user?->email ?? 'لا يوجد حساب مرتبط' }}</div>
                             </td>
-                            <td class="px-5 py-4 text-slate-300">{{ $employee->user->email ?? '—' }}</td>
-                            <td class="px-5 py-4 text-slate-300">{{ $employee->phone ?? '—' }}</td>
-                            <td class="px-5 py-4 text-slate-300">{{ $employee->shift->shift_name ?? '—' }}</td>
-                            <td class="px-5 py-4 font-semibold text-white">{{ number_format((float) $employee->base_salary, 2) }} د.ع</td>
-                            <td class="px-5 py-4"><span class="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">نشط</span></td>
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ route('employees.show', $employee) }}" class="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-sm font-semibold text-slate-200 transition hover:bg-white/20">
-                                        <i data-lucide="eye" class="h-3 w-3"></i>عرض
+                            <td class="px-6 py-4 font-mono text-xs">{{ $employee->national_id }}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-block rounded-md bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400 mb-1">
+                                    {{ $employee->department?->name ?? 'غير معين' }}
+                                </span>
+                                <div class="text-xs text-slate-500">{{ $employee->shift?->shift_name ?? 'بدون وردية' }}</div>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-emerald-400">{{ number_format($employee->base_salary, 2) }} د.أ</td>
+                            <td class="px-6 py-4 font-bold">{{ $employee->vacation_balance }} يوم</td>
+                            <td class="px-6 py-4 text-xs">{{ $employee->join_date->format('Y-m-d') }}</td>
+                            <td class="px-6 py-4 text-left">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('employees.edit', $employee->id) }}" class="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-300 transition hover:bg-slate-700 hover:text-white">
+                                        تعديل
                                     </a>
-                                    <a href="{{ route('employees.edit', $employee) }}" class="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-3 py-1.5 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20">
-                                        <i data-lucide="edit" class="h-3 w-3"></i>تعديل
-                                    </a>
-                                    <form action="{{ route('employees.destroy', $employee) }}" method="POST">
+                                    <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد تماماً من رغبتك في حذف ملف هذا الموظف؟ لا يمكن التراجع!');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-3 py-1.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">
-                                            <i data-lucide="trash-2" class="h-3 w-3"></i>حذف
+                                        <button type="submit" class="rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-400 transition hover:bg-rose-500 hover:text-white">
+                                            حذف
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="px-5 py-8 text-center text-slate-400">لا توجد موظفين مسجلين حتى الآن.</td></tr>
+                        <tr>
+                            <td colspan="7" class="px-6 py-10 text-center text-sm text-slate-500">
+                                لا يوجد موظفون مطابقون لخيارات البحث حالياً.
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="border-t border-white/10 px-6 py-4">{{ $employees->links() }}</div>
+        @if($employees->hasPages())
+            <div class="border-t border-white/5 bg-slate-900/40 p-4">
+                {{ $employees->links() }}
+            </div>
+        @endif
     </div>
 </div>
 @endsection

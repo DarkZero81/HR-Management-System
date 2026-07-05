@@ -4,44 +4,52 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\HrTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RequestWebController extends Controller
 {
+    private const TRANSACTION_TYPES = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
+    private const ADMIN_ROLES = ['admin', 'hr', 'manager'];
+
+    /**
+     * يعرض قائمة الطلبات: الموظف العادي يرى طلباته فقط، والإداري (admin/hr/manager) يرى كل الطلبات.
+     * هذا الميثود الواحد يخدم كلاً من راوت "my.requests.index" وراوت "requests.index" الإداري.
+     */
     public function index(): View
     {
-        // ====== التعديل هنا ======
-        // أضفنا تعريف أنواع الطلبات لاستخدامها في الفلتر
-        $transaction_types = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
-        // ====== نهاية التعديل ======
+        $employee = Auth::user()?->employee;
+        $isAdmin = $this->isAdminUser();
 
         $transactions = HrTransaction::query()
-            ->with(['employee.user'])
+            ->with(['employee.user', 'approver'])
+            ->when(! $isAdmin, fn ($q) => $q->where('employee_id', $employee?->id))
             ->latest()
-            ->paginate(10);
+            ->paginate($isAdmin ? 15 : 10);
 
-        // ====== التعديل هنا ======
-        // أضفنا $transaction_types إلى compact
-        return view('requests.index', compact('transactions', 'transaction_types'));
-        // ====== نهاية التعديل ======
+        return view('requests.index', [
+            'transactions' => $transactions,
+            'transaction_types' => self::TRANSACTION_TYPES,
+        ]);
     }
 
     public function create(): View
     {
         return view('requests.create', [
-            'transaction_types' => ['leave', 'permission', 'promotion', 'penalty', 'transfer'],
+            'transaction_types' => self::TRANSACTION_TYPES,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'transaction_type' => ['required', 'in:leave,permission,promotion,penalty,transfer'],
+            'transaction_type' => ['required', 'in:' . implode(',', self::TRANSACTION_TYPES)],
             'start_date_time' => ['required', 'date'],
-            'end_date_time' => ['required', 'date', 'after:start_date_time'],
+            'end_date_time' => ['required', 'date', 'after_or_equal:start_date_time'],
             'description' => ['nullable', 'string', 'max:1000'],
             'financial_impact' => ['nullable', 'numeric', 'min:0'],
         ]);
@@ -49,7 +57,16 @@ class RequestWebController extends Controller
         $employee = Auth::user()?->employee;
 
         if (! $employee) {
-            return back()->with('error', 'لا يوجد ملف موظف مرتبط بهذا الحساب.');
+            return back()->with('error', 'لا يمكن تقديم طلب، حسابك غير مرتبط بملف موظف.');
+        }
+
+        // التحقق من كفاية رصيد الإجازة المتبقي قبل قبول الطلب
+        if ($validated['transaction_type'] === 'leave') {
+            $days = $this->calculateDaysRequested($validated['start_date_time'], $validated['end_date_time']);
+
+            if ($days > $employee->vacation_balance) {
+                return back()->withInput()->with('error', "رصيد إجازاتك الحالي ({$employee->vacation_balance} يوم) لا يكفي لتغطية الطلب ({$days} يوم).");
+            }
         }
 
         $transaction = HrTransaction::create([
@@ -58,7 +75,7 @@ class RequestWebController extends Controller
             'start_date_time' => $validated['start_date_time'],
             'end_date_time' => $validated['end_date_time'],
             'description' => $validated['description'] ?? null,
-            'financial_impact' => $validated['financial_impact'] ?? 0,
+            'financial_impact' => $validated['financial_impact'] ?? 0.00,
             'status' => 'pending',
         ]);
 
@@ -71,50 +88,88 @@ class RequestWebController extends Controller
             'performed_at' => now(),
         ]);
 
-        return redirect()->route('my.requests.index')->with('success', 'تم إرسال الطلب بنجاح وهو قيد المراجعة.');
+        // مهم: الموظف العادي يرجع لصفحة "طلباتي" وليس صفحة الإدارة (المحمية بصلاحيات admin/hr/manager)
+        return redirect()->route('my.requests.index')->with('success', 'تم تقديم الطلب بنجاح وهو قيد المراجعة حالياً.');
     }
 
-    public function adminIndex(): View
+    /**
+     * اعتماد أو رفض الطلب (صلاحية إدارية فقط). يستخدم Route Model Binding مباشرة.
+     */
+    public function update(Request $request, HrTransaction $transaction): RedirectResponse
     {
-        // ====== التعديل هنا ======
-        // أضفنا تعريف أنواع الطلبات لاستخدامها في الفلتر
-        $transaction_types = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
-        // ====== نهاية التعديل ======
-
-        $transactions = HrTransaction::query()
-            ->with(['employee.user', 'approver'])
-            ->latest()
-            ->paginate(15);
-
-        // ====== التعديل هنا ======
-        // أضفنا $transaction_types إلى compact
-        return view('requests.index', compact('transactions', 'transaction_types'));
-        // ====== نهاية التعديل ======
-    }
-
-    public function updateStatus(Request $request, int $id): RedirectResponse
-    {
-        $transaction = HrTransaction::findOrFail($id);
+        if (! $this->isAdminUser()) {
+            return back()->with('error', 'عذراً، لا تمتلك الصلاحيات الإدارية الكافية لتعديل حالة الطلبات.');
+        }
 
         $validated = $request->validate([
             'status' => ['required', 'in:approved,rejected,pending'],
         ]);
 
-        $transaction->update([
-            'status' => $validated['status'],
-            'approved_by' => Auth::id(),
-        ]);
+        return DB::transaction(function () use ($validated, $transaction) {
+            // قفل الصف لمنع تعارض معالجة نفس الطلب من طلبين متزامنين
+            $transaction = HrTransaction::with('employee')->lockForUpdate()->findOrFail($transaction->id);
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action_type' => 'update',
-            'table_name' => 'hr_transactions',
-            'record_id' => $transaction->id,
-            'old_values' => $transaction->getOriginal(),
-            'new_values' => $transaction->fresh()->toArray(),
-            'performed_at' => now(),
-        ]);
+            $previousStatus = $transaction->status;
+            $newStatus = $validated['status'];
 
-        return back()->with('success', 'تم تحديث حالة الطلب بنجاح.');
+            if ($previousStatus === $newStatus) {
+                return back()->with('error', 'الطلب موجود بالفعل بهذه الحالة.');
+            }
+
+            $employee = $transaction->employee;
+
+            if ($transaction->transaction_type === 'leave' && $employee) {
+                $days = $this->calculateDaysRequested($transaction->start_date_time, $transaction->end_date_time);
+
+                // خصم الرصيد عند الاعتماد لأول مرة
+                if ($newStatus === 'approved' && $previousStatus !== 'approved') {
+                    if ($days > $employee->vacation_balance) {
+                        return back()->with('error', 'لا يمكن الموافقة: رصيد إجازات الموظف الحالي غير كافٍ.');
+                    }
+                    $employee->decrement('vacation_balance', $days);
+                }
+
+                // إعادة الرصيد عند التراجع عن موافقة سابقة
+                if ($previousStatus === 'approved' && $newStatus !== 'approved') {
+                    $employee->increment('vacation_balance', $days);
+                }
+            }
+
+            $oldValues = $transaction->getOriginal();
+
+            $transaction->update([
+                'status' => $newStatus,
+                'approved_by' => Auth::id(),
+            ]);
+
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action_type' => 'update',
+                'table_name' => 'hr_transactions',
+                'record_id' => $transaction->id,
+                'old_values' => $oldValues,
+                'new_values' => $transaction->fresh()->toArray(),
+                'performed_at' => now(),
+            ]);
+
+            return back()->with('success', 'تم تحديث حالة الطلب ومعالجة التأثيرات بنجاح.');
+        });
+    }
+
+    private function isAdminUser(): bool
+    {
+        $role = strtolower(Auth::user()?->role?->role_name ?? '');
+        return in_array($role, self::ADMIN_ROLES, true);
+    }
+
+    /**
+     * يحسب عدد أيام الإجازة المطلوبة شاملاً يوم البداية والنهاية.
+     */
+    private function calculateDaysRequested(string $start, string $end): int
+    {
+        $startDate = Carbon::parse($start)->startOfDay();
+        $endDate = Carbon::parse($end)->startOfDay();
+
+        return $startDate->diffInDays($endDate) + 1;
     }
 }

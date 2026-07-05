@@ -8,25 +8,19 @@ use App\Models\AttendanceDevice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class AttendanceWebController extends Controller
 {
-    /**
-     * عرض سجلات الدوام اليومية والشهرية مع إمكانية الفلترة (للمدراء والـ HR).
-     */
     public function index(Request $request)
     {
         $query = AttendanceLog::with(['employee', 'device']);
 
-        // فلترة البحث بحسب التاريخ
         if ($request->has('date') && $request->date != '') {
             $query->where('log_date', $request->date);
         } else {
             $query->where('log_date', Carbon::today()->format('Y-m-d'));
         }
 
-        // فلترة البحث بحسب حالة الدوام (حاضر، متأخر، غائب)
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
         }
@@ -39,51 +33,41 @@ class AttendanceWebController extends Controller
 
     public function myAttendance(Request $request)
     {
-        $employeeId = Auth::user()?->employee?->id;
-        $logs = AttendanceLog::with(['device'])
-            ->where('employee_id', $employeeId)
-            ->latest('log_date')
-            ->paginate(10);
+        // حماية أمنية: التأكد من أن المستخدم الحالي مرتبط بالموظف
+        $employee = Auth::user()?->employee;
 
-        return view('attendance.index', compact('logs'));
+        if (!$employee) {
+            return redirect()->route('dashboard')->with('error', 'هذا الحساب غير مربوط بملف موظف لعرض سجل الحضور الشخصي.');
+        }
+
+        $logs = AttendanceLog::with(['device'])
+            ->where('employee_id', $employee->id)
+            ->latest('log_date')
+            ->paginate(15);
+
+        return view('attendance.my_index', compact('logs'));
     }
 
-    /**
-     * محاكاة الـ API أو العملية البرمجية لتسجيل الحضور (Check-In) واحتساب التأخير تلقائياً.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'device_id' => 'nullable|exists:attendance_devices,id',
+            'employee_id' => ['required', 'exists:employees,id'],
+            'device_id' => ['nullable', 'exists:attendance_devices,id'],
         ]);
 
-        $employee = Employee::with('shift')->findOrFail($request->employee_id);
+        $employee = Employee::find($request->employee_id);
         $today = Carbon::today()->format('Y-m-d');
         $now = Carbon::now();
 
-        // التأكد من عدم وجود تسجيل حضور مسبق لنفس الموظف في نفس اليوم
-        $existingLog = AttendanceLog::query()->where('employee_id', $employee->id)
-                                    ->where('log_date', $today)
-                                    ->first();
-
-        if ($existingLog) {
-            return redirect()->back()->with('error', 'تم تسجيل حضور هذا الموظف مسبقاً لهذا اليوم.');
-        }
-
+        // استخدام تحديث أو إنشاء (updateOrCreate) الآمنة لتجنب خطأ القيد الفريد لقاعدة البيانات في حال البصم المزدوج
         $shift = $employee->shift;
         $lateMinutes = 0;
         $status = 'present';
 
         if ($shift) {
-            // تحويل وقت بداية الوردية الثابت إلى تاريخ اليوم للمقارنة الزمنية
             $shiftStart = Carbon::parse($today . ' ' . $shift->start_time);
-
-            // إذا تجاوز الموظف وقت بداية الوردية الرسمي
             if ($now->gt($shiftStart)) {
                 $diffInMinutes = $now->diffInMinutes($shiftStart);
-
-                // إذا تجاوزت دقائق التأخير فترة السماح المعتمدة في جدول الورديات
                 if ($diffInMinutes > $shift->grace_period_minutes) {
                     $lateMinutes = $diffInMinutes;
                     $status = 'late';
@@ -91,15 +75,19 @@ class AttendanceWebController extends Controller
             }
         }
 
-        AttendanceLog::create([
-            'employee_id' => $employee->id,
-            'device_id' => $request->device_id,
-            'log_date' => $today,
-            'check_in' => $now,
-            'late_minutes' => $lateMinutes,
-            'status' => $status
-        ]);
+        AttendanceLog::updateOrCreate(
+            [
+                'employee_id' => $employee->id,
+                'log_date' => $today,
+            ],
+            [
+                'device_id' => $request->device_id,
+                'check_in' => $now,
+                'late_minutes' => $lateMinutes,
+                'status' => $status
+            ]
+        );
 
-        return redirect()->route('attendance.index')->with('success', 'تم تسجيل حركة الحضور بنجاح واحتساب التأخير آلياً.');
+        return redirect()->route('attendance.index')->with('success', 'تم تسجيل وتحديث حركة الحضور بنظام الأمان والمطابقة بنجاح.');
     }
 }

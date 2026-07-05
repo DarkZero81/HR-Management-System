@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('overtime_minutes')->default(0); // دقائق العمل الإضافي المعتمدة
             $table->enum('status', ['present', 'absent', 'late', 'holiday'])->default('absent');
             $table->timestamps();
+            $table->enum('action_type', ['INSERT', 'UPDATE', 'DELETE']);
 
             // إضافة مفتاح مركب فريد لمنع تكرار سجل الحضور لنفس الموظف في نفس اليوم
             $table->unique(['employee_id', 'log_date']);

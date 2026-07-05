@@ -3,100 +3,95 @@
 @section('title', 'إضافة موظف جديد')
 
 @section('content')
-<div class="space-y-6">
-    <div class="rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
-        <div class="flex items-center justify-between gap-3">
+<div class="max-w-3xl mx-auto space-y-6" dir="rtl">
+    <div>
+        <h1 class="text-2xl font-black text-white">إنشاء ملف موظف جديد</h1>
+        <p class="text-sm text-slate-400">إدخال البيانات الشخصية والمالية والتعاقدية للموظف الجديد.</p>
+    </div>
+
+    @if ($errors->any())
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
+            <ul class="list-inside list-disc text-sm font-medium text-rose-400 space-y-1">
+                @foreach ($errors->any() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('employees.store') }}" method="POST" class="rounded-[28px] border border-white/10 bg-slate-900/40 p-6 space-y-6 shadow-xl">
+        @csrf
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الموظفين</p>
-                <h2 class="mt-2 text-3xl font-black text-white">إضافة موظف جديد</h2>
-                <p class="mt-2 text-sm text-slate-400">أدخل بيانات الموظف الأساسية لإنشاء ملفه الوظيفي.</p>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الاسم الأول <span class="text-rose-500">*</span></label>
+                <input type="text" name="first_name" value="{{ old('first_name') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
             </div>
-            <a href="{{ route('employees.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10">
-                <i data-lucide="arrow-right" class="h-4 w-4"></i>
-                رجوع
-            </a>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الاسم الأخير (الكنية) <span class="text-rose-500">*</span></label>
+                <input type="text" name="last_name" value="{{ old('last_name') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الرقم الوطني / الهوية <span class="text-rose-500">*</span></label>
+                <input type="text" name="national_id" value="{{ old('national_id') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm font-mono text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">رقم الهاتف</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الراتب الأساسي الثابت <span class="text-rose-500">*</span></label>
+                <input type="number" step="0.01" name="base_salary" value="{{ old('base_salary') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">رصيد الإجازات السنوي الأولي</label>
+                <input type="number" name="vacation_balance" value="{{ old('vacation_balance', 21) }}" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">القسم الوظيفي</label>
+                <select name="department_id" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+                    <option value="">-- اختر القسم --</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">وردية الدوام الرسمي</label>
+                <select name="shift_id" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+                    <option value="">-- اختر الوردية الزمنية --</option>
+                    @foreach($shifts as $shift)
+                        <option value="{{ $shift->id }}" {{ old('shift_id') == $shift->id ? 'selected' : '' }}>{{ $shift->shift_name }} ({{ $shift->start_time }} - {{ $shift->end_time }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">تاريخ التعيين المعتمد <span class="text-rose-500">*</span></label>
+                <input type="date" name="join_date" value="{{ old('join_date', date('Y-m-d')) }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">رقم الحساب البنكي الدولي (IBAN)</label>
+                <input type="text" name="bank_account_iban" value="{{ old('bank_account_iban') }}" placeholder="JO00AAAA000000000000000000000" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm font-mono text-white focus:border-blue-500 focus:outline-none">
+            </div>
         </div>
 
-        <form method="POST" action="{{ route('employees.store') }}" class="mt-6 max-w-3xl space-y-5">
-            @csrf
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الاسم الأول</label>
-                    <input type="text" name="first_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('first_name') border-rose-400 @enderror" value="{{ old('first_name') }}" required>
-                    @error('first_name')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الاسم الأخير</label>
-                    <input type="text" name="last_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('last_name') border-rose-400 @enderror" value="{{ old('last_name') }}" required>
-                    @error('last_name')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الرقم الوطني</label>
-                    <input type="text" name="national_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('national_id') border-rose-400 @enderror" value="{{ old('national_id') }}" required>
-                    @error('national_id')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الهاتف</label>
-                    <input type="text" name="phone" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('phone') border-rose-400 @enderror" value="{{ old('phone') }}">
-                    @error('phone')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">القسم</label>
-                    <select name="department_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('department_id') border-rose-400 @enderror">
-                        <option value="">بدون قسم</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('department_id')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الوردية</label>
-                    <select name="shift_id" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('shift_id') border-rose-400 @enderror">
-                        <option value="">بدون وردية</option>
-                        @foreach($shifts as $shift)
-                            <option value="{{ $shift->id }}" {{ old('shift_id') == $shift->id ? 'selected' : '' }}>{{ $shift->shift_name }}</option>
-                        @endforeach
-                    </select>
-                    @error('shift_id')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">الراتب الأساسي</label>
-                    <input type="number" step="0.01" name="base_salary" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('base_salary') border-rose-400 @enderror" value="{{ old('base_salary') }}" required>
-                    @error('base_salary')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ التعيين</label>
-                    <input type="date" name="join_date" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('join_date') border-rose-400 @enderror" value="{{ old('join_date') }}" required>
-                    @error('join_date')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-            <button type="submit" class="rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
-                حفظ الموظف
+        <div class="flex items-center justify-end gap-3 border-t border-white/5 pt-4">
+            <a href="{{ route('employees.index') }}" class="rounded-xl bg-slate-950 border border-white/10 px-5 py-2.5 text-sm font-bold text-slate-400 transition hover:text-white">
+                إلغاء العودة
+            </a>
+            <button type="submit" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500">
+                حفظ وإنشاء ملف الموظف
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 @endsection
