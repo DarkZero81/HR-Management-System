@@ -89,10 +89,10 @@ class PayrollWebController extends Controller
             // تسجيل العملية في سجل التدقيق والمراقبة
             AuditLog::create([
                 'user_id' => Auth::id(),
-                'action_type' => 'INSERT',
+                'action_type' => 'create',
                 'table_name' => 'payroll_orders',
                 'record_id' => $payroll->id,
-                'new_values' => json_encode($payroll->toArray(), JSON_UNESCAPED_UNICODE),
+                'new_values' => $payroll->toArray(),
                 'performed_at' => now(),
             ]);
         }

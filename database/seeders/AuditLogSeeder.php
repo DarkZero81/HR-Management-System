@@ -11,7 +11,7 @@ class AuditLogSeeder extends Seeder
     public function run(): void
     {
         $users = User::all();
-        $actionTypes = ['INSERT', 'UPDATE', 'DELETE'];
+        $actionTypes = ['create', 'update', 'delete'];
         $tableNames = ['employees', 'documents', 'attendance_logs', 'hr_transactions'];
 
         foreach ($users as $user) {

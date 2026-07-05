@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
             $table->enum('transaction_type', ['leave', 'permission', 'promotion', 'penalty', 'transfer']);
+            $table->timestamp('start_date_time')->nullable();
+            $table->timestamp('end_date_time')->nullable();
 
-            $table->timestamp('start_date_time'); // بداية الفترة (تاريخ أو ساعة الإذن)
-            $table->timestamp('end_date_time'); // نهاية الفترة
             $table->text('description')->nullable(); // الأسباب أو تفاصيل الترقية/العقوبة
             $table->decimal('financial_impact', 10, 2)->default(0.00); // القيمة المالية (قرض، خصم عقوبة، زيادة راتب ترقية)
 

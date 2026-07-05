@@ -34,10 +34,10 @@ class DeviceWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'INSERT',
+            'action_type' => 'create',
             'table_name'  => 'attendance_devices',
             'record_id'   => $device->id,
-            'new_values'  => json_encode($device->toArray(), JSON_UNESCAPED_UNICODE),
+            'new_values'  => $device->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -62,11 +62,11 @@ class DeviceWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'UPDATE',
+            'action_type' => 'update',
             'table_name'  => 'attendance_devices',
             'record_id'   => $device->id,
-            'old_values'  => json_encode($oldValues, JSON_UNESCAPED_UNICODE),
-            'new_values'  => json_encode($device->fresh()->toArray(), JSON_UNESCAPED_UNICODE),
+            'old_values'  => $oldValues,
+            'new_values'  => $device->fresh()->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -85,10 +85,10 @@ class DeviceWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'DELETE',
+            'action_type' => 'delete',
             'table_name'  => 'attendance_devices',
             'record_id'   => $device->id,
-            'old_values'  => json_encode($deviceData, JSON_UNESCAPED_UNICODE),
+            'old_values'  => $deviceData,
             'performed_at'=> now(),
         ]);
 

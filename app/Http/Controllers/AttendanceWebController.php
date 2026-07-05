@@ -90,4 +90,43 @@ class AttendanceWebController extends Controller
 
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل وتحديث حركة الحضور بنظام الأمان والمطابقة بنجاح.');
     }
+
+    /**
+     * تسجيل حركة الانصراف (Check-Out) لسجل الحضور الحالي لهذا اليوم، مع احتساب العمل الإضافي تلقائياً.
+     */
+    public function checkOut(Request $request)
+    {
+        $request->validate([
+            'employee_id' => ['required', 'exists:employees,id'],
+        ]);
+
+        $today = Carbon::today()->format('Y-m-d');
+        $now = Carbon::now();
+
+        $log = AttendanceLog::with('employee.shift')
+            ->where('employee_id', $request->employee_id)
+            ->where('log_date', $today)
+            ->first();
+
+        if (! $log) {
+            return redirect()->route('attendance.index')->with('error', 'لا يوجد تسجيل حضور لهذا الموظف اليوم لتسجيل انصرافه.');
+        }
+
+        $overtimeMinutes = 0;
+        $shift = $log->employee?->shift;
+
+        if ($shift) {
+            $shiftEnd = Carbon::parse($today . ' ' . $shift->end_time);
+            if ($now->gt($shiftEnd)) {
+                $overtimeMinutes = $now->diffInMinutes($shiftEnd);
+            }
+        }
+
+        $log->update([
+            'check_out' => $now,
+            'overtime_minutes' => $overtimeMinutes,
+        ]);
+
+        return redirect()->route('attendance.index')->with('success', 'تم تسجيل حركة الانصراف واحتساب العمل الإضافي بنجاح.');
+    }
 }

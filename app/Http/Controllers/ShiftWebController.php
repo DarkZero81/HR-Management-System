@@ -36,10 +36,10 @@ class ShiftWebController extends Controller
 
         AuditLog::create([
             'user_id' => Auth::id(),
-            'action_type' => 'INSERT',
+            'action_type' => 'create',
             'table_name' => 'shifts',
             'record_id' => $shift->id,
-            'new_values' => json_encode($shift->toArray(), JSON_UNESCAPED_UNICODE),
+            'new_values' => $shift->toArray(),
             'performed_at' => now(),
         ]);
 
@@ -66,11 +66,11 @@ class ShiftWebController extends Controller
 
         AuditLog::create([
             'user_id' => Auth::id(),
-            'action_type' => 'UPDATE',
+            'action_type' => 'update',
             'table_name' => 'shifts',
             'record_id' => $shift->id,
-            'old_values' => json_encode($oldValues, JSON_UNESCAPED_UNICODE),
-            'new_values' => json_encode($shift->fresh()->toArray(), JSON_UNESCAPED_UNICODE),
+            'old_values' => $oldValues,
+            'new_values' => $shift->fresh()->toArray(),
             'performed_at' => now(),
         ]);
 
@@ -90,10 +90,10 @@ class ShiftWebController extends Controller
 
         AuditLog::create([
             'user_id' => Auth::id(),
-            'action_type' => 'DELETE',
+            'action_type' => 'delete',
             'table_name' => 'shifts',
             'record_id' => $shift->id,
-            'old_values' => json_encode($shiftData, JSON_UNESCAPED_UNICODE),
+            'old_values' => $shiftData,
             'performed_at' => now(),
         ]);
 

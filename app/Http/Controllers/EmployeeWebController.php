@@ -67,10 +67,10 @@ class EmployeeWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'INSERT',
+            'action_type' => 'create',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'new_values'  => json_encode($employee->toArray(), JSON_UNESCAPED_UNICODE),
+            'new_values'  => $employee->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -106,11 +106,11 @@ class EmployeeWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'UPDATE',
+            'action_type' => 'update',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => json_encode($oldValues, JSON_UNESCAPED_UNICODE),
-            'new_values'  => json_encode($employee->fresh()->toArray(), JSON_UNESCAPED_UNICODE),
+            'old_values'  => $oldValues,
+            'new_values'  => $employee->fresh()->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -129,10 +129,10 @@ class EmployeeWebController extends Controller
 
         AuditLog::create([
             'user_id'     => Auth::id(),
-            'action_type' => 'DELETE',
+            'action_type' => 'delete',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => json_encode($employeeData, JSON_UNESCAPED_UNICODE),
+            'old_values'  => $employeeData,
             'performed_at'=> now(),
         ]);
 

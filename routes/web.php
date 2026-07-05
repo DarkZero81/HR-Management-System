@@ -44,8 +44,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/documents', [DocumentWebController::class, 'store'])->name('documents.store');
         Route::delete('/documents/{document}', [DocumentWebController::class, 'destroy'])->name('documents.destroy');
 
-        Route::get('/requests', [RequestWebController::class, 'adminIndex'])->name('requests.index');
-        Route::patch('/requests/{id}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
+        Route::get('/requests', [RequestWebController::class, 'index'])->name('requests.index');
+        Route::patch('/requests/{transaction}/status', [RequestWebController::class, 'update'])->name('requests.update_status');
 
         Route::get('/payroll', [PayrollWebController::class, 'index'])->name('payroll.index');
         Route::post('/payroll/generate', [PayrollWebController::class, 'store'])->name('payroll.generate');
