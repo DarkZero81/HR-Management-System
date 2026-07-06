@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DocumentRequest;
+use App\Http\Requests\MyDocumentRequest;
 use App\Models\AuditLog;
 use App\Models\Document;
 use App\Models\Employee;
@@ -28,7 +29,43 @@ class DocumentWebController extends Controller
             ->orderBy('expiry_date')
             ->paginate(12);
 
-        return view('documents.index', compact('documents'));
+        return view('documents.my_index', compact('documents'));
+    }
+
+    public function myCreate(): View
+    {
+        return view('documents.my_create');
+    }
+
+    public function storeMy(MyDocumentRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+        $employee = $user?->employee;
+
+        if (! $employee) {
+            return back()->with('error', 'لا يوجد ملف موظف مرتبط بحسابك.');
+        }
+
+        $filePath = $request->file('document')->store('documents', 'public');
+
+        $document = Document::create([
+            'employee_id' => $employee->id,
+            'document_type' => $request->document_type,
+            'document_number' => $request->document_number,
+            'expiry_date' => $request->expiry_date,
+            'file_path' => $filePath,
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action_type' => 'create',
+            'table_name' => 'documents',
+            'record_id' => $document->id,
+            'new_values' => $document->toArray(),
+            'performed_at' => now(),
+        ]);
+
+        return redirect()->route('my.documents')->with('success', 'تم رفع الوثيقة بنجاح.');
     }
 
     public function create(): View

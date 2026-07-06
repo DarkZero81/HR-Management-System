@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('my')->name('my.')->group(function () {
         Route::get('/attendance', [AttendanceWebController::class, 'myAttendance'])->name('attendance');
         Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents');
+        Route::get('/documents/create', [DocumentWebController::class, 'myCreate'])->name('documents.create');
         Route::resource('requests', RequestWebController::class)->only(['index', 'create', 'store']);
     });
 
@@ -54,6 +55,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/documents', [DocumentWebController::class, 'store'])->name('documents.store');
+    Route::post('/my/documents', [DocumentWebController::class, 'storeMy'])->name('my.documents.store');
+    Route::delete('/my/documents/{id}', [DocumentWebController::class, 'destroy'])->name('my.documents.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

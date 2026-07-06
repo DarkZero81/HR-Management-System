@@ -24,12 +24,20 @@ class RequestWebController extends Controller
     {
         $employee = Auth::user()?->employee;
         $isAdmin = $this->isAdminUser();
+        $isManager = $this->isManagerUser();
 
-        $transactions = HrTransaction::query()
-            ->with(['employee.user', 'approver'])
-            ->when(! $isAdmin, fn ($q) => $q->where('employee_id', $employee?->id))
-            ->latest()
-            ->paginate($isAdmin ? 8 : 3);
+        $query = HrTransaction::query()
+            ->with(['employee.user', 'approver']);
+
+        // Manager sees only their department's requests
+        if ($isManager && ! $isAdmin) {
+            $managerDepartmentId = $employee?->department_id;
+            $query->whereHas('employee', fn($q) => $q->where('department_id', $managerDepartmentId));
+        } elseif (! $isAdmin) {
+            $query->where('employee_id', $employee?->id);
+        }
+
+        $transactions = $query->latest()->paginate($isAdmin || $isManager ? 8 : 3);
 
         return view('requests.index', [
             'transactions' => $transactions,
@@ -97,8 +105,21 @@ class RequestWebController extends Controller
      */
     public function update(Request $request, HrTransaction $transaction): RedirectResponse
     {
-        if (! $this->isAdminUser()) {
+        $isAdmin = $this->isAdminUser();
+        $isManager = $this->isManagerUser();
+
+        if (! $isAdmin && ! $isManager) {
             return back()->with('error', 'عذراً، لا تمتلك الصلاحيات الإدارية الكافية لتعديل حالة الطلبات.');
+        }
+
+        // Manager can only manage requests from their own department
+        if ($isManager && ! $isAdmin) {
+            $managerDepartmentId = Auth::user()?->employee?->department_id;
+            $employeeDepartmentId = $transaction->employee?->department_id;
+
+            if ($managerDepartmentId !== $employeeDepartmentId) {
+                return back()->with('error', 'عذراً، لا يمكنك مراجعة طلبات موظفين لا ينتمون إلى قسمك.');
+            }
         }
 
         $validated = $request->validate([
@@ -160,6 +181,11 @@ class RequestWebController extends Controller
     {
         $role = strtolower(Auth::user()?->role?->role_name ?? '');
         return in_array($role, self::ADMIN_ROLES, true);
+    }
+
+    private function isManagerUser(): bool
+    {
+        return strtolower(Auth::user()?->role?->role_name ?? '') === 'manager';
     }
 
     /**

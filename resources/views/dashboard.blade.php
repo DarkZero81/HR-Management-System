@@ -186,6 +186,19 @@
             <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium">تقدير أدائي</span>
+                </div>
+                <p class="text-3xl font-bold text-slate-800">{{ $employee->performance_score ?? 0 }}</p>
+                @if($departmentAvgScore)
+                    <p class="text-sm text-slate-500 mt-2">المتوسط القسمي: {{ number_format($departmentAvgScore, 2) }}</p>
+                @endif
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
                         <i data-lucide="wallet" class="w-6 h-6 text-blue-600"></i>
                     </div>
                     <span class="text-xs text-slate-400 font-medium">الراتب</span>
@@ -228,7 +241,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
                 <h2 class="text-lg font-black text-slate-800 mb-4">مخطط رصيد الإجازات</h2>
                 <div class="h-48">
@@ -236,6 +249,36 @@
                 </div>
             </div>
 
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                <h2 class="text-lg font-black text-slate-800 mb-4">تطور أداء الحضور (12 أسبوعاً)</h2>
+                <div class="h-48">
+                    <canvas id="quarterlyChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                <h2 class="text-lg font-black text-slate-800 mb-4">تنبيهات الوثائق</h2>
+                <div class="space-y-3 max-h-48 overflow-y-auto">
+                    @php
+                        $expiringDocs = $employee?->documents?->filter(function($doc) {
+                            return $doc->expiry_date && $doc->expiry_date <= now()->addDays(7) && $doc->expiry_date >= now();
+                        })->take(5);
+                    @endphp
+                    @forelse($expiringDocs as $doc)
+                        <div class="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                            <span class="text-slate-700 font-medium">{{ $doc->document_type ?? $doc->title }}</span>
+                            <span class="rounded-lg bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                                تنتهي قريباً
+                            </span>
+                        </div>
+                    @empty
+                        <p class="text-center text-slate-500 py-4">لا توجد تنبيهات وثائق.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
                 <h2 class="text-lg font-black text-slate-800 mb-4">آخر حركاتي</h2>
                 <div class="space-y-3">
@@ -273,6 +316,48 @@
                     }
                 });
             }
+
+            const quarterlyCtx = document.getElementById('quarterlyChart');
+            @if($quarterlyPerformance)
+            if (quarterlyCtx) {
+                const quarterlyLabels = @json($quarterlyPerformance['labels'] ?? []);
+                const quarterlyPresent = @json($quarterlyPerformance['present'] ?? []);
+                const quarterlyLate = @json($quarterlyPerformance['late'] ?? []);
+
+                // Calculate trend percentage based on total present days
+                const trendData = quarterlyPresent.map((val, idx) => val + quarterlyLate[idx]);
+
+                new Chart(quarterlyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: quarterlyLabels,
+                        datasets: [{
+                            label: 'نسبة الحضور',
+                            data: trendData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            @endif
         });
         </script>
     @endif

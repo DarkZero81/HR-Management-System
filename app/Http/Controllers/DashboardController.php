@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
 use App\Models\Department;
+use App\Models\Document;
 use App\Models\Employee;
 use App\Models\HrTransaction;
 use App\Models\PayrollOrder;
@@ -11,6 +12,7 @@ use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
@@ -48,7 +50,48 @@ class DashboardController extends Controller
         }
 
         $employee = $user->employee;
+        if ($employee) {
+            $employee->load('documents');
+        }
         $employeeId = optional($employee)->id;
+
+        $departmentAvgScore = null;
+        if ($employee?->department_id) {
+            $departmentAvgScore = Employee::where('department_id', $employee->department_id)
+                ->whereNotNull('performance_score')
+                ->avg('performance_score');
+        }
+
+        $quarterlyLabels = [];
+        $quarterlyPresent = [];
+        $quarterlyLate = [];
+        $quarterlyAbsent = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $weekStart = now()->subWeeks($i)->startOfWeek();
+            $weekEnd = now()->subWeeks($i)->endOfWeek();
+            $quarterlyLabels[] = 'أسبوع ' . (12 - $i);
+
+            $weekData = AttendanceLog::query()
+                ->where('employee_id', $employeeId)
+                ->whereBetween('log_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                ->selectRaw('SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_days')
+                ->selectRaw('SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_days')
+                ->selectRaw('SUM(CASE WHEN status IN ("absent", "holiday") THEN 1 ELSE 0 END) as absent_days')
+                ->first();
+
+            $quarterlyPresent[] = $weekData?->present_days ?? 0;
+            $quarterlyLate[] = $weekData?->late_days ?? 0;
+            $quarterlyAbsent[] = $weekData?->absent_days ?? 0;
+        }
+
+        $quarterlyPerformance = [
+            'labels' => $quarterlyLabels,
+            'present' => $quarterlyPresent,
+            'late' => $quarterlyLate,
+            'absent' => $quarterlyAbsent,
+        ];
+
         return view('dashboard', [
             'viewMode' => 'employee',
             'employee' => $employee,
@@ -57,6 +100,8 @@ class DashboardController extends Controller
             'pendingRequests' => HrTransaction::query()->where('employee_id', $employeeId)->where('status', 'pending')->count('*'),
             'recentAttendance' => AttendanceLog::query()->where('employee_id', $employeeId)->latest('log_date')->take(5)->get(),
             'recentPayrolls' => PayrollOrder::query()->where('employee_id', $employeeId)->latest('salary_month')->take(4)->get(),
+            'departmentAvgScore' => $departmentAvgScore,
+            'quarterlyPerformance' => $quarterlyPerformance,
         ]);
     }
 

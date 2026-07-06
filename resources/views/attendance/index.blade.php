@@ -157,7 +157,7 @@
                             'holiday' => 'bg-blue-100 text-blue-700',
                         ][$log->status] ?? 'bg-slate-100 text-slate-700')
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 font-semibold text-slate-900">{{ $log->employee?->full_name ?? $log->employee?->first_name . ' ' . $log->employee?->last_name ?? '—' }}</td>
+                            <td class="px-6 py-4 text-slate-800 font-semibold">{{ $log->employee?->full_name ?? $log->employee?->first_name . ' ' . $log->employee?->last_name ?? '—' }}</td>
                             <td class="px-6 py-4 text-slate-800 font-semibold">{{ $log->log_date }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $log->check_in?->format('H:i') ?? '—' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $log->check_out?->format('H:i') ?? '—' }}</td>
