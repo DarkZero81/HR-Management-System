@@ -17,7 +17,7 @@
                 <i data-lucide="user" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">الملف الشخصي</span>
             </a>
-            
+
             @auth
                 @if (in_array(optional(auth()->user()->role)->role_name, ['admin', 'hr', 'manager'], true))
                     <a href="{{ route('documents.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-semibold shadow-lg transition-all duration-200">
@@ -29,9 +29,24 @@
         </div>
     </div>
 
+    {{-- عرض أخطاء التحقق (مثال: نوع/حجم الملف غير مسموح) --}}
+    @if($errors->any())
+        <div class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200">
+            <div class="flex items-center gap-2 mb-1">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <span>تعذّر رفع الملف، تحقق من الآتي:</span>
+            </div>
+            <ul class="list-disc pr-8 space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+    <div class="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-6">
+        <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
                     <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
@@ -42,7 +57,7 @@
             <p class="text-sm text-slate-500 mt-2">وثيقة</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+        <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
                     <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
@@ -53,7 +68,7 @@
             <p class="text-sm text-slate-500 mt-2">وثيقة سارية</p>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+        <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
                     <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
@@ -88,6 +103,7 @@
                     </button>
                 </form>
             </div>
+
         </div>
     </section>
 

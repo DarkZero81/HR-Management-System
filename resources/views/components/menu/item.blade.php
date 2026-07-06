@@ -1,17 +1,43 @@
-@props(['item'])
+{{--
+============================================================
+مكون: عنصر القائمة (Menu Item)
+============================================================
+يعرض عنصراً فردياً في القائمة مع إمكانية التحكم بالظهور
+--}}
 
-@php
-    $userRole = optional(auth()->user()->role)->role_name;
-    $hasAccess = in_array('all', $item->roles) || in_array($userRole, $item->roles);
-    $isActive = $item->route ? request()->routeIs($item->route . '*') : false;
-@endphp
+@props([
+    'item' => null,           // كائن العنصر
+    'level' => 0,             // مستوى التداخل (للتصميم)
+    'isSubmenu' => false      // هل هو داخل قائمة فرعية؟
+])
 
-@if($hasAccess)
-    <li>
-        <a href="{{ $item->route ? route($item->route) : '#' }}"
-           class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition duration-200 {{ $isActive ? 'bg-gradient-to-l from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-            <i data-lucide="{{ $item->icon }}" class="h-4 w-4"></i>
-            <span>{{ $item->label }}</span>
+@if($item && $item->isVisible())
+    {{-- عنوان المجموعة (إن وجد) --}}
+    @if($item->getTitle())
+        <li class="menu-title {{ $level > 0 ? 'sub-menu-title' : '' }}">
+            <span>{{ $item->getTitle() }}</span>
+        </li>
+    @endif
+
+    {{-- عنصر القائمة --}}
+    <li class="{{ request()->fullUrlIs($item->getLink()) || route_is($item->getRoute()) ? 'active' : '' }}
+               {{ $level > 0 ? 'sub-menu-item' : '' }}">
+        <a href="{{ $item->getLink() ?? ($item->getRoute() ?? '#') }}"
+           class="{{ $level > 0 ? 'sub-menu-link' : '' }}"
+           @if($item->getTarget()) target="{{ $item->getTarget() }}" @endif>
+
+            {{-- الأيقونة --}}
+            @if($item->getIcon())
+                <i class="la la-{{ $item->getIcon() }}"></i>
+            @endif
+
+            {{-- النص --}}
+            <span>{{ $item->getLabel() }}</span>
+
+            {{-- إشارة العنصر النشط (اختياري) --}}
+            @if(request()->fullUrlIs($item->getLink()) || route_is($item->getRoute()))
+                <span class="menu-active-indicator"></span>
+            @endif
         </a>
     </li>
 @endif

@@ -99,7 +99,7 @@
                                 </span>
                                 <div class="text-xs text-slate-500 mt-1">{{ $employee->shift?->shift_name ?? 'بدون وردية' }}</div>
                             </td>
-                            <td class="px-6 py-4 text-slate-800 font-semibold">{{ number_format($employee->base_salary, 2) }} د.أ</td>
+                            <td class="px-6 py-4 text-slate-800 font-semibold">{{ number_format($employee->base_salary, 2) }} ل.س</td>
                             <td class="px-6 py-4 text-slate-800 font-semibold">{{ $employee->vacation_balance }} يوم</td>
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $employee->join_date->format('Y-m-d') }}</td>
                             <td class="px-6 py-4">

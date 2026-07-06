@@ -43,35 +43,51 @@
 }
 
 html[data-theme="dark"] .bg-white {
-  background-color: #ffffff;
+  background-color: #1e293b;
 }
 
 html[data-theme="dark"] .bg-slate-50 {
-  background-color: #f8fafc;
+  background-color: #0f172a;
 }
 
 html[data-theme="dark"] .text-slate-800 {
-  color: #1e293b;
+  color: #f1f5f9;
 }
 
 html[data-theme="dark"] .text-slate-700 {
-  color: #334155;
+  color: #e2e8f0;
 }
 
 html[data-theme="dark"] .text-slate-600 {
-  color: #475569;
+  color: #cbd5e1;
 }
 
 html[data-theme="dark"] .text-slate-500 {
-  color: #64748b;
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .text-slate-400 {
+  color: #94a3b8;
 }
 
 html[data-theme="dark"] .border-slate-200 {
-  border-color: #e2e8f0;
+  border-color: #334155;
 }
 
 html[data-theme="dark"] .border-slate-100 {
-  border-color: #f1f5f9;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .hover\:bg-slate-50:hover {
+  background-color: #334155;
+}
+
+html[data-theme="dark"] thead.bg-slate-50 {
+  background-color: #0f172a;
+}
+
+html[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155;
 }
 
 html[data-theme="light"] body {

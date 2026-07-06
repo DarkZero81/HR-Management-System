@@ -4,20 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\PayrollOrder;
-use App\Models\AttendanceLog;
-use App\Models\HrTransaction;
-use App\Models\AuditLog;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class PayrollWebController extends Controller
 {
     public function index(Request $request): View
     {
-        $month = $request->get('month', Carbon::now()->format('Y-m'));
+        $month = $request->get('month', \Carbon\Carbon::now()->format('Y-m'));
         $payrolls = PayrollOrder::with('employee')
             ->where('salary_month', $month)
             ->latest()
@@ -26,7 +22,7 @@ class PayrollWebController extends Controller
         return view('payroll.index', compact('payrolls', 'month'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'salary_month' => ['required', 'date_format:Y-m'],
@@ -34,11 +30,9 @@ class PayrollWebController extends Controller
 
         $month = $validated['salary_month'];
 
-        // جلب جميع الموظفين الذين لم يستقيلوا بعد
         $employees = Employee::whereNull('resign_date')->get();
 
         foreach ($employees as $employee) {
-            // التحقق من عدم توليد كشف راتب مسبق لنفس الموظف في هذا الشهر لمنع كسر الـ Unique Constraint
             $alreadyExists = PayrollOrder::where('employee_id', $employee->id)
                 ->where('salary_month', $month)
                 ->exists();
@@ -47,36 +41,29 @@ class PayrollWebController extends Controller
                 continue;
             }
 
-            // 1. حساب دقائق التأخير من سجلات الحضور لهذا الشهر
-            $lateMinutes = AttendanceLog::where('employee_id', $employee->id)
+            $lateMinutes = \App\Models\AttendanceLog::where('employee_id', $employee->id)
                 ->where('log_date', 'like', $month . '%')
                 ->sum('late_minutes');
 
-            // حساب الخصم الناتج عن التأخير (كل 60 دقيقة = خصم ساعة عمل)
             $hourlyRate = $employee->base_salary / 30 / 8;
             $lateDeductions = round(($lateMinutes / 60) * $hourlyRate, 2);
 
-            // 2. حساب الجزاءات والخصومات المالية المعتمدة (approved) من الحركات والوقوعات لهذا الشهر
-            $hrDeductions = HrTransaction::where('employee_id', $employee->id)
+            $hrDeductions = \App\Models\HrTransaction::where('employee_id', $employee->id)
                 ->where('status', 'approved')
                 ->where('transaction_type', 'penalty')
                 ->where('start_date_time', 'like', $month . '%')
                 ->sum('financial_impact');
 
-            // إجمالي الخصومات (تأخير + جزاءات موارد بشرية)
             $totalDeductions = round($lateDeductions + $hrDeductions, 2);
 
-            // 3. حساب البدلات والمكافآت المالية المعتمدة (approved) الناتجة عن الترقيات وما شابه لهذا الشهر
-            $totalAllowances = HrTransaction::where('employee_id', $employee->id)
+            $totalAllowances = \App\Models\HrTransaction::where('employee_id', $employee->id)
                 ->where('status', 'approved')
                 ->where('transaction_type', 'promotion')
                 ->where('start_date_time', 'like', $month . '%')
                 ->sum('financial_impact');
 
-            // 4. احتساب صافي الراتب النهائي
             $netSalary = round(($employee->base_salary + $totalAllowances) - $totalDeductions, 2);
 
-            // حفظ أمر الصرف في قاعدة البيانات
             $payroll = PayrollOrder::create([
                 'employee_id' => $employee->id,
                 'salary_month' => $month,
@@ -86,9 +73,8 @@ class PayrollWebController extends Controller
                 'payment_status' => 'draft',
             ]);
 
-            // تسجيل العملية في سجل التدقيق والمراقبة
-            AuditLog::create([
-                'user_id' => Auth::id(),
+            \App\Models\AuditLog::create([
+                'user_id' => auth()->id(),
                 'action_type' => 'create',
                 'table_name' => 'payroll_orders',
                 'record_id' => $payroll->id,
@@ -99,5 +85,52 @@ class PayrollWebController extends Controller
 
         return redirect()->route('payroll.index', ['month' => $month])
             ->with('success', 'تم توليد احتساب الرواتب للشهر المحدد بناءً على الحضور والوقوعات المالية المعتمدة.');
+    }
+
+    public function downloadPayslipPdf(Request $request, int $employeeId): SymfonyResponse
+    {
+        $employee = Employee::with(['department', 'shift'])->findOrFail($employeeId);
+
+        $payrollQuery = PayrollOrder::where('employee_id', $employee->id);
+
+        if ($month = $request->query('month')) {
+            $payrollQuery->where('salary_month', $month);
+        }
+
+        $payroll = $payrollQuery->latest('salary_month')->firstOrFail();
+
+        $this->ensureMpdfAvailable();
+
+        $html = view('payroll.pdf_payslip', [
+            'employee' => $employee,
+            'payroll'  => $payroll,
+            'date'     => now()->format('Y-m-d'),
+        ])->render();
+
+        $mpdf = $this->makeMpdf();
+        $mpdf->WriteHTML($html);
+
+        $filename = 'payslip-' . $employee->full_name . '-' . $payroll->salary_month . '.pdf';
+
+        return new Response($mpdf->Output($filename, 'D'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    private function ensureMpdfAvailable(): void
+    {
+        if (!class_exists(\Mpdf\Mpdf::class)) {
+            throw new \RuntimeException('مكتبة mPDF غير مثبتة بعد. شغّل: composer require mpdf/mpdf');
+        }
+    }
+
+    private function makeMpdf(): \Mpdf\Mpdf
+    {
+        return new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'dejavusans',
+        ]);
     }
 }

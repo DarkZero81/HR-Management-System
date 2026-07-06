@@ -44,8 +44,8 @@
             </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+        <div class="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-6">
+            <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
                         <i data-lucide="wallet" class="w-6 h-6 text-blue-600"></i>
@@ -58,7 +58,7 @@
                 <p class="text-sm text-slate-500 mt-2">الراتب الأساسي</p>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+            <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
                         <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
@@ -71,7 +71,7 @@
                 <p class="text-sm text-slate-500 mt-2">صافي الراتب</p>
             </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+            <div class="w-75 bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
                         <i data-lucide="file-text" class="w-6 h-6 text-violet-600"></i>
@@ -117,7 +117,7 @@
                                             class="font-semibold text-slate-800">{{ $payroll->employee?->full_name ?? '—' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-slate-600">{{ number_format($payroll->base_salary, 2) }} ل.س</td>
+                                <td class="px-6 py-4 text-slate-600">{{ number_format($payroll->employee?->base_salary ?? 0, 2) }} ل.س</td>
                                 <td class="px-6 py-4 text-emerald-600 font-semibold">
                                     +{{ number_format($payroll->allowances, 2) }} ل.س</td>
                                 <td class="px-6 py-4 text-red-600 font-semibold">
@@ -125,11 +125,20 @@
                                 <td class="px-6 py-4 text-slate-800 font-bold">{{ number_format($payroll->net_salary, 2) }}
                                     ل.س</td>
                                 <td class="px-6 py-4">
-                                    <button onclick="window.print()"
-                                        class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors"
-                                        title="طباعة">
-                                        <i data-lucide="printer" class="w-4 h-4"></i>
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        @if($payroll->employee)
+                                            <a href="{{ route('payroll.download_pdf', ['employeeId' => $payroll->employee->id, 'month' => $payroll->salary_month]) }}"
+                                               class="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition-colors"
+                                               title="تحميل قسيمة PDF">
+                                                <i data-lucide="file-down" class="w-4 h-4"></i>
+                                            </a>
+                                        @endif
+                                        <button onclick="window.print()"
+                                            class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors"
+                                            title="طباعة">
+                                            <i data-lucide="printer" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

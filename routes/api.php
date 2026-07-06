@@ -4,7 +4,7 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AttendanceDeviceController;
 use App\Http\Controllers\Api\AttendanceLogController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DepartmentApiController; // Imported the new department controller
+use App\Http\Controllers\Api\DepartmentApiController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\HolidayController;
@@ -30,8 +30,6 @@ Route::middleware(\Illuminate\Auth\Middleware\Authenticate::class)->group(functi
     Route::get('/settings', [SystemSettingController::class, 'index']);
     Route::put('/settings', [SystemSettingController::class, 'update']);
 
-    Route::apiResource('shifts', ShiftController::class);
-
     Route::get('/devices', [AttendanceDeviceController::class, 'index']);
     Route::post('/devices', [AttendanceDeviceController::class, 'store']);
     Route::get('/devices/{id}', [AttendanceDeviceController::class, 'show']);
@@ -39,13 +37,18 @@ Route::middleware(\Illuminate\Auth\Middleware\Authenticate::class)->group(functi
     Route::delete('/devices/{id}', [AttendanceDeviceController::class, 'destroy']);
     Route::patch('/devices/{id}/toggle-status', [AttendanceDeviceController::class, 'toggleStatus']);
 
-    Route::apiResource('holidays', HolidayController::class);
+    // =========================================================================
+    // API Resources Group (Isolating names with 'api.' to prevent collisions)
+    // =========================================================================
+    Route::name('api.')->group(function () {
+        Route::apiResource('departments', DepartmentApiController::class);
+        Route::apiResource('shifts', ShiftController::class);
+        Route::apiResource('holidays', HolidayController::class);
+        Route::apiResource('employees', EmployeeController::class);
+        Route::apiResource('documents', DocumentController::class);
+    });
+    // =========================================================================
 
-    Route::apiResource('departments', DepartmentApiController::class); // Added the department resource routes
-
-    Route::apiResource('employees', EmployeeController::class);
-
-    Route::apiResource('documents', DocumentController::class);
     Route::get('/documents/expiring/{days?}', [DocumentController::class, 'getExpiringDocuments']);
 
     Route::get('/attendance-logs', [AttendanceLogController::class, 'index']);

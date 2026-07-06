@@ -15,10 +15,10 @@
                 <i data-lucide="user" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">الملف الشخصي</span>
             </a>
-            <span class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-medium cursor-not-allowed" title="قريباً">
+            <a href="{{ route('devices.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-semibold shadow-lg transition-all">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">إضافة جهاز</span>
-            </span>
+            </a>
         </div>
     </div>
 
@@ -39,14 +39,25 @@
                             <td class="px-6 py-4 text-slate-800 font-semibold">{{ $device->device_name }}</td>
                             <td class="px-6 py-4 text-slate-600 font-mono text-sm">{{ $device->ip_address ?? '—' }}</td>
                             <td class="px-6 py-4">
-                                @if($device->status === 'active')
+                                @if($device->status === 'online')
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">نشط</span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-700">متوقف</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <span class="text-xs text-slate-500">إجراءات غير متاحة حالياً</span>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('devices.edit', $device) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors" title="تعديل">
+                                        <i data-lucide="edit" class="w-4 h-4"></i>
+                                    </a>
+                                    <form action="{{ route('devices.destroy', $device) }}" method="POST" class="inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا الجهاز؟')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition-colors" title="حذف">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

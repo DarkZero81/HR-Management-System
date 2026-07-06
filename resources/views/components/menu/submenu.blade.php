@@ -1,37 +1,64 @@
-@props(['item'])
+{{--
+============================================================
+مكون: القائمة المنسدلة (Submenu)
+============================================================
+يعرض قائمة فرعية متداخلة مع دعم مستويات متعددة
+--}}
 
-@php
-    $userRole = optional(auth()->user()->role)->role_name;
-    $hasAccess = in_array($userRole, $item->roles);
+@props([
+    'item' => null,
+    'level' => 0
+])
 
-    // التحقق إذا كان أحد الأزرار الداخلية مفتوح حالياً لجعل القائمة مفتوحة تلقائياً
-    $isSubmenuActive = false;
-    if ($item->submenu) {
-        foreach($item->submenu as $sub) {
-            if (sub->route && request()->routeIs($sub->route . '*')) {
-                $isSubmenuActive = true;
-                break;
+@if($item && $item->isVisible())
+    @php
+        // تحديد إذا كانت القائمة نشطة (أي عنصر فرعي نشط)
+        $isActive = false;
+        if($item->getSubItems()) {
+            foreach($item->getSubItems() as $sub) {
+                if(request()->fullUrlIs($sub->getLink()) || route_is($sub->getRoute())) {
+                    $isActive = true;
+                    break;
+                }
+                // دعم التداخل العميق
+                if($sub->hasSubmenu() && $sub->getSubItems()) {
+                    foreach($sub->getSubItems() as $deepSub) {
+                        if(request()->fullUrlIs($deepSub->getLink()) || route_is($deepSub->getRoute())) {
+                            $isActive = true;
+                            break 2;
+                        }
+                    }
+                }
             }
         }
-    }
-@endphp
+    @endphp
 
-@if($hasAccess && $item->submenu)
-    <li class="submenu-wrapper">
-        <!-- زر فتح وإغلاق القائمة المنسدلة -->
-        <button onclick="toggleSubmenu(this)" class="w-full flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold text-slate-400 hover:bg-white/5 hover:text-white transition">
-            <div class="flex items-center gap-3">
-                <i data-lucide="{{ $item->icon }}" class="h-4 w-4"></i>
-                <span>{{ $item->label }}</span>
-            </div>
-            <!-- سهم ينقلب للأسفل أو الأعلى عند الفتح والإغلاق -->
-            <i data-lucide="chevron-down" class="h-3 w-3 transition-transform duration-200 {{ $isSubmenuActive ? 'rotate-180' : '' }}"></i>
-        </button>
+    <li class="submenu {{ $level > 0 ? 'sub-submenu' : '' }}">
+        {{-- عنوان القائمة الرئيسي --}}
+        <a href="{{ $item->getLink() ?? ($item->getRoute() ?? '#') }}"
+           class="{{ $isActive ? 'active' : '' }}
+                  {{ $level > 0 ? 'sub-submenu-toggle' : '' }}">
 
-        <!-- الأزرار الداخلية التابعة للقائمة المنسدلة -->
-        <ul class="mt-1 mr-4 space-y-1 pr-2 border-r border-white/5 {{ $isSubmenuActive ? 'block' : 'hidden' }}">
-            @foreach($item->submenu as $subItem)
-                <x-menu.item :item="$subItem" />
+            @if($item->getIcon())
+                <i class="la la-{{ $item->getIcon() }}"></i>
+            @endif
+
+            <span>{{ $item->getLabel() }}</span>
+
+            {{-- سهم القائمة المنسدلة --}}
+            <span class="menu-arrow"></span>
+        </a>
+
+        {{-- العناصر الفرعية --}}
+        <ul class="{{ $level > 0 ? 'nested-submenu' : '' }}">
+            @foreach($item->getSubItems() as $subItem)
+                @if($subItem->hasSubmenu())
+                    {{-- إذا كان العنصر يحتوي على قائمة فرعية أخرى --}}
+                    <x-menu.submenu :item="$subItem" :level="$level + 1" />
+                @else
+                    {{-- عنصر عادي --}}
+                    <x-menu.item :item="$subItem" :level="$level + 1" :isSubmenu="true" />
+                @endif
             @endforeach
         </ul>
     </li>

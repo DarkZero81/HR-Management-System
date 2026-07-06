@@ -1,19 +1,4 @@
 <!DOCTYPE html>
-{{--
-============================================================
-ملف التخطيط الرئيسي (Master Layout)
-============================================================
-هذا هو ملف الـ Layout الأساسي للتطبيق. يحتوي على:
-1. هيكل الصفحة الأساسي (HTML, Head, Body)
-2. الشريط الجانبي (Sidebar) مع قوائم التنقل
-3. الرأس الثابت للهواتف (Mobile Header)
-4. المحتوى الرئيسي مع عرض رسائل النجاح/الخطأ
-5. الفوتر (Footer)
-6. نظام الثيم (داكن/فاتح)
-7. التحكم بالقوائم المنسدلة والإشعارات
---}}
-
-<!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
     {{-- ==========================================
@@ -49,7 +34,7 @@
     {{-- ==========================================
     رأس الصفحة للأجهزة المحمولة (Mobile Header)
     ========================================== --}}
-    <header class="lg:hidden fixed top-0 right-0 left-0 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4">
+    <header class="lg:hidden  top-0 right-0 left-0 h-16 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4">
         <div class="flex items-center gap-3">
             {{-- زر فتح القائمة الجانبية --}}
             <button id="mobileMenuToggle" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors">
@@ -113,6 +98,11 @@
                         ['label' => 'الوثائق', 'route' => 'my.documents', 'icon' => 'file-text', 'roles' => ['employee', 'admin', 'hr', 'manager']],
                         ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'banknote', 'roles' => ['all']],
                         ['label' => 'الأقسام', 'route' => 'departments.index', 'icon' => 'building', 'roles' => ['all']],
+                        ['label' => 'الأجهزة', 'route' => 'devices.index', 'icon' => 'laptop', 'roles' => ['all']],
+                        ['label' => 'الورديات', 'route' => 'shifts.index', 'icon' => 'book', 'roles' => ['all']],
+                        ['label' => 'الموظفين', 'route' => 'employees.index', 'icon' => 'user', 'roles' => ['all']],
+                        ['label' => 'الإجازات', 'route' => 'holidays.index', 'icon' => 'user', 'calander' => ['all']],
+                        ['label' => 'التقرير', 'route' => 'reports.index', 'icon' => 'book', 'calander' => ['all']],
                     ];
 
                     $userRole = optional(auth()->user()->role)->role_name;
@@ -121,58 +111,18 @@
 
                 {{-- عرض عناصر القائمة حسب الصلاحيات --}}
                 @foreach ($nav as $item)
-                    @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles']))
-                    @if($hasAccess)
+                    {{-- @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles'])) --}}
+                    {{-- @if($hasAccess) --}}
                         <a href="{{ route($item['route']) }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                           class="flex items-center gap-3 px-4 py-1 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
                             <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5"></i>
                             <span class="font-medium">{{ $item['label'] }}</span>
                         </a>
-                    @endif
+                    {{-- @endif --}}
                 @endforeach
 
-                {{-- ==========================================
-                قسم الخدمة الذاتية (للموظفين)
-                ========================================== --}}
-                @if (in_array($userRole, ['employee', 'admin', 'hr', 'manager'], true))
-                    <div class="pt-4 mt-4 border-t border-white/10">
-                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الخدمة الذاتية</p>
-                        <a href="{{ route('my.requests.index') }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('my.requests.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
-                            <i data-lucide="calendar-days" class="w-5 h-5"></i>
-                            <span class="font-medium">إجازاتي</span>
-                        </a>
-                        <a href="{{ route('my.documents') }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('my.documents') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
-                            <i data-lucide="file-text" class="w-5 h-5"></i>
-                            <span class="font-medium">وثائقي</span>
-                        </a>
-                    </div>
-                @endif
 
-                {{-- ==========================================
-                قسم الإدارة (للمديرين والمشرفين)
-                ========================================== --}}
-                @if (in_array($userRole, ['admin', 'hr', 'manager'], true))
-                    <div class="pt-4 mt-4 border-t border-white/10">
-                        <p class="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-2">الإدارة</p>
-                        <a href="{{ route('reports.index') }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('reports.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
-                            <i data-lucide="chart-bar" class="w-5 h-5"></i>
-                            <span class="font-medium">التقارير الإدارية</span>
-                        </a>
-                        <a href="{{ route('employees.index') }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('employees.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
-                            <i data-lucide="users" class="w-5 h-5"></i>
-                            <span class="font-medium">إدارة الموظفين</span>
-                        </a>
-                        <a href="{{ route('departments.index') }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('departments.*') ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
-                            <i data-lucide="building-2" class="w-5 h-5"></i>
-                            <span class="font-medium">الأقسام الإدارية</span>
-                        </a>
-                    </div>
-                @endif
+
             </nav>
 
             {{-- ==========================================
@@ -265,7 +215,7 @@
                 <div class="mx-auto max-w-[1600px] space-y-6">
                     {{-- عرض رسالة نجاح (Session Flash) --}}
                     @if (session('success'))
-                        <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 flex items-center gap-2">
+                        <div class="mt-10 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-800 flex items-center gap-2">
                             <i data-lucide="check-circle" class="w-5 h-5"></i>
                             {{ session('success') }}
                         </div>
@@ -273,7 +223,7 @@
 
                     {{-- عرض رسالة خطأ (Session Flash) --}}
                     @if (session('error'))
-                        <div class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 flex items-center gap-2">
+                        <div class="mt-10 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 flex items-center gap-2">
                             <i data-lucide="alert-circle" class="w-5 h-5"></i>
                             {{ session('error') }}
                         </div>
@@ -301,6 +251,9 @@
     {{-- مسافة للفوتر الثابت في الموبايل --}}
     <div class="h-12 lg:hidden"></div>
 
+    {{-- Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     {{-- ==========================================
     السكربتات الخارجية (Alpine.js & Lucide)
     ========================================== --}}
@@ -315,133 +268,126 @@
             // ==========================================
             // تهيئة أيقونات Lucide
             // ==========================================
-            if (window.lucide) {
-                window.lucide.createIcons();
+            try {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            } catch (e) {
+                console.error('lucide icons init failed', e);
+            }
+
+            // ==========================================
+            // التحكم في القائمة الجانبية للهواتف (Mobile Sidebar)
+            // مهم: هذا القسم معزول بـ try/catch مستقل ويُنفّذ أولاً حتى لو
+            // فشل أي قسم آخر (مثل الثيم)، يبقى زر فتح/إغلاق القائمة شغّالاً.
+            // ==========================================
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                const toggleBtn = document.getElementById('mobileMenuToggle');
+                const closeBtn = document.getElementById('closeSidebarMobile');
+
+                function openSidebar() {
+                    if (!sidebar) return;
+                    sidebar.classList.remove('translate-x-full');
+                    if (overlay) overlay.classList.remove('hidden');
+                    document.body.classList.add('sidebar-open');
+                }
+
+                function closeSidebar() {
+                    if (!sidebar) return;
+                    sidebar.classList.add('translate-x-full');
+                    if (overlay) overlay.classList.add('hidden');
+                    document.body.classList.remove('sidebar-open');
+                }
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openSidebar();
+                    });
+                }
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeSidebar();
+                    });
+                }
+
+                if (overlay) {
+                    overlay.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeSidebar();
+                    });
+                }
+
+                window.addEventListener('popstate', function() {
+                    if (window.innerWidth < 1024) closeSidebar();
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth >= 1024) closeSidebar();
+                });
+
+                if (sidebar) {
+                    sidebar.querySelectorAll('a').forEach(function(link) {
+                        link.addEventListener('click', function() {
+                            if (window.innerWidth < 1024) {
+                                setTimeout(closeSidebar, 150);
+                            }
+                        });
+                    });
+                }
+            } catch (e) {
+                console.error('mobile sidebar init failed', e);
             }
 
             // ==========================================
             // نظام الثيمات (Light/Dark Mode)
             // ==========================================
-            const html = document.documentElement;
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            try {
+                const html = document.documentElement;
 
-            /**
-             * تطبيق الثيم المحدد على الصفحة
-             * @param {string} theme - 'dark' أو 'light'
-             */
-            function applyTheme(theme) {
-                html.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-
-                const isDark = theme === 'dark';
-                // إظهار/إخفاء أيقونات الثيم
-                document.querySelectorAll('.theme-icon-dark').forEach(el => el.classList.toggle('hidden', !isDark));
-                document.querySelectorAll('.theme-icon-light').forEach(el => el.classList.toggle('hidden', isDark));
-
-                // تحديث النصوص
-                const themeLabel = document.getElementById('themeLabel');
-                const themeLabelMobile = document.getElementById('themeLabelMobile');
-                if (themeLabel) themeLabel.textContent = isDark ? 'تبديل المظهر' : 'تبديل المظهر';
-                if (themeLabelMobile) themeLabelMobile.textContent = isDark ? 'داكن' : 'فاتح';
-            }
-
-            // تطبيق الثيم المحفوظ
-            applyTheme(savedTheme);
-
-            // أحداث أزرار تبديل الثيم (في الـ Sidebar و الـ Mobile Header)
-            document.getElementById('themeToggle')?.addEventListener('click', function() {
-                const current = html.getAttribute('data-theme');
-                applyTheme(current === 'dark' ? 'light' : 'dark');
-            });
-
-            document.getElementById('themeToggleMobile')?.addEventListener('click', function() {
-                const current = html.getAttribute('data-theme');
-                applyTheme(current === 'dark' ? 'light' : 'dark');
-            });
-
-            // ==========================================
-            // التحكم في القائمة الجانبية للهواتف (Mobile Sidebar)
-            // ==========================================
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const toggleBtn = document.getElementById('mobileMenuToggle');
-            const closeBtn = document.getElementById('closeSidebarMobile');
-
-            /**
-             * فتح القائمة الجانبية
-             */
-            function openSidebar() {
-                if (!sidebar) return;
-                sidebar.classList.remove('translate-x-full');
-                if (overlay) {
-                    overlay.classList.remove('hidden');
+                let savedTheme = 'dark';
+                try {
+                    savedTheme = localStorage.getItem('theme') || 'dark';
+                } catch (storageErr) {
+                    console.warn('localStorage غير متاح، سيتم استخدام الثيم الداكن كافتراضي', storageErr);
                 }
-                document.body.classList.add('sidebar-open');
-            }
 
-            /**
-             * إغلاق القائمة الجانبية
-             */
-            function closeSidebar() {
-                if (!sidebar) return;
-                sidebar.classList.add('translate-x-full');
-                if (overlay) {
-                    overlay.classList.add('hidden');
+                function applyTheme(theme) {
+                    html.setAttribute('data-theme', theme);
+                    try {
+                        localStorage.setItem('theme', theme);
+                    } catch (storageErr) {
+                        console.warn('تعذر حفظ الثيم بـ localStorage', storageErr);
+                    }
+
+                    const isDark = theme === 'dark';
+                    document.querySelectorAll('.theme-icon-dark').forEach(el => el.classList.toggle('hidden', !isDark));
+                    document.querySelectorAll('.theme-icon-light').forEach(el => el.classList.toggle('hidden', isDark));
+
+                    const themeLabelMobile = document.getElementById('themeLabelMobile');
+                    if (themeLabelMobile) themeLabelMobile.textContent = isDark ? 'داكن' : 'فاتح';
                 }
-                document.body.classList.remove('sidebar-open');
-            }
 
-            // فتح القائمة عند النقر على زر القائمة
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openSidebar();
+                applyTheme(savedTheme);
+
+                document.getElementById('themeToggle')?.addEventListener('click', function() {
+                    const current = html.getAttribute('data-theme');
+                    applyTheme(current === 'dark' ? 'light' : 'dark');
                 });
-            }
 
-            // إغلاق القائمة عند النقر على زر الإغلاق
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeSidebar();
+                document.getElementById('themeToggleMobile')?.addEventListener('click', function() {
+                    const current = html.getAttribute('data-theme');
+                    applyTheme(current === 'dark' ? 'light' : 'dark');
                 });
-            }
-
-            // إغلاق القائمة عند النقر على الـ Overlay
-            if (overlay) {
-                overlay.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeSidebar();
-                });
-            }
-
-            // إغلاق القائمة عند الضغط على زر الرجوع في المتصفح (History API)
-            window.addEventListener('popstate', function() {
-                if (window.innerWidth < 1024) {
-                    closeSidebar();
-                }
-            });
-
-            // إغلاق القائمة عند تغيير حجم النافذة إلى حجم أكبر من LG
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    closeSidebar();
-                }
-            });
-
-            // إغلاق القائمة تلقائياً بعد النقر على أي رابط داخلي (في الهواتف)
-            if (sidebar) {
-                sidebar.querySelectorAll('a').forEach(function(link) {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth < 1024) {
-                            // نؤجل الإغلاق قليلاً للسماح بتوجيه الرابط
-                            setTimeout(closeSidebar, 150);
-                        }
-                    });
-                });
+            } catch (e) {
+                console.error('theme init failed', e);
             }
 
             // ==========================================

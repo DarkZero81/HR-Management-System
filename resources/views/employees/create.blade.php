@@ -12,8 +12,8 @@
     @if ($errors->any())
         <div class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
             <ul class="list-inside list-disc text-sm font-medium text-rose-400 space-y-1">
-                @foreach ($errors->any() as $error)
-                    <li>{{ $error }}</li>
+                @foreach ($errors->all() as $error)
+                    <li  dir="ltr">{{ $error }}</li>
                 @endforeach
             </ul>
         </div>

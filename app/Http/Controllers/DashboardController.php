@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\HrTransaction;
 use App\Models\PayrollOrder;
@@ -62,6 +63,23 @@ class DashboardController extends Controller
     public function reports(): View
     {
         $today = today();
+        $currentMonth = $today->format('Y-m');
+
+        $totalBaseSalary = Employee::sum('base_salary');
+        $totalNetSalary = PayrollOrder::where('salary_month', $currentMonth)->sum('net_salary');
+        $totalDeductions = PayrollOrder::where('salary_month', $currentMonth)->sum('deductions');
+        $totalAllowances = PayrollOrder::where('salary_month', $currentMonth)->sum('allowances');
+
+        $monthlyPayrolls = PayrollOrder::query()->where('salary_month', $currentMonth)->count('*');
+
+        $salaryData = PayrollOrder::with('employee')
+            ->where('salary_month', $currentMonth)
+            ->get()
+            ->take(5);
+
+        $departments = Department::withCount(['employees' => function ($q) {
+            $q->whereNull('resign_date');
+        }])->get();
 
         return view('reports.index', [
             'totalEmployees' => Employee::query()->count('*'),
@@ -71,7 +89,71 @@ class DashboardController extends Controller
                 ->where('log_date', '>=', $today->copy()->startOfMonth()->toDateString())
                 ->where('log_date', '<=', $today->copy()->endOfMonth()->toDateString())
                 ->count('*'),
-            'monthlyPayrolls' => PayrollOrder::query()->where('salary_month', $today->format('Y-m'))->count('*'),
+            'monthlyPayrolls' => $monthlyPayrolls,
+            'financialData' => [
+                'totalBaseSalary' => $totalBaseSalary,
+                'totalNetSalary' => $totalNetSalary,
+                'totalDeductions' => $totalDeductions,
+                'totalAllowances' => $totalAllowances,
+            ],
+            'salaryData' => $salaryData,
+            'departments' => $departments,
+        ]);
+    }
+
+    public function downloadFinancialReportPdf(): \Illuminate\Http\Response
+    {
+        $today = today();
+        $currentMonth = $today->format('Y-m');
+
+        $totalBaseSalary = Employee::sum('base_salary');
+        $totalNetSalary = PayrollOrder::where('salary_month', $currentMonth)->sum('net_salary');
+        $totalDeductions = PayrollOrder::where('salary_month', $currentMonth)->sum('deductions');
+        $totalAllowances = PayrollOrder::where('salary_month', $currentMonth)->sum('allowances');
+
+        $salaryData = PayrollOrder::with('employee')
+            ->where('salary_month', $currentMonth)
+            ->get();
+
+        $departments = Department::withCount(['employees' => function ($q) {
+            $q->whereNull('resign_date');
+        }])->get();
+
+        $this->ensureMpdfAvailable();
+
+        $html = view('reports.financial_pdf', [
+            'date' => now()->format('Y-m-d'),
+            'financialData' => [
+                'totalBaseSalary' => $totalBaseSalary,
+                'totalNetSalary' => $totalNetSalary,
+                'totalDeductions' => $totalDeductions,
+                'totalAllowances' => $totalAllowances,
+            ],
+            'salaryData' => $salaryData,
+            'departments' => $departments,
+        ])->render();
+
+        $mpdf = $this->makeMpdf();
+        $mpdf->WriteHTML($html);
+
+        return new \Illuminate\Http\Response($mpdf->Output('financial-report-' . $currentMonth . '.pdf', 'D'), 200, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    private function ensureMpdfAvailable(): void
+    {
+        if (!class_exists(\Mpdf\Mpdf::class)) {
+            throw new \RuntimeException('مكتبة mPDF غير مثبتة بعد. شغّل: composer require mpdf/mpdf');
+        }
+    }
+
+    private function makeMpdf(): \Mpdf\Mpdf
+    {
+        return new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'dejavusans',
         ]);
     }
 }
