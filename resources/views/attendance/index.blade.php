@@ -139,6 +139,7 @@
             <table class="w-full">
                 <thead class="bg-slate-50">
                     <tr>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">الموظف</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">التاريخ</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">دخول</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">خروج</th>
@@ -153,8 +154,10 @@
                             'present' => 'bg-emerald-100 text-emerald-700',
                             'late' => 'bg-amber-100 text-amber-700',
                             'absent' => 'bg-rose-100 text-rose-700',
+                            'holiday' => 'bg-blue-100 text-blue-700',
                         ][$log->status] ?? 'bg-slate-100 text-slate-700')
                         <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-semibold text-slate-900">{{ $log->employee?->full_name ?? $log->employee?->first_name . ' ' . $log->employee?->last_name ?? '—' }}</td>
                             <td class="px-6 py-4 text-slate-800 font-semibold">{{ $log->log_date }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $log->check_in?->format('H:i') ?? '—' }}</td>
                             <td class="px-6 py-4 text-slate-600">{{ $log->check_out?->format('H:i') ?? '—' }}</td>
@@ -168,7 +171,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-500">لا توجد سجلات دوام بعد.</td>
+                            <td colspan="7" class="px-6 py-10 text-center text-slate-500">لا توجد سجلات دوام بعد.</td>
                         </tr>
                     @endforelse
                 </tbody>
