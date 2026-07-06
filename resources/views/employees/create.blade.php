@@ -24,6 +24,22 @@
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">حساب المستخدم المرتبط <span class="text-rose-500">*</span></label>
+                @if($users->isEmpty())
+                    <div class="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-sm text-rose-400">
+                        لا توجد حسابات مستخدمين متاحين. <a href="{{ route('register') }}" class="underline hover:text-rose-300">إنشاء حساب جديد</a>
+                    </div>
+                @else
+                    <select name="user_id" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+                        <option value="">-- اختر حساب مستخدم --</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name ?? $user->email }}</option>
+                        @endforeach
+                    </select>
+                @endif
+            </div>
+
+            <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الاسم الأول <span class="text-rose-500">*</span></label>
                 <input type="text" name="first_name" value="{{ old('first_name') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
             </div>

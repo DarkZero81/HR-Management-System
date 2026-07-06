@@ -20,7 +20,7 @@ $table->foreignId('department_id')->nullable()->constrained('departments')->onDe
             $table->string('last_name', 50);
             $table->string('national_id', 50)->unique(); // الرقم الوطني للذاتية
             $table->string('phone', 20)->nullable();
-            $table->decimal('base_salary', 10, 2); // الراتب الأساسي التعاقدي الثابت
+            $table->decimal('base_salary', 15, 2); // الراتب الأساسي التعاقدي الثابت (زيادة من 10 إلى 15 للسماح برواتب عالية)
             $table->string('bank_account_iban', 50)->nullable();
             $table->date('join_date'); // تاريخ التعيين
             $table->date('resign_date')->nullable(); // تاريخ الاستقالة إن وجد

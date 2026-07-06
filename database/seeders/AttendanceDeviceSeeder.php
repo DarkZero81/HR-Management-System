@@ -27,7 +27,10 @@ class AttendanceDeviceSeeder extends Seeder
         ];
 
         foreach ($devices as $device) {
-            AttendanceDevice::create($device);
+            AttendanceDevice::firstOrCreate(
+                ['device_name' => $device['device_name']],
+                $device
+            );
         }
     }
 }

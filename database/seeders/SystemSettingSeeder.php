@@ -17,7 +17,10 @@ class SystemSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            SystemSetting::create($setting);
+            SystemSetting::firstOrCreate(
+                ['setting_key' => $setting['setting_key']],
+                $setting
+            );
         }
     }
 }

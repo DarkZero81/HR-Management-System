@@ -18,7 +18,10 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-            RolePermission::create($role);
+            RolePermission::firstOrCreate(
+                ['role_name' => $role['role_name']],
+                $role
+            );
         }
     }
 }

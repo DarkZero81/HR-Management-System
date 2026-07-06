@@ -18,6 +18,11 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Attendance routes accessible by all authenticated users
+    Route::get('/attendance', [AttendanceWebController::class, 'index'])->name('attendance.index');
+    Route::post('/attendance/check-in', [AttendanceWebController::class, 'store'])->name('attendance.checkin');
+    Route::post('/attendance/check-out', [AttendanceWebController::class, 'checkOut'])->name('attendance.checkout');
+
     Route::prefix('my')->name('my.')->group(function () {
         Route::get('/attendance', [AttendanceWebController::class, 'myAttendance'])->name('attendance');
         Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents');
@@ -32,10 +37,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('shifts', ShiftWebController::class);
         Route::resource('holidays', HolidayWebController::class);
         Route::resource('devices', DeviceWebController::class);
-
-        Route::get('/attendance', [AttendanceWebController::class, 'index'])->name('attendance.index');
-        Route::post('/attendance/check-in', [AttendanceWebController::class, 'store'])->name('attendance.checkin');
-        Route::post('/attendance/check-out', [AttendanceWebController::class, 'checkOut'])->name('attendance.checkout');
 
         Route::get('/documents', [DocumentWebController::class, 'index'])->name('documents.index');
         Route::get('/documents/create', [DocumentWebController::class, 'create'])->name('documents.create');

@@ -23,17 +23,19 @@ class EmployeeSeeder extends Seeder
         }
 
         foreach ($users as $user) {
+            // تخطي إذا كان الموظف موجوداً مسبقاً
+            if (Employee::where('user_id', $user->id)->exists()) {
+                continue;
+            }
+
             Employee::create([
-                // تعديل: ربط الموظف بالمعرّف الحقيقي للمستخدم بدلاً من دالة توليد رقم عشوائي مكسورة
                 'user_id' => $user->id,
                 'shift_id' => $shifts->random()->id,
-                'department_id' => $departments->isNotEmpty() ? $departments->random()->id : null, // ربط الموظف بقسم عشوائي
+                'department_id' => $departments->isNotEmpty() ? $departments->random()->id : null,
                 'first_name' => fake()->firstName(),
                 'last_name' => fake()->lastName(),
                 'national_id' => 'NID' . fake()->unique()->numberBetween(1000000, 9999999),
                 'phone' => fake()->phoneNumber(),
-
-                // تنويه: تأكد من مطابقة أسماء الحقول أدناه (base_salary و join_date) مع أسماء الأعمدة في قاعدة البيانات لديك
                 'base_salary' => fake()->randomFloat(2, 3000, 8000),
                 'bank_account_iban' => 'IBAN' . fake()->unique()->numberBetween(100000000, 999999999),
                 'join_date' => fake()->date(),

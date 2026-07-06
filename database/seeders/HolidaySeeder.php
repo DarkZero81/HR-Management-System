@@ -16,7 +16,10 @@ class HolidaySeeder extends Seeder
         ];
 
         foreach ($holidays as $holiday) {
-            Holiday::create($holiday);
+            Holiday::firstOrCreate(
+                ['holiday_name' => $holiday['holiday_name']],
+                $holiday
+            );
         }
     }
 }

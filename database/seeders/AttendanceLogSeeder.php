@@ -52,7 +52,8 @@ class AttendanceLogSeeder extends Seeder
 
                 // FIX: Calculate accurate lateness parameters using safe cloning boundaries
                 $lateMinutes = 0;
-                $gracePeriodThreshold = $shiftStartTime->copy()->addMinutes($shift->grace_period_minutes);
+                $gracePeriodMinutes = $shift->grace_period_minutes ?? 15;
+                $gracePeriodThreshold = $shiftStartTime->copy()->addMinutes($gracePeriodMinutes);
 
                 if ($checkInTime->gt($gracePeriodThreshold)) {
                     // Lateness is calculated from the true shift start marker, not the grace threshold
@@ -63,16 +64,17 @@ class AttendanceLogSeeder extends Seeder
                 $checkOutTime = $checkInTime->copy()->addHours(fake()->numberBetween(8, 9))->addMinutes(fake()->numberBetween(0, 59));
 
                 // Commit the synchronized metric variables safely down into the database rows
-                AttendanceLog::create([
-                    'employee_id'      => $employee->id,
-                    'device_id'        => $devices->random()->id,
-                    'log_date'         => $logDate,
-                    'check_in'         => $checkInTime->format('Y-m-d H:i:s'),  // Explicit database formatting string
-                    'check_out'        => $checkOutTime->format('Y-m-d H:i:s'), // Explicit database formatting string
-                    'late_minutes'     => $lateMinutes,
-                    'overtime_minutes' => 0,
-                    'status'           => $lateMinutes > 0 ? 'late' : 'present',
-                ]);
+                AttendanceLog::updateOrCreate(
+                    ['employee_id' => $employee->id, 'log_date' => $logDate],
+                    [
+                        'device_id' => $devices->random()->id,
+                        'check_in' => $checkInTime,
+                        'check_out' => $checkOutTime,
+                        'late_minutes' => $lateMinutes,
+                        'overtime_minutes' => 0,
+                        'status' => $lateMinutes > 0 ? 'late' : 'present',
+                    ]
+                );
             }
         }
     }

@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('device_name', 100);
             $table->string('ip_address', 45); // يدعم IPv4 و IPv6
+            $table->string('location', 100)->nullable();
+            $table->timestamp('last_seen_at')->nullable();
+            $table->timestamp('last_sync_at')->nullable();
             $table->enum('status', ['online', 'offline'])->default('offline');
             $table->timestamp('last_sync')->nullable(); // وقت آخر سحب ناجح للحركات
             $table->timestamps();

@@ -16,7 +16,10 @@ class ShiftSeeder extends Seeder
         ];
 
         foreach ($shifts as $shift) {
-            Shift::create($shift);
+            Shift::firstOrCreate(
+                ['shift_name' => $shift['shift_name']],
+                $shift
+            );
         }
     }
 }
