@@ -91,34 +91,39 @@
                                     {{-- تعريف عناصر القائمة الأساسية --}}
 
                 @php
+                    $userRole = optional(auth()->user()->role)->role_name;
+                    $isAdminRole = in_array($userRole, ['admin', 'hr', 'manager'], true);
+
                     $nav = [
                         ['label' => 'الرئيسية', 'route' => 'dashboard', 'icon' => 'home', 'roles' => ['all']],
-                        ['label' => 'الدوام والحضور', 'route' => 'attendance.index', 'icon' => 'clock', 'roles' => ['all']],
+                        // تصحيح: الموظف العادي يذهب لصفحة حضوره الشخصية، والإداري لصفحة إدارة الحضور الكاملة
+                        ['label' => 'الدوام والحضور', 'route' => $isAdminRole ? 'attendance.index' : 'my.attendance', 'icon' => 'clock', 'roles' => ['all']],
                         ['label' => 'الإجازات والطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar', 'roles' => ['employee', 'admin', 'hr', 'manager']],
                         ['label' => 'الوثائق', 'route' => 'my.documents', 'icon' => 'file-text', 'roles' => ['employee', 'admin', 'hr', 'manager']],
-                        ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'banknote', 'roles' => ['all']],
+                        // تصحيح: هذه الصفحات محمية إدارياً على مستوى السيرفر (role:admin,hr,manager)
+                        // لذلك يجب أن تظهر بالقائمة فقط لهذه الأدوار، وإلا يأخذ الموظف خطأ 403 عند الضغط
+                        ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'banknote', 'roles' => ['admin', 'hr', 'manager']],
                         ['label' => 'الأقسام', 'route' => 'departments.index', 'icon' => 'building', 'roles' => ['all']],
-                        ['label' => 'الأجهزة', 'route' => 'devices.index', 'icon' => 'laptop', 'roles' => ['all']],
-                        ['label' => 'الورديات', 'route' => 'shifts.index', 'icon' => 'book', 'roles' => ['all']],
-                        ['label' => 'الموظفين', 'route' => 'employees.index', 'icon' => 'user', 'roles' => ['all']],
-                        ['label' => 'الإجازات', 'route' => 'holidays.index', 'icon' => 'user', 'calander' => ['all']],
-                        ['label' => 'التقرير', 'route' => 'reports.index', 'icon' => 'book', 'calander' => ['all']],
+                        ['label' => 'الأجهزة', 'route' => 'devices.index', 'icon' => 'laptop', 'roles' => ['admin', 'hr', 'manager']],
+                        ['label' => 'الورديات', 'route' => 'shifts.index', 'icon' => 'book', 'roles' => ['admin', 'hr', 'manager']],
+                        ['label' => 'الموظفين', 'route' => 'employees.index', 'icon' => 'user', 'roles' => ['admin', 'hr', 'manager']],
+                        // تصحيح: كان المفتاح 'calander' بدل 'roles' بالخطأ، وهذا يسبب خطأ Undefined array key عند تفعيل فحص الصلاحيات
+                        ['label' => 'الإجازات', 'route' => 'holidays.index', 'icon' => 'calendar-days', 'roles' => ['admin', 'hr', 'manager']],
+                        ['label' => 'التقرير', 'route' => 'reports.index', 'icon' => 'bar-chart', 'roles' => ['admin', 'hr', 'manager']],
                     ];
-
-                    $userRole = optional(auth()->user()->role)->role_name;
                 @endphp
                     {{-- تحديد دور المستخدم الحالي --}}
 
                 {{-- عرض عناصر القائمة حسب الصلاحيات --}}
                 @foreach ($nav as $item)
-                    {{-- @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles'])) --}}
-                    {{-- @if($hasAccess) --}}
+                    @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles']))
+                    @if($hasAccess)
                         <a href="{{ route($item['route']) }}"
                            class="flex items-center gap-3 px-4 py-1 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
                             <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5"></i>
                             <span class="font-medium">{{ $item['label'] }}</span>
                         </a>
-                    {{-- @endif --}}
+                    @endif
                 @endforeach
 
 

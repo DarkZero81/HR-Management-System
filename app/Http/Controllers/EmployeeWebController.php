@@ -31,8 +31,10 @@ class EmployeeWebController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        if ($request->filled('sort_by')) {
-            $query->orderBy($request->sort_by, $request->get('sort_direction', 'asc'));
+        $sortable = ['first_name', 'last_name', 'national_id', 'base_salary', 'join_date', 'created_at'];
+
+        if ($request->filled('sort_by') && in_array($request->sort_by, $sortable, true)) {
+            $query->orderBy($request->sort_by, $request->get('sort_direction') === 'desc' ? 'desc' : 'asc');
         } else {
             $query->orderBy('created_at', 'desc');
         }
@@ -78,7 +80,7 @@ class EmployeeWebController extends Controller
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
             'old_values'  => null,
-            'new_values'  => json_encode($employee->toArray(), JSON_UNESCAPED_UNICODE),
+            'new_values'  => $employee->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -117,8 +119,8 @@ class EmployeeWebController extends Controller
             'action_type' => 'update',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => json_encode($oldValues, JSON_UNESCAPED_UNICODE),
-            'new_values'  => json_encode($employee->fresh()->toArray(), JSON_UNESCAPED_UNICODE),
+            'old_values'  => $oldValues,
+            'new_values'  => $employee->fresh()->toArray(),
             'performed_at'=> now(),
         ]);
 
@@ -141,7 +143,7 @@ class EmployeeWebController extends Controller
             'action_type' => 'delete',
             'table_name'  => 'employees',
             'record_id'   => $employee->id,
-            'old_values'  => json_encode($employeeData, JSON_UNESCAPED_UNICODE),
+            'old_values'  => $employeeData,
             'new_values'  => null,
             'performed_at'=> now(),
         ]);
