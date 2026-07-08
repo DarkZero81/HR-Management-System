@@ -1,69 +1,46 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-
-{{--  --}}
-<div class="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50">
+<div class="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50" dir="rtl">
     <div class="flex flex-1 items-center justify-center p-4">
         <div class="w-full max-w-5xl rounded-[32px] border border-slate-200/70 bg-white/80 p-2 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.15)] backdrop-blur-xl lg:flex lg:p-0">
             <div class="w-full rounded-l-[28px] lg:block lg:w-1/2">
                 <img class="h-full w-full rounded-l-[28px] object-cover" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/leftSideImage.png" alt="leftSideImage">
             </div>
             <div class="flex w-full flex-col items-center justify-center p-8 lg:w-1/2">
-            <form class="md:w-96 w-80 flex flex-col items-center justify-center" id="registerForm" method="POST" action="{{ route('register') }}">
-            @csrf
+                <form class="flex w-full max-w-sm flex-col items-center justify-center" method="POST" action="{{ route('register') }}" id="registerForm">
+                    @csrf
 
-            <h2 class="text-4xl text-gray-900 font-medium">Create account</h2>
-            <p class="text-sm text-gray-500/90 mt-3">Join us and get started today</p>
+                    <h2 class="text-3xl font-black text-slate-900">إنشاء حساب جديد</h2>
+                    <p class="mt-2 text-sm text-slate-500">أنشئ حسابك للوصول إلى البوابة الذاتية</p>
 
-            <button type="button" class="w-full mt-8 bg-gray-500/10 flex items-center justify-center h-12 rounded-full">
-                <img src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/googleLogo.svg" alt="googleLogo">
-            </button>
+                    <div class="mt-8 flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
+                        <i data-lucide="user" class="h-4 w-4 text-slate-400"></i>
+                        <input type="text" placeholder="الاسم الكامل" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="name" value="{{ old('name') }}">
+                    </div>
+                    <x-input-error :messages="$errors->get('name')" class="mt-2 self-start" />
 
-            <div class="flex items-center gap-4 w-full my-5">
-                <div class="w-full h-px bg-gray-300/90"></div>
-                <p class="w-full text-nowrap text-sm text-gray-500/90">or sign up with email</p>
-                <div class="w-full h-px bg-gray-300/90"></div>
-            </div>
-            {{-- enter name --}}
-            <div class="flex items-center w-full gap-2 border border-black/10 rounded-full px-3 py-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="12" cy="7" r="4" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <input type="text" placeholder="Full Name" class="my-2 bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="name" value="{{ old('name') }}" autofocus autocomplete="name">
-            </div>
-            <x-input-error :messages="$errors->get('name')" class="mt-2 self-start" />
-            {{-- enter email --}}
-            <div class="flex items-center mt-4 w-full gap-2 border border-black/10 rounded-full px-3 py-2">
-                <svg width="16" height="11" viewBox="0 0 16 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M0 .55.571 0H15.43l.57.55v9.9l-.571.55H.57L0 10.45zm1.143 1.138V9.9h13.714V1.69l-6.503 4.8h-.697zM13.749 1.1H2.25L8 5.356z" fill="#6B7280"/>
-                </svg>
-                <input type="email" placeholder="Email id" class="my-2 bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="email" value="{{ old('email') }}" autocomplete="username">
-            </div>
-            <x-input-error :messages="$errors->get('email')" class="mt-2 self-start" />
-                {{-- enter password --}}
-            <div class="flex items-center mt-4 w-full gap-2 border border-black/10 rounded-full px-3 py-2">
-                <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 6.5A3.5 3.5 0 009.5 3h-5A3.5 3.5 0 001 6.5v7A3.5 3.5 0 004.5 17h5a3.5 3.5 0 003.5-3.5v-7zM4.5 5A1.5 1.5 0 016 3.5h2A1.5 1.5 0 019.5 5V6h-5V5zM12 10.5a1.5 1.5 0 01-1.5 1.5h-5A1.5 1.5 0 014 10.5V8h8v2.5z" fill="#6B7280"/>
-                </svg>
-                <input type="password" placeholder="Password" class="my-2 bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="password" autocomplete="new-password">
-            </div>
-            <x-input-error :messages="$errors->get('password')" class="mt-2 self-start" />
-                {{-- confirm password --}}
-            <div class="flex items-center mt-4 w-full gap-2 border border-black/10 rounded-full px-3 py-2">
-                <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 6.5A3.5 3.5 0 009.5 3h-5A3.5 3.5 0 001 6.5v7A3.5 3.5 0 004.5 17h5a3.5 3.5 0 003.5-3.5v-7zM4.5 5A1.5 1.5 0 016 3.5h2A1.5 1.5 0 019.5 5V6h-5V5zM12 10.5a1.5 1.5 0 01-1.5 1.5h-5A1.5 1.5 0 014 10.5V8h8v2.5z" fill="#6B7280"/>
-                </svg>
-                <input type="password" placeholder="Confirm Password" class=" my-2 bg-transparent text-gray-500/80 placeholder-gray-500/80 outline-none text-sm w-full h-full" required name="password_confirmation" autocomplete="new-password">
-            </div>
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 self-start" />
+                    <div class="my-2 flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
+                        <i data-lucide="mail" class="h-4 w-4 text-slate-400"></i>
+                        <input type="email" placeholder="البريد الإلكتروني" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="email" value="{{ old('email') }}">
+                    </div>
+                    <x-input-error :messages="$errors->get('email')" class="mt-2 self-start" />
 
-            <button type="submit" class="mt-8 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity" id="registerBtn">
-                Register
-            </button>
+                    <div class="my-2 flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
+                        <i data-lucide="lock" class="h-4 w-4 text-slate-400"></i>
+                        <input type="password" placeholder="كلمة المرور" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="password">
+                    </div>
+                    <x-input-error :messages="$errors->get('password')" class="mt-2 self-start" />
 
-            <p class="text-gray-500/90 text-sm mt-4">Already have an account? <a class="text-indigo-400 hover:underline" href="{{ route('login') }}">Sign in</a></p>
-        </form>
+                    <div class="my-2 flex w-full items-center gap-2 border border-black/10 rounded-full px-3 py-3">
+                        <i data-lucide="lock" class="h-4 w-4 text-slate-400"></i>
+                        <input type="password" placeholder="تأكيد كلمة المرور" class="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" required name="password_confirmation">
+                    </div>
+
+                    <button type="submit" class="mt-6 w-full rounded-full bg-gradient-to-l from-cyan-500 to-blue-600 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+                        إنشاء حساب
+                    </button>
+
+                    <p class="mt-4 text-sm text-slate-500">لديك حساب؟ <a class="font-semibold text-blue-600 hover:underline" href="{{ route('login') }}">تسجيل الدخول</a></p>
+                </form>
             </div>
         </div>
     </div>

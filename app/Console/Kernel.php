@@ -2,9 +2,9 @@
 
 namespace App\Console;
 
-use App\Console\Commands\SendDocumentExpiryNotifications;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\SendDocumentExpiryNotifications;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,8 +14,9 @@ class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('documents:send-expiry-notifications')
+        $schedule->command('notifications:document-expiry')
             ->dailyAt('08:00')
+            ->timezone('Asia/Riyadh')
             ->withoutOverlapping();
     }
 
