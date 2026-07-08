@@ -97,6 +97,21 @@ class OtpController extends Controller
             return back()->with('error', 'البريد الإلكتروني غير مسجل');
         }
 
+        // Check rate limit: max 2 resends per minute
+        $recentResends = OtpCode::where('email', $request->email)
+            ->where('created_at', '>=', now()->subMinute())
+            ->count();
+
+        if ($recentResends >= 2) {
+            $lastResend = OtpCode::where('email', $request->email)
+                ->latest()
+                ->first();
+            
+            $waitTime = $lastResend ? now()->diffInSeconds($lastResend->created_at->addMinute()) : 60;
+            
+            return back()->with('error', "لقد تجاوزت الحد المسموح من محاولات إعادة الإرسال. يرجى الانتظار {$waitTime} ثانية قبل المحاولة مرة أخرى.");
+        }
+
         $code = str_pad((int) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         OtpCode::where('email', $request->email)->delete();
 

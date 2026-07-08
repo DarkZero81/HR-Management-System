@@ -24,7 +24,8 @@ class Employee extends Model
         'join_date',
         'resign_date',
         'vacation_balance',
-        'performance_score'
+        'performance_score',
+        'avatar'
     ];
 
     protected $casts = [

@@ -144,3 +144,134 @@ html[data-theme="light"] select {
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* Employees page theme support */
+html[data-theme="dark"] .employees-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .employees-card-input {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .employees-card-input::placeholder {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .employees-table-header {
+  background-color: #0f172a;
+}
+
+html[data-theme="dark"] .employees-table-row {
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .employees-table-row:hover {
+  background-color: #1e293b;
+}
+
+html[data-theme="light"] .employees-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .employees-card-input {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .employees-card-input::placeholder {
+  color: #64748b;
+}
+
+html[data-theme="light"] .employees-table-row {
+  border-color: #f1f5f9;
+}
+
+html[data-theme="light"] .employees-table-row:hover {
+  background-color: #f8fafc;
+}
+
+/* Employee create/edit form theme support */
+html[data-theme="dark"] .employee-form-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .employee-form-input {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .employee-form-input::placeholder {
+  color: #94a3b8;
+}
+
+html[data-theme="light"] .employee-form-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .employee-form-input {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .employee-form-input::placeholder {
+  color: #64748b;
+}
+
+html[data-theme="dark"] .employees-card-input {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .employees-card-input::placeholder {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .employees-table-header {
+  background-color: #0f172a;
+}
+
+html[data-theme="dark"] .employees-table-row {
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .employees-table-row:hover {
+  background-color: #1e293b;
+}
+
+html[data-theme="light"] .employees-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+html[data-theme="light"] .employees-card-input {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+html[data-theme="light"] .employees-card-input::placeholder {
+  color: #64748b;
+}
+
+html[data-theme="light"] .employees-table-row {
+  border-color: #f1f5f9;
+}
+
+html[data-theme="light"] .employees-table-row {
+  border-color: #f1f5f9;
+}
+
+html[data-theme="light"] .employees-table-row:hover {
+  background-color: #f8fafc;
+}

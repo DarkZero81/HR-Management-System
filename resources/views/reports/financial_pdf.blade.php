@@ -5,46 +5,53 @@
     <title>التقرير المالي الرسمي للشركة</title>
     <style>
         body {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif;
             direction: rtl;
             text-align: right;
             padding: 24px;
             color: #1f2937;
+            font-size: 13px;
+            line-height: 1.7;
         }
         .header {
             text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 12px;
-            margin-bottom: 28px;
+            border-bottom: 3px solid #1e40af;
+            padding-bottom: 16px;
+            margin-bottom: 32px;
         }
         .header h2 {
-            margin: 0 0 6px;
-            font-size: 22px;
+            margin: 0 0 8px;
+            font-size: 24px;
             font-weight: 900;
+            color: #1e40af;
+            letter-spacing: 0.5px;
         }
         .header h3 {
-            margin: 0 0 4px;
-            font-size: 16px;
+            margin: 0 0 6px;
+            font-size: 18px;
             font-weight: 700;
+            color: #374151;
         }
         .header p {
             margin: 0;
             font-size: 12px;
-            color: #4b5563;
+            color: #6b7280;
         }
         .section {
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
         .section h4 {
-            margin: 0 0 10px;
-            font-size: 14px;
+            margin: 0 0 12px;
+            font-size: 15px;
             font-weight: 800;
             color: #111827;
+            border-right: 4px solid #3b82f6;
+            padding-right: 10px;
         }
         .table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 12px;
         }
         .table th, .table td {
             border: 1px solid #d1d5db;
@@ -52,9 +59,10 @@
             text-align: right;
         }
         .table th {
-            background-color: #f3f4f6;
-            width: 35%;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: #ffffff;
             font-weight: 700;
+            font-size: 12px;
         }
         .table td {
             font-weight: 600;
@@ -62,13 +70,14 @@
         }
         .total-box {
             margin-top: 28px;
-            padding: 16px;
-            background-color: #ecfdf5;
+            padding: 18px;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
             border: 1px solid #10b981;
             font-weight: 900;
             font-size: 16px;
             color: #065f46;
             text-align: right;
+            border-radius: 8px;
         }
         .footer {
             margin-top: 40px;
@@ -76,6 +85,8 @@
             justify-content: space-between;
             font-size: 11px;
             color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 12px;
         }
         .summary-grid {
             display: flex;
@@ -86,11 +97,12 @@
         .summary-item {
             flex: 1;
             min-width: 120px;
-            padding: 12px;
-            background: #f9fafb;
+            padding: 14px;
+            background: #ffffff;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         .summary-item .value {
             font-size: 18px;
@@ -101,6 +113,7 @@
         .summary-item .label {
             font-size: 11px;
             color: #6b7280;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -175,9 +188,9 @@
                     <tr>
                         <td>{{ $payroll->employee->full_name ?? '—' }}</td>
                         <td>{{ number_format($payroll->employee->base_salary ?? 0, 2) }} ل.س</td>
-                        <td class="text-emerald-600">+{{ number_format($payroll->allowances, 2) }} ل.س</td>
-                        <td class="text-red-600">-{{ number_format($payroll->deductions, 2) }} ل.س</td>
-                        <td class="font-bold">{{ number_format($payroll->net_salary, 2) }} ل.س</td>
+                        <td style="color: #065f46; font-weight: 700;">+{{ number_format($payroll->allowances, 2) }} ل.س</td>
+                        <td style="color: #991b1b; font-weight: 700;">-{{ number_format($payroll->deductions, 2) }} ل.س</td>
+                        <td style="font-weight: 900; color: #111827;">{{ number_format($payroll->net_salary, 2) }} ل.س</td>
                     </tr>
                 @empty
                     <tr>
@@ -194,6 +207,7 @@
 
     <div class="footer">
         <span>التقرير المالي الرسمي - نظام الموارد البشرية</span>
+        <span>HR Engine © {{ date('Y') }}</span>
     </div>
 
 </body>

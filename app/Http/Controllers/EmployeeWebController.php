@@ -6,11 +6,12 @@ use App\Models\Employee;
 use App\Models\AuditLog;
 use App\Models\Department;
 use App\Models\Shift;
-use App\Models\User; // تم الاستدعاء لربط حساب المستخدم بالملف الوظيفي
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeWebController extends Controller
 {
@@ -39,7 +40,7 @@ class EmployeeWebController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $employees = $query->paginate(8);
+        $employees = $query->paginate(15);
         $departments = Department::orderBy('name')->get();
         return view('employees.index', compact('employees', 'departments'));
     }
@@ -48,8 +49,6 @@ class EmployeeWebController extends Controller
     {
         $departments = Department::orderBy('name')->get();
         $shifts = Shift::orderBy('shift_name')->get();
-
-        // جلب المستخدمين الذين ليس لديهم ملف موظف مرتبط بعد لمنع الازدواجية
         $users = User::whereDoesntHave('employee')->get();
 
         return view('employees.create', compact('departments', 'shifts', 'users'));
@@ -58,7 +57,7 @@ class EmployeeWebController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'user_id'            => ['required', 'exists:users,id', 'unique:employees,user_id'], // حقل إجباري لربط النظام بالموظف
+            'user_id'            => ['required', 'exists:users,id', 'unique:employees,user_id'],
             'first_name'         => ['required', 'string', 'max:50'],
             'last_name'          => ['required', 'string', 'max:50'],
             'national_id'        => ['required', 'string', 'max:50', 'unique:employees,national_id'],
@@ -69,11 +68,15 @@ class EmployeeWebController extends Controller
             'shift_id'           => ['nullable', 'exists:shifts,id'],
             'vacation_balance'   => ['nullable', 'integer', 'min:0'],
             'bank_account_iban'  => ['nullable', 'string', 'max:50'],
+            'avatar'             => ['nullable', 'image', 'max:2048'],
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
 
         $employee = Employee::create($validated);
 
-        // تصحيح: تحويل المصفوفة إلى JSON string لتفادي تضارب دمج البيانات في قاعدة البيانات
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'create',
@@ -108,12 +111,19 @@ class EmployeeWebController extends Controller
             'shift_id'           => ['nullable', 'exists:shifts,id'],
             'vacation_balance'   => ['required', 'integer', 'min:0'],
             'bank_account_iban'  => ['nullable', 'string', 'max:50'],
+            'avatar'             => ['nullable', 'image', 'max:2048'],
         ]);
+
+        if ($request->hasFile('avatar')) {
+            if ($employee->avatar && Storage::disk('public')->exists($employee->avatar)) {
+                Storage::disk('public')->delete($employee->avatar);
+            }
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
 
         $oldValues = $employee->toArray();
         $employee->update($validated);
 
-        // تصحيح: تحويل المصفوفات إلى مسارات نصوص JSON آمنة للتخزين داخل حقول الـ TEXT/JSON
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'update',
@@ -132,12 +142,14 @@ class EmployeeWebController extends Controller
         $employeeData = $employee->toArray();
 
         try {
+            if ($employee->avatar && Storage::disk('public')->exists($employee->avatar)) {
+                Storage::disk('public')->delete($employee->avatar);
+            }
             $employee->delete();
         } catch (\Exception $e) {
             return redirect()->route('employees.index')->with('error', 'لا يمكن حذف الموظف لارتباطه بسجلات رواتب أو حضور تاريخية في قاعدة البيانات، يفضل تعيين تاريخ استقالة بدلاً من الحذف.');
         }
 
-        // تصحيح: تشفير مصفوفة الحذف لتخزينها نصياً بشكل سليم
         AuditLog::create([
             'user_id'     => Auth::id(),
             'action_type' => 'delete',

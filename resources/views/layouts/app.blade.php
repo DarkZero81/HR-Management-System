@@ -245,7 +245,7 @@
     الفوتر (Footer) الثابت
     ========================================== --}}
     <footer class="bottom-0 left-0 right-0 lg:right-72 bg-slate-900/90 backdrop-blur-xl border-t border-white/10 py-3 px-4 z-30">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-2">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-2">
             <p class="text-xs text-slate-400">Copyright © 2025 HR Engine. All rights reserved.</p>
             <div class="flex items-center gap-3">
                 <span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">v1.0</span>

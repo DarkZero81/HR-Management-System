@@ -3,53 +3,55 @@
 @section('title', 'إضافة إجازة جديدة')
 
 @section('content')
-<div class="space-y-6">
-    <div class="rounded-[28px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
-        <div class="flex items-center justify-between gap-3">
-            <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">الإجازات</p>
-                <h2 class="mt-2 text-3xl font-black text-white">إضافة إجازة جديدة</h2>
-                <p class="mt-2 text-sm text-slate-400">حدد فترة الإجازة ومواصفاتها.</p>
-            </div>
-            <a href="{{ route('holidays.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10">
-                <i data-lucide="arrow-right" class="h-4 w-4"></i>
-                رجوع
-            </a>
-        </div>
+<div class="max-w-3xl mx-auto space-y-6" dir="rtl">
+    <div>
+        <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الإجازات</p>
+        <h1 class="text-2xl md:text-3xl font-black text-white mt-1">إضافة إجازة جديدة</h1>
+        <p class="text-sm text-slate-400 mt-1">حدد فترة الإجازة ومواصفاتها.</p>
+    </div>
 
-        <form method="POST" action="{{ route('holidays.store') }}" class="mt-6 max-w-2xl space-y-5">
-            @csrf
+    @if ($errors->any())
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
+            <ul class="list-inside list-disc text-sm font-medium text-rose-400 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('holidays.store') }}" class="rounded-[28px] border border-white/10 bg-slate-900/40 p-6 space-y-6 shadow-xl">
+        @csrf
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-                <label class="block text-sm font-semibold text-slate-300 mb-2">اسم الإجازة</label>
-                <input type="text" name="holiday_name" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('holiday_name') border-rose-400 @enderror" value="{{ old('holiday_name') }}" required>
-                @error('holiday_name')
-                    <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                @enderror
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">اسم الإجازة <span class="text-rose-500">*</span></label>
+                <input type="text" name="holiday_name" value="{{ old('holiday_name') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ البداية</label>
-                    <input type="date" name="start_date" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('start_date') border-rose-400 @enderror" value="{{ old('start_date') }}" required>
-                    @error('start_date')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-300 mb-2">تاريخ النهاية</label>
-                    <input type="date" name="end_date" class="w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500 @error('end_date') border-rose-400 @enderror" value="{{ old('end_date') }}" required>
-                    @error('end_date')
-                        <p class="mt-2 text-sm text-rose-300">{{ $message }}</p>
-                    @enderror
-                </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">تاريخ البداية <span class="text-rose-500">*</span></label>
+                <input type="date" name="start_date" value="{{ old('start_date') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
             </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">تاريخ النهاية <span class="text-rose-500">*</span></label>
+                <input type="date" name="end_date" value="{{ old('end_date') }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none">
+            </div>
+
             <div class="flex items-center gap-3">
-                <input type="checkbox" name="is_recurring" value="1" id="is_recurring" class="h-4 w-4 rounded border-white/10 bg-slate-950/50 text-cyan-500 focus:ring-cyan-500" {{ old('is_recurring') ? 'checked' : '' }}>
+                <input type="checkbox" name="is_recurring" value="1" id="is_recurring" class="h-4 w-4 rounded border-white/10 bg-slate-950 text-cyan-500 focus:ring-cyan-500" {{ old('is_recurring') ? 'checked' : '' }}>
                 <label for="is_recurring" class="text-sm font-semibold text-slate-300">إجازة متكررة سنوياً</label>
             </div>
-            <button type="submit" class="rounded-2xl bg-gradient-to-l from-cyan-500 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-white/5 pt-4">
+            <a href="{{ route('holidays.index') }}" class="rounded-xl bg-slate-950 border border-white/10 px-5 py-2.5 text-sm font-bold text-slate-400 transition hover:text-white">
+                إلغاء العودة
+            </a>
+            <button type="submit" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500">
                 حفظ الإجازة
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 @endsection

@@ -13,9 +13,15 @@ class PayrollOrderSeeder extends Seeder
         $employees = Employee::all();
 
         foreach ($employees as $employee) {
+            $baseSalary = (float) ($employee->base_salary ?? 0);
+
+            if ($baseSalary <= 0) {
+                $baseSalary = 1000;
+            }
+
             $allowances = fake()->randomFloat(2, 100, 500);
             $deductions = fake()->randomFloat(2, 0, 200);
-            $netSalary = $employee->base_salary + $allowances - $deductions;
+            $netSalary = $baseSalary + $allowances - $deductions;
 
             PayrollOrder::firstOrCreate(
                 ['employee_id' => $employee->id, 'salary_month' => now()->subMonth()->format('Y-m')],

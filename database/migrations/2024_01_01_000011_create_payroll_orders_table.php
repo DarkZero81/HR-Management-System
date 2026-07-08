@@ -13,9 +13,9 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
             $table->string('salary_month', 7); // يخزن بصيغة السنة والشهر "YYYY-MM"
 
-            $table->decimal('allowances', 10, 2)->default(0.00); // إجمالي المكافآت والبدلات من جدول الوقوعات
-            $table->decimal('deductions', 10, 2)->default(0.00); // إجمالي الخصومات وأقساط السلف والغياب والتأخير
-            $table->decimal('net_salary', 10, 2); // الراتب الصافي النهائي المستحق = (الأساسي + البدلات - الخصومات)
+            $table->decimal('allowances', 15, 2)->default(0.00); // إجمالي المكافآت والبدلات من جدول الوقوعات
+            $table->decimal('deductions', 15, 2)->default(0.00); // إجمالي الخصومات وأقساط السلف والغياب والتأخير
+            $table->decimal('net_salary', 15, 2); // الراتب الصافي النهائي المستحق = (الأساسي + البدلات - الخصومات)
 
             $table->enum('payment_status', ['draft', 'approved', 'paid'])->default('draft');
             $table->timestamp('paid_at')->nullable(); // توقيت تأكيد عملية الصرف البنكي

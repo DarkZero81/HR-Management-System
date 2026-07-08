@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <form action="{{ route('employees.update', $employee->id) }}" method="POST" class="rounded-[28px] border border-white/10 bg-slate-900/40 p-6 space-y-6 shadow-xl">
+    <form action="{{ route('employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data" class="rounded-[28px] border border-white/10 bg-slate-900/40 p-6 space-y-6 shadow-xl">
         @csrf
         @method('PUT')
 
@@ -32,6 +32,14 @@
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">الاسم الأخير <span class="text-rose-500">*</span></label>
                 <input type="text" name="last_name" value="{{ old('last_name', $employee->last_name) }}" required class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">صورة الموظف</label>
+                <input type="file" name="avatar" accept="image/*" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-2.5 text-sm text-white focus:outline-none">
+                @if($employee->avatar)
+                    <img src="{{ asset('storage/' . $employee->avatar) }}" class="mt-3 w-20 h-20 rounded-full object-cover border border-white/10 shadow-lg">
+                @endif
             </div>
 
             <div>
