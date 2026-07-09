@@ -7,21 +7,17 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">ملفاتي</p>
-            <h1 class="text-3xl font-bold text-slate-800">وثائقي الشخصية</h1>
-            <p class="text-sm text-slate-500 mt-1">عرض وإدارة الوثائق الخاصة بك فقط.</p>
+            <h1 class="text-3xl font-bold text-slate-800">ملفاتي الشخصية</h1>
+            <p class="text-sm text-slate-500 mt-1">عرض الملفات التي قمت برفعها مع إمكانية فتحها مباشرة.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
-                <i data-lucide="user" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">الملف الشخصي</span>
+            <a href="{{ route('my.documents') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">وثائقي</span>
             </a>
             <a href="{{ route('my.documents.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-semibold shadow-lg transition-all">
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">رفع وثيقة</span>
-            </a>
-            <a href="{{ route('my.files') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-semibold transition-all">
-                <i data-lucide="folder-open" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">ملفاتي</span>
+                <span class="hidden sm:inline">رفع ملف</span>
             </a>
         </div>
     </div>
@@ -40,87 +36,13 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="employees-card rounded-2xl p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
-                </div>
-                <div>
-                    <p class="text-2xl font-black text-slate-800">{{ $stats['total'] }}</p>
-                    <p class="text-xs text-slate-500">إجمالي الوثائق</p>
-                </div>
-            </div>
-        </div>
-        <div class="employees-card rounded-2xl p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
-                </div>
-                <div>
-                    <p class="text-2xl font-black text-slate-800">{{ $stats['active'] }}</p>
-                    <p class="text-xs text-slate-500">سارية</p>
-                </div>
-            </div>
-        </div>
-        <div class="employees-card rounded-2xl p-5">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                    <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-600"></i>
-                </div>
-                <div>
-                    <p class="text-2xl font-black text-slate-800">{{ $stats['expiring'] }}</p>
-                    <p class="text-xs text-slate-500">قريبة الانتهاء</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @if($expiringDocuments->count() > 0)
-        <div class="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-5">
-            <div class="flex items-center gap-2 mb-4">
-                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i>
-                <span class="font-bold text-amber-700">تنبيهات انتهاء الوثائق</span>
-            </div>
-            <div class="space-y-2">
-                @foreach($expiringDocuments as $doc)
-                    <div class="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-xs">
-                                {{ strtoupper(substr($doc->employee->first_name ?? 'U', 0, 1)) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-800">{{ ucfirst(str_replace('_', ' ', $doc->document_type)) }} رقم {{ $doc->document_number }}</p>
-                                <p class="text-xs text-slate-500">تنتهي في {{ \Carbon\Carbon::parse($doc->expiry_date)->format('Y-m-d') }}</p>
-                            </div>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-xs font-bold text-amber-700">{{ \Carbon\Carbon::parse($doc->expiry_date)->diffForHumans() }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     <div class="employees-card rounded-2xl shadow-lg border overflow-hidden">
-        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800">وثائقي</h2>
-                <p class="text-sm text-slate-500 mt-1">جميع الوثائق التي قمت برفعها</p>
-            </div>
-            <div class="relative">
-                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2"></i>
-                <input type="text" id="docSearch" placeholder="بحث عن وثيقة..."
-                    class="employees-card-input pr-10 pl-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full sm:w-64">
-            </div>
-        </div>
         <div class="overflow-x-auto">
-            <table class="w-full" id="documentsTable">
+            <table class="w-full">
                 <thead class="employees-table-header">
                     <tr>
-                        <th class="px-6 py-4 text-slate-600 text-right font-medium">المستخدم</th>
-                        <th class="px-6 py-4 text-slate-600 text-right font-medium">نوع الوثيقة</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">#</th>
+                        <th class="px-6 py-4 text-slate-600 text-right font-medium">نوع الملف</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">الرقم</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">تاريخ الانتهاء</th>
                         <th class="px-6 py-4 text-slate-600 text-right font-medium">تاريخ الرفع</th>
@@ -133,10 +55,9 @@
                             $ext = strtoupper(pathinfo($doc->file_path ?? '', PATHINFO_EXTENSION));
                             $isExpired = $doc->expiry_date && \Carbon\Carbon::parse($doc->expiry_date)->lt(now());
                             $isExpiring = !$isExpired && $doc->expiry_date && \Carbon\Carbon::parse($doc->expiry_date)->lte(now()->addMonths(3));
-                            $isOwner = auth()->id() === ($doc->employee->user_id ?? null);
                         @endphp
                         <tr class="employees-table-row hover:bg-slate-50 transition-colors {{ $isExpired ? 'bg-rose-50/50' : '' }} {{ $isExpiring ? 'bg-amber-50/50' : '' }}">
-                            <td class="px-6 py-4 text-sm text-slate-600">{{ $doc->employee->user->name ?? $doc->employee->user->email ?? '-' }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ $documents->firstItem() + $loop->index }}</td>
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                                     {{ ucfirst(str_replace('_', ' ', $doc->document_type)) }}
@@ -151,7 +72,7 @@
                             <td class="px-6 py-4 text-slate-600 text-sm">{{ $doc->created_at?->format('Y-m-d') ?? '-' }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    @if($isOwner && $doc->file_path)
+                                    @if($doc->file_path)
                                         <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank"
                                             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors"
                                             title="عرض/تحميل">
@@ -183,12 +104,12 @@
                                         <i data-lucide="file-text" class="w-8 h-8 text-slate-400"></i>
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-slate-700">لا توجد وثائق مرفوعة حتى الآن</p>
-                                        <p class="text-sm text-slate-500 mt-1">ابدأ برفع وثائقك الرسمية للحفاظ على تنظيم ملفك الوظيفي</p>
+                                        <p class="font-semibold text-slate-700">لا توجد ملفات مرفوعة حتى الآن</p>
+                                        <p class="text-sm text-slate-500 mt-1">ابدأ برفع ملفاتك الرسمية للحفاظ على تنظيم سجلاتك</p>
                                     </div>
                                     <a href="{{ route('my.documents.create') }}" class="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl text-sm font-semibold shadow-lg transition-all">
                                         <i data-lucide="plus" class="w-4 h-4"></i>
-                                        رفع وثيقة جديدة
+                                        رفع ملف جديد
                                     </a>
                                 </div>
                             </td>
@@ -197,28 +118,11 @@
                 </tbody>
             </table>
         </div>
-        <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
-            {{ $documents->links() }}
-        </div>
+        @if($documents->hasPages())
+            <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
+                {{ $documents->links() }}
+            </div>
+        @endif
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('docSearch');
-    const table = document.getElementById('documentsTable');
-
-    if (searchInput && table) {
-        searchInput.addEventListener('input', function() {
-            const term = this.value.trim().toLowerCase();
-            const rows = table.querySelectorAll('tbody tr');
-
-            rows.forEach(function(row) {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
-            });
-        });
-    }
-});
-</script>
 @endsection

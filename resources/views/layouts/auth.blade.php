@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'HR Engine') }}</title>
+    <title>@yield('title', config('app.name', 'HR Engine'))</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,18 +13,34 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased" dir="rtl">
+<body class="min-h-screen antialiased" dir="rtl">
 
     <div class="fixed top-4 left-4 z-50">
-        <button id="themeToggle" class="p-3 rounded-full bg-slate-800/80 hover:bg-slate-700 transition-colors shadow-lg">
+        <button id="themeToggle" class="p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 transition-colors shadow-lg">
             <i data-lucide="sun" class="w-5 h-5 theme-icon-dark hidden"></i>
             <i data-lucide="moon" class="w-5 h-5 theme-icon-light hidden"></i>
         </button>
     </div>
 
-    <div class="min-h-screen flex flex-col items-center justify-center pt-6 sm:pt-0">
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white/70 shadow-2xl overflow-hidden sm:rounded-2xl border border-slate-200/60 backdrop-blur-xl">
-            {{ $slot }}
+    <div class="flex min-h-screen w-full flex-col">
+        <div class="flex flex-1 items-center justify-center p-4">
+            <div class="w-full max-w-md">
+                <div class="rounded-[32px] border border-slate-200/60 bg-white/70 p-8 glass-shell backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/60">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-teal-400 mb-4 shadow-lg">
+                            <i data-lucide="briefcase" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <h1 class="text-2xl font-black text-slate-900 dark:text-white">HR Engine</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">نظام الموارد البشرية</p>
+                    </div>
+
+                    @yield('content')
+                </div>
+
+                <p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-6">
+                    © {{ date('Y') }} HR Engine. All rights reserved.
+                </p>
+            </div>
         </div>
     </div>
 

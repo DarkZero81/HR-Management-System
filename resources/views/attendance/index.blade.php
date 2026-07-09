@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الدوام والحضور</p>
-            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">تسجيل الحضور والانصراف</h1>
+            <h1 class="text-3xl font-bold text-slate-800">تسجيل الحضور والانصراف</h1>
             <p class="text-sm text-slate-400 mt-1">اضغط على الزر لتسجيل دخولك أو خروجك اليوم.</p>
         </div>
     </div>
@@ -42,7 +42,7 @@
                     <i data-lucide="log-in" class="w-6 h-6 text-blue-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">تسجيل الدخول</h3>
+                    <h3 class="text-2xl font-bold text-slate-800">تسجيل الدخول</h3>
                     <p class="text-sm text-slate-500">تسجيل حضورك عند بداية الدوام</p>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                     <i data-lucide="log-out" class="w-6 h-6 text-amber-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">تسجيل الخروج</h3>
+                    <h3 class="text-2xl font-bold text-slate-800">تسجيل الخروج</h3>
                     <p class="text-sm text-slate-500">تسجيل انصرافك عند نهاية الدوام</p>
                 </div>
             </div>
@@ -130,9 +130,9 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">تفاصيل الدوام</p>
-                    <h2 class="text-xl font-black text-slate-900 mt-1">سجل الحضور الكامل</h2>
+                    <h2 class="text-xl font-bold text-slate-800 mt-1">سجل الحضور الكامل</h2>
                 </div>
-                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">{{ $logs->count() }} سجل</span>
+                <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900">{{ $logs->count() }} سجل</span>
             </div>
         </div>
         <div class="overflow-x-auto">

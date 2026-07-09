@@ -1,17 +1,11 @@
 @extends('layouts.app')
-
 @section('title', 'إضافة قسم جديد')
-
 @section('content')
-<div class="space-y-6">
-    <div class="flex items-center gap-4">
-        <a href="{{ route('departments.index') }}" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-white/10">
-            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-        </a>
-        <div>
-            <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الأقسام</p>
-            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">إضافة قسم جديد</h1>
-        </div>
+<div class="max-w-3xl mx-auto space-y-6 px-4 py-4" dir="rtl">
+    <div class="border-b border-white/5 pb-4">
+        <p class="text-xs font-black uppercase tracking-[0.35em] text-blue-400 dark:text-cyan-400">الأقسام</p>
+        <h1 class="text-3xl font-bold text-slate-800">إضافة قسم جديد</h1>
+        <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">أدخل بيانات القسم الوظيفي الجديد.</p>
     </div>
 
     @if(session('success'))
@@ -28,56 +22,45 @@
         </div>
     @endif
 
-    <div class="bg-slate-800 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
-        <div class="bg-gradient-to-l from-blue-600 to-teal-500 px-6 py-4 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                <i data-lucide="plus" class="w-5 h-5 text-white"></i>
-            </div>
-            <div>
-                <h5 class="text-white font-bold text-lg">بيانات القسم الجديد</h5>
-                <p class="text-blue-100 text-xs">أدخل بيانات القسم أدناه</p>
-            </div>
+    @if ($errors->any())
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
+            <ul class="list-inside list-disc text-xs font-medium text-rose-400 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-        <div class="p-6">
-            <form action="{{ route('departments.store') }}" method="POST" class="space-y-5">
-                @csrf
-                
-                <div>
-                    <label for="name" class="block text-sm font-semibold text-white mb-2">اسم القسم <span class="text-rose-400">*</span></label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-                    @error('name')
-                        <p class="text-rose-400 text-sm mt-1.5 flex items-center gap-1.5">
-                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
+    @endif
 
-                <div>
-                    <label for="description" class="block text-sm font-semibold text-white mb-2">الوصف</label>
-                    <textarea name="description" id="description" rows="4"
-                        class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none">{{ old('description') }}</textarea>
-                    @error('description')
-                        <p class="text-rose-400 text-sm mt-1.5 flex items-center gap-1.5">
-                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
+    <form method="POST" action="{{ route('departments.store') }}" class="employee-form-card rounded-[28px] border border-white/10 dark:border-white/5 p-6 space-y-5 shadow-2xl backdrop-blur-md">
+        @csrf
 
-                <div class="flex items-center gap-3 pt-4">
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-bold shadow-lg transition-all">
-                        <i data-lucide="save" class="w-5 h-5"></i>
-                        حفظ القسم
-                    </button>
-                    <a href="{{ route('departments.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all border border-white/10">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                        إلغاء
-                    </a>
-                </div>
-            </form>
+        <div>
+            <label for="name" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">اسم القسم <span class="text-rose-500">*</span></label>
+            <input type="text" name="name" id="name" value="{{ old('name') }}" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
+            @error('name')
+                <p class="text-rose-500 text-sm mt-1.5 flex items-center gap-1.5">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    {{ $message }}
+                </p>
+            @enderror
         </div>
-    </div>
+
+        <div>
+            <label for="description" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الوصف</label>
+            <textarea name="description" id="description" rows="4" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all resize-none">{{ old('description') }}</textarea>
+            @error('description')
+                <p class="text-rose-500 text-sm mt-1.5 flex items-center gap-1.5">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 border-t border-slate-200 dark:border-white/5 pt-4">
+            <a href="{{ route('departments.index') }}" class="rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 transition active:scale-95">إلغاء والعودة</a>
+            <button type="submit" class="rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 hover:opacity-95 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/10 transition active:scale-95 cursor-pointer">حفظ القسم</button>
+        </div>
+    </form>
 </div>
 @endsection

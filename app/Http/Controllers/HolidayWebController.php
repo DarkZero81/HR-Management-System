@@ -17,6 +17,26 @@ class HolidayWebController extends Controller
         return view('holidays.index', compact('holidays'));
     }
 
+    public function calendar(): View
+    {
+        $holidays = Holiday::all()->map(function ($holiday) {
+            return [
+                'id' => $holiday->id,
+                'title' => $holiday->holiday_name,
+                'start' => $holiday->start_date,
+                'end' => $holiday->end_date ? \Carbon\Carbon::parse($holiday->end_date)->addDay()->format('Y-m-d') : null,
+                'allDay' => true,
+                'backgroundColor' => $holiday->is_recurring ? '#10b981' : '#3b82f6',
+                'borderColor' => $holiday->is_recurring ? '#059669' : '#2563eb',
+                'extendedProps' => [
+                    'recurring' => $holiday->is_recurring,
+                ],
+            ];
+        });
+
+        return view('holidays.calendar', compact('holidays'));
+    }
+
     public function create(): View
     {
         return view('holidays.create');

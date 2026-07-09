@@ -7,10 +7,14 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الإجازات</p>
-            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">قائمة الإجازات</h1>
+            <h1 class="text-3xl font-bold text-slate-800">قائمة الإجازات</h1>
             <p class="text-sm text-slate-400 mt-1">إدارة الإجازات الرسمية والتقويم السنوي.</p>
         </div>
         <div class="flex items-center gap-3">
+            <a href="{{ route('holidays.calendar') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">التقويم</span>
+            </a>
             <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-all border border-white/10">
                 <i data-lucide="user" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">الملف الشخصي</span>
@@ -19,6 +23,92 @@
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">إضافة إجازة</span>
             </a>
+        </div>
+    </div>
+
+    @if(session('success'))
+        <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <i data-lucide="calendar-days" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $holidays->count() }}</p>
+                    <p class="text-xs text-slate-500">إجازات مسجلة</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <i data-lucide="repeat" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $holidays->where('is_recurring', true)->count() }}</p>
+                    <p class="text-xs text-slate-500">متكررة سنوياً</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                    <i data-lucide="clock" class="w-5 h-5 text-violet-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ \App\Models\Holiday::where('start_date', '>=', now())->count() }}</p>
+                    <p class="text-xs text-slate-500">قادمة</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                    <i data-lucide="sun" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ now()->diffInDays(\Carbon\Carbon::create(now()->year, 12, 31)) }}</p>
+                    <p class="text-xs text-slate-500">يوم لنهاية السنة</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                    <i data-lucide="party-popper" class="w-5 h-5 text-cyan-600"></i>
+                </div>
+                <div>
+                    @php
+                        $nextHoliday = \App\Models\Holiday::where('start_date', '>=', now())->orderBy('start_date')->first();
+                        $daysToNextHoliday = $nextHoliday ? now()->diffInDays($nextHoliday->start_date) : 0;
+                    @endphp
+                    <p class="text-2xl font-black text-slate-800">{{ $daysToNextHoliday }}</p>
+                    <p class="text-xs text-slate-500">يوم للعطلة القادمة</p>
+                </div>
+            </div>
+        </div>
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                    <i data-lucide="briefcase" class="w-5 h-5 text-rose-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ now()->diffInDays(\Carbon\Carbon::create(now()->year, 12, 31)) - $holidays->count() }}</p>
+                    <p class="text-xs text-slate-500">أيام دوام متبقية</p>
+                </div>
+            </div>
         </div>
     </div>
 

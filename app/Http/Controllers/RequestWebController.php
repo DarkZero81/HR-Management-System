@@ -26,22 +26,32 @@ class RequestWebController extends Controller
         $isAdmin = $this->isAdminUser();
         $isManager = $this->isManagerUser();
 
-        $query = HrTransaction::query()
+        $baseQuery = HrTransaction::query()
             ->with(['employee.user', 'approver']);
 
-        // Manager sees only their department's requests
         if ($isManager && ! $isAdmin) {
             $managerDepartmentId = $employee?->department_id;
-            $query->whereHas('employee', fn($q) => $q->where('department_id', $managerDepartmentId));
+            $baseQuery->whereHas('employee', fn($q) => $q->where('department_id', $managerDepartmentId));
         } elseif (! $isAdmin) {
-            $query->where('employee_id', $employee?->id);
+            $baseQuery->where('employee_id', $employee?->id);
         }
 
-        $transactions = $query->latest()->paginate($isAdmin || $isManager ? 8 : 3);
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
+            'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
+            'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
+        ];
+
+        $pendingTransactions = (clone $baseQuery)->where('status', 'pending')->latest()->take(5)->get();
+
+        $transactions = $baseQuery->latest()->paginate($isAdmin || $isManager ? 8 : 3);
 
         return view('requests.index', [
             'transactions' => $transactions,
             'transaction_types' => self::TRANSACTION_TYPES,
+            'stats' => $stats,
+            'pendingTransactions' => $pendingTransactions,
         ]);
     }
 

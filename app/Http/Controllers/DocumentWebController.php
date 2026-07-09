@@ -18,18 +18,53 @@ class DocumentWebController extends Controller
     public function index(): View
     {
         $documents = Document::with('employee')->orderBy('expiry_date')->paginate(8);
-        return view('documents.index', compact('documents'));
+        $expiringDocuments = Document::with('employee')
+            ->where('expiry_date', '<=', now()->addMonths(3))
+            ->where('expiry_date', '>', now())
+            ->get();
+
+        return view('documents.index', compact('documents', 'expiringDocuments'));
+    }
+
+    public function myFiles(): View
+    {
+        $employeeId = Auth::user()?->employee?->id;
+
+        $documents = Document::query()
+            ->where('employee_id', $employeeId)
+            ->orderBy('expiry_date')
+            ->paginate(15);
+
+        return view('documents.my_files', compact('documents'));
     }
 
     public function myDocuments(): View
     {
         $employeeId = Auth::user()?->employee?->id;
-        $documents = Document::query()
+
+        $baseQuery = Document::query()
             ->where('employee_id', $employeeId)
+            ->with('employee');
+
+        $documents = (clone $baseQuery)
             ->orderBy('expiry_date')
             ->paginate(12);
 
-        return view('documents.my_index', compact('documents'));
+        $stats = [
+            'total' => (clone $baseQuery)->count(),
+            'active' => (clone $baseQuery)->where('expiry_date', '>', now())->count(),
+            'expiring' => (clone $baseQuery)
+                ->where('expiry_date', '<=', now()->addMonths(3))
+                ->where('expiry_date', '>', now())
+                ->count(),
+        ];
+
+        $expiringDocuments = (clone $baseQuery)
+            ->where('expiry_date', '<=', now()->addMonths(3))
+            ->where('expiry_date', '>', now())
+            ->get();
+
+        return view('documents.my_index', compact('documents', 'stats', 'expiringDocuments'));
     }
 
     public function myCreate(): View
@@ -79,38 +114,20 @@ class DocumentWebController extends Controller
         $user = Auth::user();
         $data = $request->validated();
 
-        if ($request->hasFile('document')) {
-            $employee = $user?->employee;
-
-            if (!$employee) {
-                return redirect()->route('my.documents')->with('error', 'عذراً، لا يوجد ملف وظيفي مرتبط بحسابك الحالي لرفع المستندات إليه.');
-            }
-
-            $filePath = $request->file('document')->store('documents', 'public');
-
-            $document = Document::create([
-                'employee_id'     => $employee->id,
-                'document_type'   => 'contract',
-                'document_number' => 'QUICK-' . strtoupper(uniqid()),
-                'expiry_date'     => now()->addYear()->format('Y-m-d'),
-                'file_path'       => $filePath,
-            ]);
-
-            AuditLog::create([
-                'user_id'      => $user->id,
-                'action_type'  => 'create',
-                'table_name'   => 'documents',
-                'record_id'    => $document->id,
-                'old_values'   => null,
-                'new_values'   => $document->fresh()->toArray(),
-                'performed_at' => now(),
-            ]);
-
-            return redirect()->route('my.documents')->with('success', 'تم رفع وحفظ الوثيقة بنجاح في سجل مستنداتك.');
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('documents', 'public');
+            $data['file_path'] = $filePath;
         }
 
-        $filePath = $request->file('file')->store('documents', 'public');
-        $data['file_path'] = $filePath;
+        $employee = $user?->employee;
+
+        if (!$employee) {
+            return redirect()->route('my.documents')->with('error', 'عذراً، لا يوجد ملف وظيفي مرتبط بحسابك الحالي لرفع المستندات إليه.');
+        }
+
+        if ($data['employee_id'] != $employee->id && !in_array(strtolower(optional($user->role)->role_name ?? ''), ['admin', 'hr', 'manager'])) {
+            return redirect()->route('my.documents')->with('error', 'غير مصرح لك برفع وثائق لموظفين آخرين.');
+        }
 
         $document = Document::create($data);
 

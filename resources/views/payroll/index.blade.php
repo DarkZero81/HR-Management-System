@@ -7,7 +7,7 @@
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الرواتب</p>
-                <h1 class="text-2xl md:text-3xl font-black text-white mt-1">إدارة كشوف الرواتب</h1>
+                <h1 class="text-3xl font-bold text-slate-800">إدارة كشوف الرواتب</h1>
                 <p class="text-sm text-slate-400 mt-1">راجع كشوف الشهر، شغّل الحسابات، واطبع القسائم مباشرة من هنا.</p>
             </div>
             <div class="flex items-center gap-3">

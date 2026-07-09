@@ -25,7 +25,18 @@ class Employee extends Model
         'resign_date',
         'vacation_balance',
         'performance_score',
-        'avatar'
+        'avatar',
+        'date_of_birth',
+        'place_of_birth',
+        'education_level',
+        'marital_status',
+        'nationality',
+        'address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'job_title',
+        'contract_end_date',
+        'insurance_number',
     ];
 
     protected $casts = [
@@ -33,8 +44,43 @@ class Employee extends Model
         'performance_score' => 'decimal:2',
         'vacation_balance' => 'integer',
         'join_date' => 'date',
-        'resign_date' => 'date'
+        'resign_date' => 'date',
+        'date_of_birth' => 'date',
+        'contract_end_date' => 'date',
     ];
+
+    public function getAgeAttribute(): ?int
+    {
+        if (!$this->date_of_birth) {
+            return null;
+        }
+
+        return $this->date_of_birth->age;
+    }
+
+    public function getEducationLabelAttribute(): string
+    {
+        return match($this->education_level) {
+            'high_school' => 'ثانوية',
+            'diploma' => 'دبلوم',
+            'bachelor' => 'بكالوريوس',
+            'master' => 'ماجستير',
+            'phd' => 'دكتوراه',
+            'other' => 'أخرى',
+            default => '-',
+        };
+    }
+
+    public function getMaritalStatusLabelAttribute(): string
+    {
+        return match($this->marital_status) {
+            'single' => 'أعزب',
+            'married' => 'متزوج',
+            'divorced' => 'مطلق',
+            'widowed' => 'أرمل',
+            default => '-',
+        };
+    }
 
     /**
      * الحصول على الاسم الكامل للموظف.

@@ -7,7 +7,7 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الأقسام</p>
-            <h1 class="text-2xl md:text-3xl font-black text-white mt-1">إدارة الأقسام الإدارية</h1>
+            <h1 class="text-3xl font-bold text-slate-800">إدارة الأقسام الإدارية</h1>
             <p class="text-sm text-slate-400 mt-1">تنظيم الهيكل الإداري وإدارة الأقسام بسهولة.</p>
         </div>
         <div class="flex items-center gap-3">
@@ -36,6 +36,80 @@
         </div>
     @endif
 
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <i data-lucide="building-2" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->count() }}</p>
+                    <p class="text-xs text-slate-500">عدد الأقسام</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->sum('employees_count') }}</p>
+                    <p class="text-xs text-slate-500">إجمالي الموظفين</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                    <i data-lucide="trending-up" class="w-5 h-5 text-violet-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->max('employees_count') ?? 0 }}</p>
+                    <p class="text-xs text-slate-500">أكبر قسم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                    <i data-lucide="minimize" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->min('employees_count') ?? 0 }}</p>
+                    <p class="text-xs text-slate-500">أصغر قسم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                    <i data-lucide="calculator" class="w-5 h-5 text-cyan-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->count() ? round(($departments->sum('employees_count') / $departments->count()), 1) : 0 }}</p>
+                    <p class="text-xs text-slate-500">متوسط الموظفين/قسم</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-form-card rounded-2xl p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+                    <i data-lucide="user-x" class="w-5 h-5 text-rose-600"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-800">{{ $departments->filter(fn($d) => $d->employees_count == 0)->count() }}</p>
+                    <p class="text-xs text-slate-500">أقسام بدون موظفين</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -61,6 +135,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
+                                    <a href="{{ route('departments.show', $department->id) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors" title="عرض الموظفين">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </a>
                                     <a href="{{ route('departments.edit', $department->id) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-colors" title="تعديل">
                                         <i data-lucide="edit" class="w-4 h-4"></i>
                                     </a>

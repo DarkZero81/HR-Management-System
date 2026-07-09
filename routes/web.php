@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/attendance', [AttendanceWebController::class, 'myAttendance'])->name('attendance');
         Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents');
         Route::get('/documents/create', [DocumentWebController::class, 'myCreate'])->name('documents.create');
+        Route::get('/files', [DocumentWebController::class, 'myFiles'])->name('files');
         Route::resource('requests', RequestWebController::class)->only(['index', 'create', 'store']);
     });
 
@@ -32,8 +33,16 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,hr,manager'])->group(function () {
         Route::resource('departments', DepartmentWebController::class)->except(['index', 'show']);
         Route::resource('employees', EmployeeWebController::class);
+        Route::get('employees/{employee}/pdf', [EmployeeWebController::class, 'downloadPdf'])->name('employees.pdf');
         Route::resource('shifts', ShiftWebController::class);
-        Route::resource('holidays', HolidayWebController::class);
+        Route::get('/holidays/calendar', [HolidayWebController::class, 'calendar'])->name('holidays.calendar');
+        Route::get('/holidays', [HolidayWebController::class, 'index'])->name('holidays.index');
+        Route::get('/holidays/create', [HolidayWebController::class, 'create'])->name('holidays.create');
+        Route::post('/holidays', [HolidayWebController::class, 'store'])->name('holidays.store');
+        Route::get('/holidays/{holiday}', [HolidayWebController::class, 'show'])->name('holidays.show');
+        Route::get('/holidays/{holiday}/edit', [HolidayWebController::class, 'edit'])->name('holidays.edit');
+        Route::put('/holidays/{holiday}', [HolidayWebController::class, 'update'])->name('holidays.update');
+        Route::delete('/holidays/{holiday}', [HolidayWebController::class, 'destroy'])->name('holidays.destroy');
         Route::resource('devices', DeviceWebController::class);
 
         Route::get('/attendance', [AttendanceWebController::class, 'index'])->name('attendance.index');
@@ -46,7 +55,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/documents/{document}', [DocumentWebController::class, 'update'])->name('documents.update');
         Route::delete('/documents/{id}', [DocumentWebController::class, 'destroy'])->name('documents.destroy');
 
-        Route::get('/requests', [RequestWebController::class, 'index'])->name('requests.index');
+        Route::get('/departments/{department}', [DepartmentWebController::class, 'show'])->name('departments.show');
+        Route::resource('departments', DepartmentWebController::class);
         Route::patch('/requests/{transaction}/status', [RequestWebController::class, 'update'])->name('requests.update_status');
 
         Route::get('/payroll', [PayrollWebController::class, 'index'])->name('payroll.index');

@@ -20,8 +20,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     {{-- مكتبة الأيقونات Lucide --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.468.0/lucide.min.css">
-    {{-- Tailwind CSS via CDN (للنماذج الأولية) --}}
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     {{-- ==========================================
     الملفات المحلية (Vite)
@@ -46,12 +44,14 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+
             {{-- زر تبديل الثيم في الموبايل --}}
             <button id="themeToggleMobile" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors">
                 <i data-lucide="sun" class="w-4 h-4 text-amber-400 theme-icon-dark hidden"></i>
                 <i data-lucide="moon" class="w-4 h-4 text-slate-300 theme-icon-light hidden"></i>
                 <span class="text-xs font-bold text-white" id="themeLabelMobile">داكن</span>
             </button>
+
         </div>
     </header>
 
@@ -97,8 +97,8 @@
                     $nav = [
                         ['label' => 'الرئيسية', 'route' => 'dashboard', 'icon' => 'home', 'roles' => ['all']],
                         // تصحيح: الموظف العادي يذهب لصفحة حضوره الشخصية، والإداري لصفحة إدارة الحضور الكاملة
-                        ['label' => 'الدوام والحضور', 'route' => $isAdminRole ? 'attendance.index' : 'my.attendance', 'icon' => 'clock', 'roles' => ['all']],
-                        ['label' => 'الإجازات والطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar', 'roles' => ['employee', 'admin', 'hr', 'manager']],
+                        ['label' => 'الدوام', 'route' => $isAdminRole ? 'attendance.index' : 'my.attendance', 'icon' => 'clock', 'roles' => ['all']],
+                        ['label' => 'الطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar', 'roles' => ['employee', 'admin', 'hr', 'manager']],
                         ['label' => 'الوثائق', 'route' => 'my.documents', 'icon' => 'file-text', 'roles' => ['employee', 'admin', 'hr', 'manager']],
                         // تصحيح: هذه الصفحات محمية إدارياً على مستوى السيرفر (role:admin,hr,manager)
                         // لذلك يجب أن تظهر بالقائمة فقط لهذه الأدوار، وإلا يأخذ الموظف خطأ 403 عند الضغط
@@ -119,7 +119,7 @@
                     @php($hasAccess = in_array('all', $item['roles']) || in_array($userRole, $item['roles']))
                     @if($hasAccess)
                         <a href="{{ route($item['route']) }}"
-                           class="flex items-center gap-3 px-4 py-1 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
+                           class="flex items-center gap-3 px-4 py-1.5 rounded-xl transition-all duration-200 {{ request()->routeIs($item['route']) ? 'bg-gradient-to-l from-blue-600 to-teal-500 text-white shadow-lg' : 'text-slate-300 hover:bg-slate-700/50 hover:text-white' }}">
                             <i data-lucide="{{ $item['icon'] }}" class="w-5 h-5"></i>
                             <span class="font-medium">{{ $item['label'] }}</span>
                         </a>
@@ -133,9 +133,9 @@
             {{-- ==========================================
             المنطقة السفلية في القائمة (مستخدم + إشعارات + ثيم)
             ========================================== --}}
-            <div class="p-4 border-t border-white/10 space-y-2">
+            <div class="p-4 border-t border-white/10 space-y-1">
                 {{-- زر تبديل الثيم --}}
-                <button id="themeToggle" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
+                <button id="themeToggle" class="w-full flex items-center gap-3 px-4 py-1 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
                     <i data-lucide="sun" class="w-5 h-5 theme-icon-dark hidden"></i>
                     <i data-lucide="moon" class="w-5 h-5 theme-icon-light hidden"></i>
                     <span class="font-medium" id="themeLabel">تبديل المظهر</span>
@@ -146,7 +146,7 @@
                 ========================================== --}}
                 @php($latestRequests = \App\Models\HrTransaction::query()->where('employee_id', auth()->user()?->employee?->id)->latest()->take(5)->get())
                 <div class="relative">
-                    <button id="notificationsToggle" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
+                    <button id="notificationsToggle" class="w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 text-slate-300 hover:bg-slate-700/50 hover:text-white">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span class="font-medium">الإشعارات</span>
                         @php($unread = $latestRequests->where('status', 'pending')->count())
@@ -155,7 +155,7 @@
                         @endif
                     </button>
                     {{-- القائمة المنسدلة للإشعارات --}}
-                    <div id="notificationsDropdown" class="hidden absolute bottom-full left-0 w-72 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl mb-2 overflow-hidden z-50">
+                    <div id="notificationsDropdown" class="hidden absolute bottom-full left-0 w-72 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl mb-2 overflow-hidden z-50 ">
                         <div class="p-3 border-b border-white/10">
                             <p class="text-sm font-bold text-white">آخر الطلبات</p>
                         </div>
@@ -260,9 +260,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {{-- ==========================================
-    السكربتات الخارجية (Alpine.js & Lucide)
+    السكربتات الخارجية (Lucide)
     ========================================== --}}
-    <script src="https://unpkg.com/alpinejs@3.10.5/dist/cdn.min.js" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     {{-- ==========================================
@@ -365,14 +364,15 @@
                 }
 
                 function applyTheme(theme) {
+                    const isDark = theme === 'dark';
                     html.setAttribute('data-theme', theme);
+                    html.classList.toggle('dark', isDark);
                     try {
                         localStorage.setItem('theme', theme);
                     } catch (storageErr) {
                         console.warn('تعذر حفظ الثيم بـ localStorage', storageErr);
                     }
 
-                    const isDark = theme === 'dark';
                     document.querySelectorAll('.theme-icon-dark').forEach(el => el.classList.toggle('hidden', !isDark));
                     document.querySelectorAll('.theme-icon-light').forEach(el => el.classList.toggle('hidden', isDark));
 

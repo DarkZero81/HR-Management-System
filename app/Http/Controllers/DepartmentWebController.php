@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DepartmentWebController extends Controller
 {
@@ -12,6 +13,25 @@ class DepartmentWebController extends Controller
     {
         $departments = Department::withCount('employees')->get();
         return view('departments.index', compact('departments'));
+    }
+
+    public function show(Department $department): View
+    {
+        $department->load(['employees' => function ($query) {
+            $query->orderBy('resign_date')->orderByDesc('join_date');
+        }]);
+
+        $employees = $department->employees;
+
+        $stats = [
+            'total' => $employees->count(),
+            'active' => $employees->whereNull('resign_date')->count(),
+            'resigned' => $employees->whereNotNull('resign_date')->count(),
+            'total_salary' => $employees->sum('base_salary'),
+            'avg_performance' => $employees->avg('performance_score'),
+        ];
+
+        return view('departments.show', compact('department', 'stats', 'employees'));
     }
 
     // واجهة إنشاء قسم جديد

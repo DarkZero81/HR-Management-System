@@ -5,7 +5,7 @@
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الموظفين</p>
-                <h1 class="text-2xl md:text-3xl font-black text-white mt-1">الملفات الوظيفية</h1>
+                <h1 class="text-3xl font-bold text-slate-800">الملفات الوظيفية</h1>
                 <p class="text-sm text-slate-400 mt-1">إدارة بيانات الموظفين والرواتب والأقسام.</p>
             </div>
             <div class="flex items-center gap-3">
@@ -50,6 +50,17 @@
                         @foreach ($departments as $dept)
                             <option value="{{ $dept->id }}"
                                 {{ request('department_id') == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">تصفية حسب الوردية</label>
+                    <select name="shift_id"
+                        class="employees-card-input w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
+                        <option value="">كل الورديات</option>
+                        @foreach ($shifts as $shift)
+                            <option value="{{ $shift->id }}"
+                                {{ request('shift_id') == $shift->id ? 'selected' : '' }}>{{ $shift->shift_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -114,25 +125,36 @@
                                     {{ number_format($employee->base_salary, 2) }} ل.س</td>
                                 <td class="px-6 py-4 text-slate-800 font-semibold">{{ $employee->vacation_balance }} يوم
                                 </td>
-                                <td class="px-6 py-4 text-slate-600 text-sm">{{ $employee->join_date->format('Y-m-d') }}
+                                <td class="px-6 py-4 text-slate-600 text-sm">{{ $employee->join_date?->format('Y-m-d') ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2"><a
-                                            href="{{ route('employees.edit', $employee->id) }}"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium transition-colors"
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('employees.show', $employee->id) }}"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-xs font-medium transition-colors"
+                                            title="عرض">
+                                            <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                           </a>
+                                        <a href="{{ route('employees.edit', $employee->id) }}"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium transition-colors"
                                             title="تعديل">
                                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
-                                            تعديل</a>
+                                           </a>
+                                        <a href="{{ route('employees.pdf', $employee->id) }}"
+                                            target="_blank"
+                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-medium transition-colors"
+                                            title="تحميل PDF">
+                                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                            </a>
                                         <form action="{{ route('employees.destroy', $employee->id) }}" method="POST"
                                             class="inline"
                                             onsubmit="return confirm('هل أنت متأكد تماماً من رغبتك في حذف ملف هذا الموظف؟ لا يمكن التراجع!');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 text-xs font-medium transition-colors"
+                                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 text-xs font-medium transition-colors"
                                                 title="حذف">
                                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                                حذف</button>
+                                               </button>
                                         </form>
                                     </div>
                                 </td>

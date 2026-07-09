@@ -24,11 +24,61 @@ class DashboardController extends Controller
         $viewMode = in_array($role, ['admin', 'hr', 'manager'], true) ? 'admin' : 'employee';
 
         if ($viewMode === 'admin') {
+            $todayAttendance = AttendanceLog::query()->where('log_date', $today)->count('*');
+
+            $weekStart = $today->copy()->startOfWeek(\Carbon\Carbon::SATURDAY);
+            $weekEnd = $today->copy()->endOfWeek(\Carbon\Carbon::FRIDAY);
+
+            $weekDays = [];
+            $weeklyAttendance = [];
+            $weeklyAttendanceRate = [];
+
+            for ($d = $weekStart->copy(); $d->lte($weekEnd); $d->addDay()) {
+                $weekDays[] = match($d->dayOfWeek) {
+                    0 => 'الأحد',
+                    1 => 'الاثنين',
+                    2 => 'الثلاثاء',
+                    3 => 'الأربعاء',
+                    4 => 'الخميس',
+                    5 => 'الجمعة',
+                    6 => 'السبت',
+                    default => $d->format('D'),
+                };
+
+                $dayLogs = AttendanceLog::query()->where('log_date', $d->toDateString())->get();
+                $totalEmployees = Employee::query()->count('*');
+                $presentCount = $dayLogs->whereIn('status', ['present', 'late'])->count();
+                $attendanceRate = $totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100, 1) : 0;
+
+                $weeklyAttendance[] = $presentCount;
+                $weeklyAttendanceRate[] = $attendanceRate;
+            }
+
+            $currentMonth = $today->format('Y-m');
+            $monthlyPayrolls = PayrollOrder::query()->where('salary_month', $currentMonth)->get();
+            $totalNetSalary = $monthlyPayrolls->sum('net_salary');
+            $totalDeductions = $monthlyPayrolls->sum('deductions');
+            $totalAllowances = $monthlyPayrolls->sum('allowances');
+
+            $totalBaseSalary = Employee::sum('base_salary');
+            $totalPayrollCost = $totalBaseSalary + $totalAllowances;
+            $netSalaryRatio = $totalPayrollCost > 0 ? round(($totalNetSalary / $totalPayrollCost) * 100, 1) : 0;
+            $deductionRatio = $totalPayrollCost > 0 ? round(100 - $netSalaryRatio, 1) : 0;
+
+            $profitMarginData = [
+                'totalPayrollCost' => $totalPayrollCost,
+                'totalNetPaid' => $totalNetSalary,
+                'totalDeductions' => $totalDeductions,
+                'totalAllowances' => $totalAllowances,
+                'netSalaryRatio' => $netSalaryRatio,
+                'deductionRatio' => $deductionRatio,
+            ];
+
             return view('dashboard', [
                 'viewMode' => 'admin',
                 'employeeCount' => Employee::query()->count('*'),
                 'shiftCount' => Shift::query()->count('*'),
-                'todayAttendance' => AttendanceLog::query()->where('log_date', $today)->count('*'),
+                'todayAttendance' => $todayAttendance,
                 'lateMinutes' => AttendanceLog::query()->where('log_date', $today)->sum('late_minutes'),
                 'pendingRequests' => HrTransaction::query()->where('status', 'pending')->count('*'),
                 'recentAttendance' => AttendanceLog::query()->with('employee.user')
@@ -45,7 +95,11 @@ class DashboardController extends Controller
                     ->latest()
                     ->take(4)
                     ->get(),
-                'recentPayrolls' => PayrollOrder::query()->latest('salary_month')->take(4)->get(),
+                'recentPayrolls' => PayrollOrder::query()->latest('salary_month')->take(6)->get(),
+                'weekDays' => $weekDays,
+                'weeklyAttendance' => $weeklyAttendance,
+                'weeklyAttendanceRate' => $weeklyAttendanceRate,
+                'profitMarginData' => $profitMarginData,
             ]);
         }
 

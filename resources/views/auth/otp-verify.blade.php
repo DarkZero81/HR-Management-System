@@ -1,76 +1,70 @@
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<div class="flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-blue-50" dir="rtl">
-    <div class="flex flex-1 items-center justify-center p-4">
-        <div class="w-full max-w-5xl rounded-[32px] border border-slate-200/70 bg-white/80 p-2 shadow-[0_25px_80px_-35px_rgba(15,23,42,0.15)] backdrop-blur-xl lg:flex lg:p-0">
-            <div class="w-full rounded-l-[28px] lg:block lg:w-1/2">
-                <img class="h-full w-full rounded-l-[28px] object-cover" src="https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/login/leftSideImage.png" alt="leftSideImage">
-            </div>
-            <div class="flex w-full flex-col items-center justify-center p-8 lg:w-1/2">
-                <form class="flex w-full max-w-sm flex-col items-center justify-center" method="POST" action="{{ route('otp.verify') }}" dir="ltr">
-                    @csrf
-                    <input type="hidden" name="email" value="{{ $email }}">
+@extends('layouts.auth')
 
-                    <h2 class="text-3xl font-black text-slate-900 text-center w-full">أدخل رمز التحقق</h2>
-                    <p class="mt-2 text-sm text-slate-500 text-center w-full">تم إرسال رمز مكوّن من 6 أرقام إلى {{ $email }}</p>
+@section('title', 'أدخل رمز التحقق')
 
-                    <div class="mt-8 flex items-center justify-center gap-3" dir="ltr">
-                        @for($i = 0; $i < 6; $i++)
-                            <input type="text" maxlength="1" 
-                                class="otp-input w-12 h-12 text-center text-xl font-bold border border-black/10 rounded-full bg-slate-50 outline-none focus:border-blue-500 transition-all"
-                                name="code[]" inputmode="numeric" pattern="[0-9]*" required autocomplete="one-time-code">
-                        @endfor
-                        <input type="hidden" name="code" id="otpCode">
-                    </div>
+@section('content')
+    <form class="flex w-full max-w-sm flex-col items-center justify-center" method="POST" action="{{ route('otp.verify') }}" dir="ltr">
+        @csrf
+        <input type="hidden" name="email" value="{{ $email }}">
 
-                    <x-input-error :messages="$errors->get('code')" class="mt-2 self-start" />
+        <h2 class="text-3xl font-black text-slate-900 text-center w-full">أدخل رمز التحقق</h2>
+        <p class="mt-2 text-sm text-slate-500 text-center w-full">تم إرسال رمز مكوّن من 6 أرقام إلى {{ $email }}</p>
 
-                    @if(session('error'))
-                        <div class="mt-4 w-full rounded-full border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <button type="submit" class="mt-6 w-full rounded-full bg-gradient-to-l from-cyan-500 to-blue-600 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
-                        تحقق من الرمز
-                    </button>
-
-                    <div class="mt-4 flex items-center gap-2">
-                        <form method="POST" action="{{ route('otp.resend') }}" class="inline">
-                            @csrf
-                            <input type="hidden" name="email" value="{{ $email }}">
-                            <button type="submit" class="text-sm text-blue-600 hover:underline">إعادة الإرسال</button>
-                        </form>
-                        <span class="text-slate-300">|</span>
-                        <a href="{{ route('login') }}" class="text-sm text-slate-500 hover:underline">تعديل البريد الإلكتروني</a>
-                    </div>
-                </form>
-            </div>
+        <div class="mt-8 flex items-center justify-center gap-3" dir="ltr">
+            @for($i = 0; $i < 6; $i++)
+                <input type="text" maxlength="1"
+                    class="otp-input w-12 h-12 text-center text-xl font-bold border border-black/10 rounded-full bg-slate-50 outline-none focus:border-blue-500 transition-all"
+                    name="code[]" inputmode="numeric" pattern="[0-9]*" required autocomplete="one-time-code">
+            @endfor
+            <input type="hidden" name="code" id="otpCode">
         </div>
-    </div>
+
+        <x-input-error :messages="$errors->get('code')" class="mt-2 self-start" />
+
+        @if(session('error'))
+            <div class="mt-4 w-full rounded-full border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <button type="submit" class="mt-6 w-full rounded-full bg-gradient-to-l from-cyan-500 to-blue-600 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-90">
+            تحقق من الرمز
+        </button>
+
+        <div class="mt-4 flex items-center gap-2">
+            <form method="POST" action="{{ route('otp.resend') }}" class="inline">
+                @csrf
+                <input type="hidden" name="email" value="{{ $email }}">
+                <button type="submit" class="text-sm text-blue-600 hover:underline">إعادة الإرسال</button>
+            </form>
+            <span class="text-slate-300">|</span>
+            <a href="{{ route('login') }}" class="text-sm text-slate-500 hover:underline">تعديل البريد الإلكتروني</a>
+        </div>
+    </form>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const inputs = document.querySelectorAll('.otp-input');
-        
-        inputs.forEach((input, idx) => {
-            input.addEventListener('input', function(e) {
-                if (e.target.value.length >= 1 && idx < 5) {
-                    inputs[idx + 1].focus();
-                }
-                updateHiddenCode();
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.otp-input');
+
+            inputs.forEach((input, idx) => {
+                input.addEventListener('input', function(e) {
+                    if (e.target.value.length >= 1 && idx < 5) {
+                        inputs[idx + 1].focus();
+                    }
+                    updateHiddenCode();
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && idx > 0) {
+                        inputs[idx - 1].focus();
+                    }
+                });
             });
 
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && e.target.value.length === 0 && idx > 0) {
-                    inputs[idx - 1].focus();
-                }
-            });
+            function updateHiddenCode() {
+                const code = Array.from(inputs).map(i => i.value).join('');
+                document.getElementById('otpCode').value = code;
+            }
         });
-
-        function updateHiddenCode() {
-            const code = Array.from(inputs).map(i => i.value).join('');
-            document.getElementById('otpCode').value = code;
-        }
-    });
     </script>
-</div>
+@endsection

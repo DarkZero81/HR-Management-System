@@ -8,7 +8,7 @@
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">لوحة التقارير</p>
-                <h2 class="mt-2 text-3xl font-black text-slate-900">ملخص الأداء والتقارير التشغيلية والمالية</h2>
+                <h2 class="text-3xl font-bold text-slate-800">ملخص الأداء والتقارير التشغيلية والمالية</h2>
                 <p class="mt-2 text-sm text-slate-600">اطّلع على المؤشرات التشغيلية والمالية في مكان واحد.</p>
             </div>
             <a href="{{ route('reports.financial_pdf') }}"
@@ -22,19 +22,19 @@
     <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <p class="text-sm font-semibold text-slate-500">عدد الموظفين</p>
-            <div class="mt-3 text-3xl font-black text-slate-900">{{ $totalEmployees }}</div>
+            <div class="mt-3 text-3xl font-bold text-slate-800">{{ $totalEmployees }}</div>
         </div>
         <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <p class="text-sm font-semibold text-slate-500">الوردية النشطة</p>
-            <div class="mt-3 text-3xl font-black text-slate-900">{{ $activeShifts }}</div>
+            <div class="mt-3 text-3xl font-bold text-slate-800">{{ $activeShifts }}</div>
         </div>
         <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <p class="text-sm font-semibold text-slate-500">الطلبات المعلقة</p>
-            <div class="mt-3 text-3xl font-black text-slate-900">{{ $pendingRequests }}</div>
+            <div class="mt-3 text-3xl font-bold text-slate-800">{{ $pendingRequests }}</div>
         </div>
         <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <p class="text-sm font-semibold text-slate-500">سجلات الدوام الشهرية</p>
-            <div class="mt-3 text-3xl font-black text-slate-900">{{ $monthlyAttendance }}</div>
+            <div class="mt-3 text-3xl font-bold text-slate-800">{{ $monthlyAttendance }}</div>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
         <section class="rounded-[28px] border border-slate-200/70 bg-white/80 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-xl font-black text-slate-900">مخطط توزيع الرواتب</h3>
+                    <h3 class="mt-3 text-3xl font-bold text-slate-800">مخطط توزيع الرواتب</h3>
                     <p class="mt-1 text-sm text-slate-500">نسبة الرواتب حسب الموظفين</p>
                 </div>
             </div>
@@ -71,7 +71,7 @@
         </section>
 
         <aside class="rounded-[28px] border border-slate-200/70 bg-white/80 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
-            <h3 class="text-xl font-black text-slate-900 mb-4">مخطط توزيع الأقسام</h3>
+            <h3 class="text-l font-bold text-slate-800">مخطط توزيع الأقسام</h3>
             <div class="h-64">
                 <canvas id="departmentChart" class="w-full h-full"></canvas>
             </div>
@@ -80,23 +80,23 @@
         <section class="rounded-[28px] border border-slate-200/70 bg-white/80 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.45)] backdrop-blur">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-xl font-black text-slate-900">تفاصيل الرواتب</h3>
+                    <h3 class="mt-3 text-3xl font-bold text-slate-800">تفاصيل الرواتب</h3>
                     <p class="mt-1 text-sm text-slate-500">عدد كشوف الرواتب الشهر الحالي: {{ $monthlyPayrolls }} كشف</p>
                 </div>
             </div>
             <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200/70 bg-slate-950/5 p-4">
                 <div class="grid gap-4 sm:grid-cols-3">
                     <div class="rounded-3xl bg-slate-950/10 p-4 text-slate-900">
-                        <p class="text-sm font-semibold">إجمالي المدفوعات</p>
-                        <p class="mt-3 text-2xl font-black">{{ $monthlyPayrolls }} دفعة</p>
+                        <p class="text-l font-bold text-slate-800">إجمالي المدفوعات</p>
+                        <p class="mt-3 text-xl font-bold text-slate-800">{{ $monthlyPayrolls }} دفعة</p>
                     </div>
                     <div class="rounded-3xl bg-slate-950/10 p-4 text-slate-900">
-                        <p class="text-sm font-semibold">معدل الإنجاز</p>
-                        <p class="mt-3 text-2xl font-black">90%</p>
+                        <p class="text-l font-bold text-slate-800">معدل الإنجاز</p>
+                        <p class="mt-3 text-xl font-bold text-slate-800">90%</p>
                     </div>
                     <div class="rounded-3xl bg-slate-950/10 p-4 text-slate-900">
-                        <p class="text-sm font-semibold">طلب الموافقة</p>
-                        <p class="mt-3 text-2xl font-black">{{ $pendingRequests }}</p>
+                        <p class="text-l font-bold text-slate-800">طلب الموافقة</p>
+                        <p class="mt-3 text-xl font-bold text-slate-800">{{ $pendingRequests }}</p>
                     </div>
                 </div>
             </div>
@@ -119,13 +119,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const salaryCtx = document.getElementById('salaryChart');
     const deptCtx = document.getElementById('departmentChart');
 
-    const salaryData = @json($salaryData->map(function($p) {
+    const salaryData = <?php echo json_encode($salaryData->map(function($p) {
         return ['name' => $p->employee->full_name ?? '—', 'net_salary' => (float)$p->net_salary];
-    }));
+    })->values()->all(), JSON_UNESCAPED_UNICODE); ?>;
 
-    const departmentData = @json($departments->map(function($d) {
+    const departmentData = <?php echo json_encode($departments->map(function($d) {
         return ['name' => $d->name, 'count' => $d->employees_count];
-    }));
+    })->values()->all(), JSON_UNESCAPED_UNICODE); ?>;
 
     if (salaryCtx && salaryData.length > 0) {
         new Chart(salaryCtx, {
