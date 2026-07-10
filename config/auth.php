@@ -114,4 +114,15 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | OTP Security Settings
+    |--------------------------------------------------------------------------
+    */
+
+    'otp' => [
+        'max_attempts' => env('OTP_MAX_ATTEMPTS', 5),
+        'lockout_minutes' => env('OTP_LOCKOUT_MINUTES', 15),
+    ],
+
 ];

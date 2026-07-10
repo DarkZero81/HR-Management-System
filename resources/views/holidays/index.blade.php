@@ -73,43 +73,75 @@
                 </div>
             </div>
         </div>
-        <div class="employee-form-card rounded-2xl p-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                    <i data-lucide="sun" class="w-5 h-5 text-amber-600"></i>
-                </div>
-                <div>
-                    <p class="text-2xl font-black text-slate-800">{{ now()->diffInDays(\Carbon\Carbon::create(now()->year, 12, 31)) }}</p>
-                    <p class="text-xs text-slate-500">يوم لنهاية السنة</p>
-                </div>
-            </div>
+  <!-- يوم لنهاية السنة -->
+<div class="employee-form-card rounded-2xl p-4">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+            <i data-lucide="sun" class="w-5 h-5 text-amber-600"></i>
         </div>
-        <div class="employee-form-card rounded-2xl p-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
-                    <i data-lucide="party-popper" class="w-5 h-5 text-cyan-600"></i>
-                </div>
-                <div>
-                    @php
-                        $nextHoliday = \App\Models\Holiday::where('start_date', '>=', now())->orderBy('start_date')->first();
-                        $daysToNextHoliday = $nextHoliday ? now()->diffInDays($nextHoliday->start_date) : 0;
-                    @endphp
-                    <p class="text-2xl font-black text-slate-800">{{ $daysToNextHoliday }}</p>
-                    <p class="text-xs text-slate-500">يوم للعطلة القادمة</p>
-                </div>
-            </div>
+        <div>
+            @php
+                $today = now()->startOfDay();
+                $endOfYear = \Carbon\Carbon::create(now()->year, 12, 31)->startOfDay();
+                // استخدام intval لضمان رقم صحيح بدون فواصل
+                $daysToEndOfYear = intval($today->diffInDays($endOfYear));
+            @endphp
+            <p class="text-2xl font-black text-slate-800">{{ $daysToEndOfYear }}</p>
+            <p class="text-xs text-slate-500">يوم لنهاية السنة</p>
         </div>
-        <div class="employee-form-card rounded-2xl p-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
-                    <i data-lucide="briefcase" class="w-5 h-5 text-rose-600"></i>
-                </div>
-                <div>
-                    <p class="text-2xl font-black text-slate-800">{{ now()->diffInDays(\Carbon\Carbon::create(now()->year, 12, 31)) - $holidays->count() }}</p>
-                    <p class="text-xs text-slate-500">أيام دوام متبقية</p>
-                </div>
-            </div>
+    </div>
+</div>
+
+<!-- يوم للعطلة القادمة -->
+<div class="employee-form-card rounded-2xl p-4">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+            <i data-lucide="party-popper" class="w-5 h-5 text-cyan-600"></i>
         </div>
+        <div>
+            @php
+                $nextHoliday = \App\Models\Holiday::where('start_date', '>=', now()->toDateTimeString())
+                    ->orderBy('start_date')
+                    ->first();
+
+                // تحويل الناتج لرقم صحيح
+                $daysToNextHoliday = $nextHoliday
+                    ? intval($today->diffInDays(\Carbon\Carbon::parse($nextHoliday->start_date)->startOfDay()))
+                    : 0;
+            @endphp
+            <p class="text-2xl font-black text-slate-800">{{ $daysToNextHoliday }}</p>
+            <p class="text-xs text-slate-500">يوم للعطلة القادمة</p>
+        </div>
+    </div>
+</div>
+
+<!-- أيام دوام متبقية -->
+<div class="employee-form-card rounded-2xl p-4">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+            <i data-lucide="briefcase" class="w-5 h-5 text-rose-600"></i>
+        </div>
+        <div>
+            @php
+                $upcomingHolidaysDates = \App\Models\Holiday::where('start_date', '>=', $today)
+                    ->where('start_date', '<=', $endOfYear)
+                    ->get()
+                    ->pluck('start_date')
+                    ->map(fn($date) => \Carbon\Carbon::parse($date)->format('Y-m-d'))
+                    ->toArray();
+
+                // حساب الأيام المفلترة وتحويلها مباشرة لرقم صحيح
+                $workingDaysLeft = intval($today->diffInDaysFiltered(function (\Carbon\Carbon $date) use ($upcomingHolidaysDates) {
+                    // استثناء يومي الجمعة والسبت كإجازة أسبوعية، واستثناء العطلات الرسمية القادمة
+                    return !$date->isFriday() && !$date->isSaturday() && !in_array($date->format('Y-m-d'), $upcomingHolidaysDates);
+                }, $endOfYear));
+            @endphp
+            <p class="text-2xl font-black text-slate-800">{{ $workingDaysLeft }}</p>
+            <p class="text-xs text-slate-500">أيام دوام متبقية</p>
+        </div>
+    </div>
+</div>
+
     </div>
 
     <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">

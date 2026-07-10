@@ -54,9 +54,12 @@
 
         <p class="text-center text-sm text-slate-600 dark:text-slate-400">
             لا تملك حساباً؟
-            <a href="{{ route('register') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+         @if (auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'hr'))
+                <a href="{{ route('register') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                 إنشاء حساب جديد
             </a>
-        </p>
+         @else
+            <p class="font-bold text-slate-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors px-4 text-xs mt-0">تواصل مع مدير النظام او المدير المسؤول ليقوم بانشاء حساب لك.</p>
+         @endif
     </form>
 @endsection

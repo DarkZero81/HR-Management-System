@@ -4,7 +4,7 @@
 <div class="max-w-3xl mx-auto space-y-6 px-4 py-4" dir="rtl">
     <div class="border-b border-white/5 pb-4">
         <p class="text-xs font-black uppercase tracking-[0.35em] text-blue-400 dark:text-cyan-400">الوثائق</p>
-        <h1 class="text-2xl md:text-3xl font-black text-white dark:text-slate-900 mt-0.5">إضافة وثيقة جديدة</h1>
+        <h1 class="text-3xl font-bold text-slate-800">إضافة وثيقة جديدة</h1>
         <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">أدخل بيانات الوثيقة وارفق الملف.</p>
     </div>
 

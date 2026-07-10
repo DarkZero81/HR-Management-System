@@ -14,20 +14,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'user.active' => \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
     })
     ->withProviders([
-        \App\Providers\NotificationServiceProvider::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
-            if ($request->expectsHtml()) {
+            if (! $request->expectsJson()) {
                 return response()->view('errors.404', [], 404);
             }
         });
 
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
-            if ($request->expectsHtml()) {
+            if (! $request->expectsJson()) {
                 return response()->view('errors.403', [], 403);
             }
         });

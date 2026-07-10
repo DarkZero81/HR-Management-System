@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'user.active'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('my')->name('my.')->group(function () {
@@ -25,15 +25,18 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents');
         Route::get('/documents/create', [DocumentWebController::class, 'myCreate'])->name('documents.create');
         Route::get('/files', [DocumentWebController::class, 'myFiles'])->name('files');
-        Route::resource('requests', RequestWebController::class)->only(['index', 'create', 'store']);
+        Route::resource('requests', RequestWebController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
+        Route::post('requests/{request}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
+        Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'downloadPdf'])->name('requests.pdf.employee');
+        Route::get('requests/export-csv', [RequestWebController::class, 'downloadCsv'])->name('requests.export.csv');
     });
 
     Route::get('/departments', [DepartmentWebController::class, 'index'])->name('departments.index');
 
     Route::middleware(['role:admin,hr,manager'])->group(function () {
         Route::resource('departments', DepartmentWebController::class)->except(['index', 'show']);
-        Route::resource('employees', EmployeeWebController::class);
         Route::get('employees/{employee}/pdf', [EmployeeWebController::class, 'downloadPdf'])->name('employees.pdf');
+        Route::resource('employees', EmployeeWebController::class);
         Route::resource('shifts', ShiftWebController::class);
         Route::get('/holidays/calendar', [HolidayWebController::class, 'calendar'])->name('holidays.calendar');
         Route::get('/holidays', [HolidayWebController::class, 'index'])->name('holidays.index');
@@ -58,6 +61,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/departments/{department}', [DepartmentWebController::class, 'show'])->name('departments.show');
         Route::resource('departments', DepartmentWebController::class);
         Route::patch('/requests/{transaction}/status', [RequestWebController::class, 'update'])->name('requests.update_status');
+        Route::post('/requests/{transaction}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status.post');
+        Route::get('/requests/export-csv', [RequestWebController::class, 'downloadCsv'])->name('requests.export.csv');
+// تأكد أن الاسم مطابق لما يتم استدعاؤه في الـ Controller
+Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'downloadPdf'])->name('requests.pdf.employee');
+
+        Route::resource('requests', RequestWebController::class)->only(['index', 'show']);
 
         Route::get('/payroll', [PayrollWebController::class, 'index'])->name('payroll.index');
         Route::post('/payroll/generate', [PayrollWebController::class, 'store'])->name('payroll.generate');

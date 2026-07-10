@@ -12,10 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('email')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->string('code', 6);
+            $table->string('code');
             $table->string('type')->default('login');
             $table->timestamp('expires_at');
             $table->timestamp('used_at')->nullable();
+            $table->unsignedInteger('failed_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable();
             $table->timestamps();
 
             $table->index(['email', 'code']);

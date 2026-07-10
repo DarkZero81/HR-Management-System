@@ -4,7 +4,7 @@
 <div class="max-w-3xl mx-auto space-y-6 px-4 py-4" dir="rtl">
     <div class="border-b border-white/5 pb-4">
         <p class="text-xs font-black uppercase tracking-[0.35em] text-blue-400 dark:text-cyan-400">الوثائق</p>
-        <h1 class="text-2xl md:text-3xl font-black text-white dark:text-slate-900 mt-0.5">تعديل بيانات الوثيقة</h1>
+        <h1 class="text-3xl font-bold text-slate-800">تعديل بيانات الوثيقة</h1>
         <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">قم بتعديل بيانات الوثيقة أو استبدال الملف.</p>
     </div>
     @if(session('success'))
@@ -35,7 +35,7 @@
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
                 <label for="employee_id" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الموظف <span class="text-rose-500">*</span></label>
-                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
                     @foreach($employees as $employee)
                         <option value="{{ $employee->id }}" {{ old('employee_id', $document->employee_id) == $employee->id ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $employee->full_name }}</option>
                     @endforeach
@@ -50,7 +50,7 @@
 
             <div>
                 <label for="document_type" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">نوع الوثيقة <span class="text-rose-500">*</span></label>
-                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
                     <option value="identity" {{ old('document_type', $document->document_type) == 'identity' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">هوية</option>
                     <option value="passport" {{ old('document_type', $document->document_type) == 'passport' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">جواز سفر</option>
                     <option value="contract" {{ old('document_type', $document->document_type) == 'contract' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">عقد</option>

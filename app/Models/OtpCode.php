@@ -14,11 +14,14 @@ class OtpCode extends Model
         'type',
         'expires_at',
         'used_at',
+        'failed_attempts',
+        'locked_until',
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
         'used_at' => 'datetime',
+        'locked_until' => 'datetime',
     ];
 
     public function user(): BelongsTo

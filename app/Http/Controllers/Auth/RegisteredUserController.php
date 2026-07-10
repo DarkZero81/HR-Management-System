@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\OtpCode;
+use App\Models\RolePermission;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -31,14 +32,20 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $employeeRole = RolePermission::firstOrCreate(
+            ['role_name' => 'employee'],
+            ['description' => 'Regular employee with self-service access']
+        );
+        $roleId = $employeeRole->id;
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => 4,
+            'role_id' => $roleId,
+            'is_active' => 1,
         ]);
 
-        // Create employee record
         $nameParts = explode(' ', trim($request->name), 2);
         Employee::create([
             'user_id' => $user->id,
@@ -50,7 +57,6 @@ class RegisteredUserController extends Controller
             'join_date' => now(),
         ]);
 
-        // Generate OTP for registration
         $code = str_pad((int) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         OtpCode::where('email', $request->email)->delete();
@@ -58,15 +64,13 @@ class RegisteredUserController extends Controller
         OtpCode::create([
             'email' => $request->email,
             'user_id' => $user->id,
-            'code' => $code,
+            'code' => Hash::make($code),
             'type' => 'register',
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        // Send OTP via email
         Mail::to($request->email)->send(new \App\Mail\OtpMail($code, 'register'));
 
-        // Redirect to OTP verification page
         return redirect()->route('otp.verify.form', [
             'email' => $request->email,
         ])->with('success', 'تم إنشاء الحساب! تم إرسال رمز التحقق إلى بريدك الإلكتروني.');

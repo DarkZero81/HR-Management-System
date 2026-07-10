@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\HrTransaction;
 use App\Models\PayrollOrder;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -40,9 +41,27 @@ class PayrollOrderController extends Controller
                     ->first();
 
                 if (!$existing) {
-                    $allowances = 0;
-                    $deductions = 0;
-                    $netSalary = $employee->base_salary + $allowances - $deductions;
+                    $transportAllowance = 50000;
+                    $housingAllowance = 100000;
+                    $allowances = $transportAllowance + $housingAllowance;
+
+                    $lateMinutes = $employee->attendanceLogs()
+                        ->whereMonth('log_date', Carbon::parse($salaryMonth)->month)
+                        ->whereYear('log_date', Carbon::parse($salaryMonth)->year)
+                        ->sum('late_minutes');
+
+                    $latePenaltyRate = 500;
+                    $lateDeductions = $lateMinutes * $latePenaltyRate;
+
+                    $penaltyDeductions = HrTransaction::where('employee_id', $employee->id)
+                        ->where('transaction_type', 'penalty')
+                        ->whereMonth('start_date_time', Carbon::parse($salaryMonth)->month)
+                        ->whereYear('start_date_time', Carbon::parse($salaryMonth)->year)
+                        ->where('status', 'approved')
+                        ->sum('financial_impact');
+
+                    $deductions = $lateDeductions + $penaltyDeductions;
+                    $netSalary = max(0, $employee->base_salary + $allowances - $deductions);
 
                     $payroll = PayrollOrder::create([
                         'employee_id' => $employee->id,

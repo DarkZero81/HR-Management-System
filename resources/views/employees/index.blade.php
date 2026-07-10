@@ -17,6 +17,15 @@
                     class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white rounded-xl font-semibold shadow-lg transition-all">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">إضافة موظف</span></a>
+                @auth
+                    @if (auth()->user()->role && in_array(strtolower(auth()->user()->role->role_name), ['admin', 'hr']))
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-700 to-cyan-700 hover:from-emerald-600 hover:to-cyan-600 text-slate-800 rounded-xl font-semibold shadow-lg transition-all">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">إنشاء حساب موظف</span>
+                        </a>
+                    @endif
+                @endauth
             </div>
         </div>
         @if (session('success'))
@@ -35,7 +44,7 @@
         @endif
 
         <div class="employees-card rounded-2xl shadow-lg border p-6">
-            <form action="{{ route('employees.index') }}" method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <form action="{{ route('employees.index') }}" method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">بحث نصي</label>
                     <input type="text" name="search" value="{{ request('search') }}"
@@ -45,7 +54,7 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">تصفية حسب القسم</label>
                     <select name="department_id"
-                        class="employees-card-input w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
+                        class="employees-card-input w-full px-8 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
                         <option value="">كل الأقسام</option>
                         @foreach ($departments as $dept)
                             <option value="{{ $dept->id }}"
@@ -56,7 +65,7 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">تصفية حسب الوردية</label>
                     <select name="shift_id"
-                        class="employees-card-input w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
+                        class="employees-card-input w-full px-8 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer">
                         <option value="">كل الورديات</option>
                         @foreach ($shifts as $shift)
                             <option value="{{ $shift->id }}"
