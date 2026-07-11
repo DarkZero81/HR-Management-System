@@ -22,9 +22,14 @@ Route::middleware(['auth', 'user.active'])->group(function () {
 
     Route::prefix('my')->name('my.')->group(function () {
         Route::get('/attendance', [AttendanceWebController::class, 'myAttendance'])->name('attendance');
-        Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents');
+        Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents.index');
         Route::get('/documents/create', [DocumentWebController::class, 'myCreate'])->name('documents.create');
-        Route::get('/files', [DocumentWebController::class, 'myFiles'])->name('files');
+        Route::get('/documents/{document}', [DocumentWebController::class, 'myShow'])->name('documents.show');
+        Route::get('/documents/{document}/edit', [DocumentWebController::class, 'myEdit'])->name('documents.edit');
+        Route::put('/documents/{document}', [DocumentWebController::class, 'myUpdate'])->name('documents.update');
+        Route::get('/files', function () {
+            return redirect()->route('my.documents.index');
+        })->name('files');
         Route::resource('requests', RequestWebController::class)->only(['index', 'create', 'store', 'show', 'destroy']);
         Route::post('requests/{request}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
         Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'downloadPdf'])->name('requests.pdf.employee');
@@ -33,7 +38,7 @@ Route::middleware(['auth', 'user.active'])->group(function () {
 
     Route::get('/departments', [DepartmentWebController::class, 'index'])->name('departments.index');
 
-    Route::middleware(['role:admin,hr,manager'])->group(function () {
+    Route::middleware(['role:admin,manager'])->group(function () {
         Route::resource('departments', DepartmentWebController::class)->except(['index', 'show']);
         Route::get('employees/{employee}/pdf', [EmployeeWebController::class, 'downloadPdf'])->name('employees.pdf');
         Route::resource('employees', EmployeeWebController::class);
@@ -54,6 +59,8 @@ Route::middleware(['auth', 'user.active'])->group(function () {
 
         Route::get('/documents', [DocumentWebController::class, 'index'])->name('documents.index');
         Route::get('/documents/create', [DocumentWebController::class, 'create'])->name('documents.create');
+        Route::post('/documents', [DocumentWebController::class, 'store'])->name('documents.store');
+        Route::get('/documents/{document}', [DocumentWebController::class, 'show'])->name('documents.show');
         Route::get('/documents/{document}/edit', [DocumentWebController::class, 'edit'])->name('documents.edit');
         Route::put('/documents/{document}', [DocumentWebController::class, 'update'])->name('documents.update');
         Route::delete('/documents/{id}', [DocumentWebController::class, 'destroy'])->name('documents.destroy');
@@ -80,7 +87,6 @@ Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'download
         Route::post('/sms', [SmsMessageController::class, 'store'])->name('sms.store');
     });
 
-    Route::post('/documents', [DocumentWebController::class, 'store'])->name('documents.store');
     Route::post('/my/documents', [DocumentWebController::class, 'storeMy'])->name('my.documents.store');
     Route::delete('/my/documents/{id}', [DocumentWebController::class, 'destroy'])->name('my.documents.destroy');
 

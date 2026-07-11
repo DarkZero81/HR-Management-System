@@ -26,11 +26,17 @@ class DocumentExpiryNotification extends Notification implements ShouldQueue
     {
         $docList = collect($this->documents)
             ->map(fn($d) => "• {$d['type']}: تنتهي في {$d['expiry']}")
-            ->join('\n');
+            ->join("\n");
+
+        $days = match($this->type) {
+            'sms' => 30,
+            'whatsapp' => 30,
+            default => 7,
+        };
 
         return (new MailMessage)
             ->subject('تنبيه: وثائقك تنتهي صلاحيتها قريباً')
-            ->line("لديك الوثائق التالية التي تنتهي صلاحيتها خلال 7 أيام:\n\n{$docList}")
+            ->line("لديك الوثائق التالية التي تنتهي صلاحيتها خلال {$days} أيام:\n\n{$docList}")
             ->action('إدارة الوثائق', url(route('my.documents.index')))
             ->line('يرجى التجديد قبل انتهاء الصلاحية.');
     }

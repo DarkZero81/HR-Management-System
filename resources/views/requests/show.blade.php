@@ -5,7 +5,7 @@
 @section('content')
     @php
         $isAdmin =
-            auth()->user()?->role && in_array(strtolower(auth()->user()->role->role_name), ['admin', 'hr', 'manager']);
+            auth()->user()?->role && in_array(strtolower(auth()->user()->role->role_name), ['admin', 'manager']);
         $isPending = $transaction->status === 'pending';
         $basePath = $isAdmin ? '/requests' : '/my/requests';
         $csvUrl = url(

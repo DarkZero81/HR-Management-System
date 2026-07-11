@@ -28,16 +28,25 @@
             </ul>
         </div>
     @endif
-    <form method="POST" action="{{ route('documents.update', $document->id) }}" enctype="multipart/form-data" class="employee-form-card rounded-[28px] border border-white/10 dark:border-white/5 p-6 space-y-5 shadow-2xl backdrop-blur-md">
+    @php
+        $formRoute = ($myMode ?? false) ? 'my.documents.update' : 'documents.update';
+        $cancelRoute = ($myMode ?? false) ? 'my.documents.index' : 'documents.index';
+        $oldVal = fn(string $key) => old($key, $document->{$key} ?? '');
+        $oldDateVal = fn(string $key) => old($key, isset($document->{$key}) ? \Carbon\Carbon::parse($document->{$key})->format('Y-m-d') : '');
+        $showEmployeeField = ($employees ?? null) !== null;
+    @endphp
+    <form method="POST" action="{{ route($formRoute, $document->id) }}" enctype="multipart/form-data" class="employee-form-card rounded-[28px] border border-white/10 dark:border-white/5 p-6 space-y-5 shadow-2xl backdrop-blur-md">
         @csrf
         @method('PUT')
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            @if($showEmployeeField)
             <div>
                 <label for="employee_id" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الموظف <span class="text-rose-500">*</span></label>
-                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                    <option value="">اختر الموظف...</option>
                     @foreach($employees as $employee)
-                        <option value="{{ $employee->id }}" {{ old('employee_id', $document->employee_id) == $employee->id ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $employee->full_name }}</option>
+                        <option value="{{ $employee->id }}" {{ (string) $oldVal('employee_id') === (string) $employee->id ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $employee->full_name }}</option>
                     @endforeach
                 </select>
                 @error('employee_id')
@@ -47,14 +56,16 @@
                     </p>
                 @enderror
             </div>
+            @endif
 
             <div>
                 <label for="document_type" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">نوع الوثيقة <span class="text-rose-500">*</span></label>
-                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
-                    <option value="identity" {{ old('document_type', $document->document_type) == 'identity' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">هوية</option>
-                    <option value="passport" {{ old('document_type', $document->document_type) == 'passport' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">جواز سفر</option>
-                    <option value="contract" {{ old('document_type', $document->document_type) == 'contract' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">عقد</option>
-                    <option value="health_certificate" {{ old('document_type', $document->document_type) == 'health_certificate' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">شهادة صحية</option>
+                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                    <option value="">اختر النوع...</option>
+                    <option value="identity" {{ $oldVal('document_type') === 'identity' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">هوية</option>
+                    <option value="passport" {{ $oldVal('document_type') === 'passport' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">جواز سفر</option>
+                    <option value="contract" {{ $oldVal('document_type') === 'contract' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">عقد</option>
+                    <option value="health_certificate" {{ $oldVal('document_type') === 'health_certificate' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">شهادة صحية</option>
                 </select>
                 @error('document_type')
                     <p class="text-rose-500 text-sm mt-1.5 flex items-center gap-1.5">
@@ -66,7 +77,7 @@
 
             <div>
                 <label for="document_number" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">رقم الوثيقة <span class="text-rose-500">*</span></label>
-                <input type="text" name="document_number" id="document_number" value="{{ old('document_number', $document->document_number) }}" required placeholder="أدخل رقم الوثيقة" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
+                <input type="text" name="document_number" id="document_number" value="{{ $oldVal('document_number') }}" required placeholder="أدخل رقم الوثيقة" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
                 @error('document_number')
                     <p class="text-rose-500 text-sm mt-1.5 flex items-center gap-1.5">
                         <i data-lucide="alert-circle" class="w-4 h-4"></i>
@@ -77,7 +88,7 @@
 
             <div>
                 <label for="expiry_date" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">تاريخ الانتهاء <span class="text-rose-500">*</span></label>
-                <input type="date" name="expiry_date" id="expiry_date" value="{{ old('expiry_date', optional($document->expiry_date)->format('Y-m-d')) }}" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
+                <input type="date" name="expiry_date" id="expiry_date" value="{{ $oldDateVal('expiry_date') }}" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
                 @error('expiry_date')
                     <p class="text-rose-500 text-sm mt-1.5 flex items-center gap-1.5">
                         <i data-lucide="alert-circle" class="w-4 h-4"></i>
@@ -87,8 +98,8 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الملف الحالي</label>
-                @if($document->file_path)
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الملف <span class="text-rose-500">*</span></label>
+                @if($document->file_path ?? null)
                     <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($document->file_path) }}" target="_blank" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mb-3">
                         <i data-lucide="file-text" class="w-4 h-4"></i> عرض الملف الحالي
                     </a>
@@ -110,7 +121,7 @@
         </div>
 
         <div class="flex items-center justify-end gap-2.5 border-t border-slate-200 dark:border-white/5 pt-4">
-            <a href="{{ route('documents.index') }}" class="form-cancel-btn rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 transition active:scale-95">إلغاء والعودة</a>
+            <a href="{{ route($cancelRoute) }}" class="form-cancel-btn rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-white/5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 transition active:scale-95">إلغاء والعودة</a>
             <button type="submit" class="rounded-xl bg-gradient-to-l from-cyan-500 to-blue-600 hover:opacity-95 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/10 transition active:scale-95 cursor-pointer inline-flex items-center gap-2">
                 <i data-lucide="save" class="w-4 h-4"></i>
                 حفظ التعديلات
@@ -118,15 +129,4 @@
         </div>
     </form>
 </div>
-<script>
-function updateFileName(input) {
-    const fileNameDisplay = document.getElementById('fileName');
-    if (input.files && input.files.length > 0) {
-        fileNameDisplay.textContent = input.files[0].name;
-        fileNameDisplay.classList.remove('hidden');
-    } else {
-        fileNameDisplay.classList.add('hidden');
-    }
-}
-</script>
 @endsection

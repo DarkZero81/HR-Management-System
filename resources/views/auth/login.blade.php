@@ -54,7 +54,7 @@
 
         <p class="text-center text-sm text-slate-600 dark:text-slate-400">
             لا تملك حساباً؟
-         @if (auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'hr'))
+         @if (auth()->check() && in_array(optional(auth()->user()->role)->role_name, ['admin', 'manager'], true))
                 <a href="{{ route('register') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                 إنشاء حساب جديد
             </a>

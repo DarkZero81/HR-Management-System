@@ -18,7 +18,7 @@
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">إضافة موظف</span></a>
                 @auth
-                    @if (auth()->user()->role && in_array(strtolower(auth()->user()->role->role_name), ['admin', 'hr']))
+                     @if (auth()->user()->role && in_array(strtolower(auth()->user()->role->role_name), ['admin']))
                         <a href="{{ route('register') }}"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-700 to-cyan-700 hover:from-emerald-600 hover:to-cyan-600 text-slate-800 rounded-xl font-semibold shadow-lg transition-all">
                             <i data-lucide="user-plus" class="w-4 h-4"></i>

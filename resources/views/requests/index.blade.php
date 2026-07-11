@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-12 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="employee-form-card rounded-2xl p-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
@@ -148,38 +148,54 @@
                 </a>
             </div>
 
-        <form method="GET" action="{{ route('my.requests.index') }}" class="mb-6 space-y-4" id="filterForm">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                <div class="col-span-2 md:col-span-3">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">بحث</label>
+        <form method="GET" action="{{ route('my.requests.index') }}" class="mb-6" id="filterForm">
+            <div class="employee-form-card rounded-2xl border border-slate-200 p-4 md:p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="filter" class="w-5 h-5 text-cyan-600"></i>
+                        <span class="text-sm font-bold text-slate-700">فلترة الطلبات</span>
+                    </div>
+                    <span class="text-xs text-slate-400">استخدم الفلاتر لتضييق البحث</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <div class="relative">
-                        <i data-lucide="search" class="absolute right-3 top-3 h-4 w-4 text-slate-400"></i>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">بحث</label>
+                        <i data-lucide="search" class="absolute right-3 top-9 h-4 w-4 text-slate-400 pointer-events-none"></i>
                         <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="ابحث عن طلب..." class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 pr-10 pl-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">الحالة</label>
+                        <div class="relative">
+                            <i data-lucide="chevron-down" class="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none"></i>
+                            <select name="status" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-8 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all appearance-none">
+                                <option value="">الكل</option>
+                                <option value="pending" {{ ($filters['status'] ?? '') === 'pending' ? 'selected' : '' }}>معلقة</option>
+                                <option value="approved" {{ ($filters['status'] ?? '') === 'approved' ? 'selected' : '' }}>موافق عليها</option>
+                                <option value="rejected" {{ ($filters['status'] ?? '') === 'rejected' ? 'selected' : '' }}>مرفوضة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">من تاريخ</label>
+                        <div class="relative">
+                            <input type="date" name="from_date" value="{{ $filters['from_date'] ?? '' }}" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 pr-2 pl-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">إلى تاريخ</label>
+                        <div class="relative">
+                            <input type="date" name="to_date" value="{{ $filters['to_date'] ?? '' }}" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 pr-2 pl-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
+                        </div>
+                    </div>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="block text-xs font-bold text-slate-600 mb-2">الحالة</label>
-                    <select name="status" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 px-8 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
-                        <option value="">الكل</option>
-                        <option value="pending" {{ ($filters['status'] ?? '') === 'pending' ? 'selected' : '' }}>معلقة</option>
-                        <option value="approved" {{ ($filters['status'] ?? '') === 'approved' ? 'selected' : '' }}>موافق عليها</option>
-                        <option value="rejected" {{ ($filters['status'] ?? '') === 'rejected' ? 'selected' : '' }}>مرفوضة</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">من تاريخ</label>
-                    <input type="date" name="from_date" value="{{ $filters['from_date'] ?? '' }}" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-2">إلى تاريخ</label>
-                    <input type="date" name="to_date" value="{{ $filters['to_date'] ?? '' }}" class="employee-form-input w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all">
-                </div>
-                <div class="flex items-end gap-2">
-                    <button type="submit" class="flex-1 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-all">
+                <div class="flex items-center gap-2 pt-1">
+                    <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all shadow-sm">
                         <i data-lucide="filter" class="w-4 h-4"></i>
+                        تطبيق
                     </button>
-                    <a href="{{ route('my.requests.index') }}" class="flex-1 px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-medium transition-all flex items-center justify-center">
-                        <i data-lucide="x" class="w-4 h-4"></i>
+                    <a href="{{ route('my.requests.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-all">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        إعادة تعيين
                     </a>
                 </div>
             </div>
@@ -189,45 +205,7 @@
 
         <div id="listView">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="mb-2">
-                        <tr class="border-b border-slate-200">
-                            <th class="pb-4 text-right cursor-pointer hover:text-cyan-600 transition-colors" onclick="sortBy('transaction_type')">
-                                <div class="flex items-center gap-1">
-                                    النوع
-                                    @if(request('sort_by') === 'transaction_type')
-                                        <i data-lucide="{{ request('sort_direction') === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3.5 h-3.5"></i>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="pb-4 text-right cursor-pointer hover:text-cyan-600 transition-colors" onclick="sortBy('status')">
-                                <div class="flex items-center gap-1">
-                                    الحالة
-                                    @if(request('sort_by') === 'status')
-                                        <i data-lucide="{{ request('sort_direction') === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3.5 h-3.5"></i>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="pb-4 text-right cursor-pointer hover:text-cyan-600 transition-colors" onclick="sortBy('start_date_time')">
-                                <div class="flex items-center gap-1">
-                                    من تاريخ
-                                    @if(request('sort_by') === 'start_date_time')
-                                        <i data-lucide="{{ request('sort_direction') === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3.5 h-3.5"></i>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="pb-4 text-right cursor-pointer hover:text-cyan-600 transition-colors" onclick="sortBy('end_date_time')">
-                                <div class="flex items-center gap-1">
-                                    إلى تاريخ
-                                    @if(request('sort_by') === 'end_date_time')
-                                        <i data-lucide="{{ request('sort_direction') === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="w-3.5 h-3.5"></i>
-                                    @endif
-                            </th>
-                            <th class="pb-4 text-right">المدة</th>
-                            <th class="pb-4 text-right">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
+
         <div id="listView">
             <div class="overflow-x-auto -mx-4 md:mx-0">
                 <div class="inline-block min-w-full align-middle">

@@ -15,7 +15,7 @@ class MyDocumentRequest extends FormRequest
     {
         return [
             'document_type' => ['required', 'in:identity,passport,contract,health_certificate'],
-            'document_number' => ['required', 'string', 'max:100'],
+            'document_number' => ['required', 'string', 'max:100', 'unique:documents,document_number'],
             'expiry_date' => ['required', 'date', 'after:today'],
             'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];

@@ -23,18 +23,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        $hrRole = RolePermission::where('role_name', 'hr')->first();
-
-        User::firstOrCreate(
-            ['email' => 'hr@hr.com'],
-            [
-                'email' => 'hr@hr.com',
-                'password' => Hash::make('password'),
-                'role_id' => $hrRole->id,
-                'is_active' => true,
-            ]
-        );
-
         $employeeRole = RolePermission::where('role_name', 'employee')->first();
 
         // Only create users that don't have employee records yet

@@ -27,7 +27,7 @@ class HrTransactionFactory extends Factory
             'description' => $this->faker->sentence(),
             'financial_impact' => $type === 'penalty' ? $this->faker->randomFloat(2, 10000, 50000) : ($type === 'promotion' ? $this->faker->randomFloat(2, 50000, 200000) : 0.00),
             'status' => $status,
-            'approved_by' => $status !== 'pending' ? User::whereHas('role', function($q){ $q->whereIn('role_name', ['admin', 'manager', 'hr']); })->inRandomOrder()->first()?->id : null,
+            'approved_by' => $status !== 'pending' ? User::whereHas('role', function($q){ $q->whereIn('role_name', ['admin', 'manager']); })->inRandomOrder()->first()?->id : null,
         ];
     }
 }

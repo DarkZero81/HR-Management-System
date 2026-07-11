@@ -12,7 +12,7 @@ class RolePermissionFactory extends Factory
     public function definition(): array
     {
         return [
-            'role_name' => fake()->unique()->randomElement(['admin', 'investor', 'manager', 'employee']),
+            'role_name' => fake()->unique()->randomElement(['admin', 'manager', 'employee']),
             'description' => fake()->sentence(),
         ];
     }

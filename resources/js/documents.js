@@ -1,10 +1,4 @@
-
-
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-window.updateFileName = function(input) {
+function updateFileName(input) {
     const fileNameDisplay = document.getElementById('fileName');
     if (input.files && input.files.length > 0) {
         fileNameDisplay.textContent = input.files[0].name;
@@ -12,6 +6,4 @@ window.updateFileName = function(input) {
     } else {
         fileNameDisplay.classList.add('hidden');
     }
-};
-
-Alpine.start();
+}

@@ -13,7 +13,7 @@ class DocumentFactory extends Factory
     public function definition(): array
     {
         return [
-            'employee_id' => Employee::inRandomOrder()->first()?->id ?? 1,
+            'employee_id' => Employee::factory(),
             'document_type' => fake()->randomElement(['identity', 'passport', 'contract', 'health_certificate']),
             'document_number' => 'DOC' . fake()->unique()->numberBetween(10000, 99999),
             'expiry_date' => fake()->dateTimeBetween('now', '+5 years')->format('Y-m-d'),

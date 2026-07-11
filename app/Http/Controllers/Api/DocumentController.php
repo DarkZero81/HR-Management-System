@@ -8,23 +8,41 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DocumentController extends Controller
 {
+    protected function ensureAuthorized(): void
+    {
+        if (! Auth::check()) {
+            abort(401, 'Unauthorized');
+        }
+
+        $role = strtolower(optional(Auth::user()->role)->role_name ?? '');
+
+        if (! in_array($role, ['admin', 'manager'], true)) {
+            abort(403, 'Forbidden');
+        }
+    }
+
     public function index(): JsonResponse
     {
-        $documents = Document::with('employee')->get();
+        $this->ensureAuthorized();
+
+        $documents = Document::with('employee.user')->get();
         return response()->json(['data' => $documents], 200);
     }
 
     public function store(Request $request): JsonResponse
     {
+        $this->ensureAuthorized();
+
         return DB::transaction(function () use ($request) {
             $validated = $request->validate([
                 'employee_id' => ['required', 'exists:employees,id'],
                 'document_type' => ['required', 'in:identity,passport,contract,health_certificate'],
-                'document_number' => ['required', 'string', 'max:100', 'unique:documents'],
+                'document_number' => ['required', 'string', 'max:100', 'unique:documents,document_number'],
                 'expiry_date' => ['required', 'date', 'after:today'],
                 'file_path' => ['required', 'string'],
             ]);
@@ -36,12 +54,16 @@ class DocumentController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $document = Document::with('employee')->findOrFail($id);
+        $this->ensureAuthorized();
+
+        $document = Document::with('employee.user')->findOrFail($id);
         return response()->json(['data' => $document], 200);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
+        $this->ensureAuthorized();
+
         return DB::transaction(function () use ($request, $id) {
             $document = Document::findOrFail($id);
 
@@ -60,6 +82,8 @@ class DocumentController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
+        $this->ensureAuthorized();
+
         return DB::transaction(function () use ($id) {
             $document = Document::findOrFail($id);
             $document->delete();
@@ -69,7 +93,9 @@ class DocumentController extends Controller
 
     public function getExpiringDocuments(int $days = 30): JsonResponse
     {
-        $expiringDocuments = Document::with('employee')
+        $this->ensureAuthorized();
+
+        $expiringDocuments = Document::with('employee.user')
             ->where('expiry_date', '<=', Carbon::now()->addDays($days))
             ->where('expiry_date', '>=', Carbon::now())
             ->get();

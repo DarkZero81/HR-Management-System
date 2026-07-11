@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $today = today();
         $role = strtolower(optional($user?->role)->role_name ?? '');
-        $viewMode = in_array($role, ['admin', 'hr', 'manager'], true) ? 'admin' : 'employee';
+        $viewMode = in_array($role, ['admin', 'manager'], true) ? 'admin' : 'employee';
 
         if ($viewMode === 'admin') {
             $todayAttendance = AttendanceLog::query()->where('log_date', $today)->count('*');

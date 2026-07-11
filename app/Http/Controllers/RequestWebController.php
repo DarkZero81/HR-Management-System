@@ -18,12 +18,12 @@ class RequestWebController extends Controller
 {
     private const TRANSACTION_TYPES = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
 
-    private const ADMIN_ROLES = ['admin', 'hr', 'manager'];
+    private const ADMIN_ROLES = ['admin', 'manager'];
 
-    /**
-     * يعرض قائمة الطلبات: الموظف العادي يرى طلباته فقط، والإداري (admin/hr/manager) يرى كل الطلبات.
-     * هذا الميثود الواحد يخدم كلاً من راوت "my.requests.index" وراوت "requests.index" الإداري.
-     */
+     /**
+      * يعرض قائمة الطلبات: الموظف العادي يرى طلباته فقط، والإداري (admin/manager) يرى كل الطلبات.
+      * هذا الميثود الواحد يخدم كلاً من راوت "my.requests.index" وراوت "requests.index" الإداري.
+      */
     public function index(Request $request): View
     {
         $employee = Auth::user()?->employee;
@@ -178,7 +178,7 @@ class RequestWebController extends Controller
             'performed_at' => now(),
         ]);
 
-        // مهم: الموظف العادي يرجع لصفحة "طلباتي" وليس صفحة الإدارة (المحمية بصلاحيات admin/hr/manager)
+        // مهم: الموظف العادي يرجع لصفحة "طلباتي" وليس صفحة الإدارة (المحمية بصلاحيات admin/manager)
         return redirect()->route('my.requests.index')->with('success', 'تم تقديم الطلب بنجاح وهو قيد المراجعة حالياً.');
     }
 
