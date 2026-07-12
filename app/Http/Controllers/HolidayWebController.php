@@ -26,7 +26,7 @@ class HolidayWebController extends Controller
             $holidays = Holiday::all();
         }
 
-        $events = $holidays->map(function ($holiday) {
+        $holidays = $holidays->map(function ($holiday) {
             return [
                 'id' => $holiday->id,
                 'title' => $holiday->holiday_name,
@@ -41,7 +41,7 @@ class HolidayWebController extends Controller
             ];
         });
 
-        return view('holidays.calendar', compact('events'));
+        return view('holidays.calendar', compact('holidays'));
     }
 
     public function create(): View

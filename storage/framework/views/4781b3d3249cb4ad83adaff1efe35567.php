@@ -89,7 +89,7 @@
 
                     $nav = [
                         ['label' => 'الرئيسية', 'route' => 'dashboard', 'icon' => 'home', 'roles' => ['all']],
-                        ['label' => 'الدوام', 'route' => $isAdminRole ? 'attendance.index' : 'my.attendance.my_index', 'icon' => 'clock', 'roles' => ['all']],
+                        ['label' => 'الدوام', 'route' => $isAdminRole ? 'attendance.index' : 'my.attendance', 'icon' => 'clock', 'roles' => ['all']],
                         ['label' => 'الطلبات', 'route' => 'my.requests.index', 'icon' => 'calendar', 'roles' => ['employee', 'admin', 'manager']],
                         ['label' => 'الوثائق', 'route' => 'my.documents.index', 'icon' => 'file-text', 'roles' => ['employee', 'admin', 'manager']],
                         ['label' => 'الرواتب', 'route' => 'payroll.index', 'icon' => 'banknote', 'roles' => ['admin', 'manager']],

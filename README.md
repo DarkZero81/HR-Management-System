@@ -68,6 +68,9 @@
 - 🌓 **وضع داكن / فاتح (Dark/Light Theme)** قابل للتبديل ومحفوظ لكل مستخدم
 - 📱 **تصميم متجاوب بالكامل (Responsive)** مع قائمة جانبية مخصصة للهواتف
 - 🖨️ **تقارير تشغيلية ومالية** قابلة للتصدير
+- 🔔 **Modal تفاصيل الطلب** — عرض تفاصيل أي طلب بنافذة منبثقة بدون مغادرة الصفحة
+- ⚡ **تحسينات الأداء** — Cache للبيانات الثابتة، Pagination للجداول الكبيرة، SoftDeletes لحماية البيانات
+- 🗂️ **ورديات ليلية مدعومة** — إمكانية إنشاء ورديات تمتد عبر منتصف الليل مثل Evening Shift و Night Shift
 
 ---
 
@@ -75,7 +78,7 @@
 
 | الطبقة | التقنية |
 |---|---|
-| **Backend Framework** | Laravel 13 (PHP 8.3+) |
+| **Backend Framework** | Laravel 13 (PHP 8.5+) |
 | **Frontend** | Blade Templates + Tailwind CSS + Alpine.js |
 | **Build Tool** | Vite |
 | **PDF Engine** | mPDF (لدعم عربي كامل وربط صحيح للحروف) |
@@ -91,11 +94,11 @@
 
 ```
 roles_permissions ─┬─< users ─┬─< employees ─┬─< documents
-                    │          │              ├─< attendance_logs >─ attendance_devices
-                    │          │              ├─< hr_transactions
-                    │          └─< audit_logs  └─< payroll_orders
-                    │
-                shifts ────────< employees
+                     │          │              ├─< attendance_logs >─ attendance_devices
+                     │          │              ├─< hr_transactions
+                     │          └─< audit_logs  └─< payroll_orders
+                     │
+                 shifts ────────< employees
 ```
 
 **أهم الجداول:**
@@ -152,6 +155,11 @@ composer run dev
 ## 📌 حالة المشروع وخارطة الطريق
 
 هذا المشروع قيد التطوير الفعلي والتحسين المستمر. من ضمن الإضافات المخطط لها لاحقاً:
+- [x] تحسينات أمنية واضافة SoftDeletes و Observers
+- [x] توحيد API Responses و إضافة Pagination
+- [x] إضافة Cache للبيانات الثابتة
+- [x] دعم الورديات الليلية (Overnight Shifts)
+- [x] Modal تفاصيل الطلب
 - [ ] واجهة API مستقلة موثّقة (Authentication, Attendance, Payroll, Requests) لتطبيق موبايل مستقبلي
 - [ ] نظام إشعارات فورية (Database Notifications) بدل الاعتماد فقط على تحديث الصفحة
 - [ ] تفعيل الـ Queue للعمليات الثقيلة (توليد رواتب شهر كامل لعدد كبير من الموظفين)

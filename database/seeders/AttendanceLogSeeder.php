@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\AttendanceLog;
 use App\Models\AttendanceDevice;
+use App\Models\AttendanceLog;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -21,7 +21,9 @@ class AttendanceLogSeeder extends Seeder
 
         foreach ($employees as $employee) {
             $shift = $employee->shift;
-            if (!$shift) continue;
+            if (! $shift) {
+                continue;
+            }
 
             // Loop back 30 days to build out clear historical performance data
             for ($day = 30; $day >= 0; $day--) {
@@ -33,7 +35,9 @@ class AttendanceLogSeeder extends Seeder
                 }
 
                 // 10% chance a given employee calls out absent completely
-                if (fake()->boolean(10)) continue;
+                if (fake()->boolean(10)) {
+                    continue;
+                }
 
                 // Safely extract the configured standard shift timing hour window
                 $shiftTime = date('H:i:s', strtotime($shift->start_time));

@@ -3,7 +3,7 @@
 @section('title', 'تسجيل الحضور')
 
 @section('content')
-<div class="space-y-6 mb-4">
+<div class="space-y-6 my-4">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الدوام والحضور</p>
@@ -293,7 +293,12 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                @php
+                                    $userRole = optional(auth()->user()->role)->role_name;
+                                    $canManage = in_array(strtolower($userRole), ['admin', 'manager'], true);
+                                @endphp
+                                @if($canManage)
+                                <div class="flex items-center gap-2">
                                     <a href="{{ route('attendance.edit', $log) }}" class="p-2 rounded-xl bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 transition-all" title="تعديل">
                                         <i data-lucide="pencil" class="w-4 h-4"></i>
                                     </a>
@@ -305,6 +310,7 @@
                                         </button>
                                     </form>
                                 </div>
+                                @endif
                             </td>
                         </tr>
                     @empty

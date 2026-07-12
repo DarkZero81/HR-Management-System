@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class DepartmentWebController extends Controller
@@ -73,9 +74,14 @@ class DepartmentWebController extends Controller
     }
 
     // حذف القسم
-    public function destroy(Department $department)
+    public function destroy(Department $department): RedirectResponse
     {
+        if ($department->employees()->exists()) {
+            return redirect()->route('departments.index')->with('error', 'لا يمكن حذف هذا القسم لارتباط موظفين به حالياً.');
+        }
+
         $department->delete();
+
         return redirect()->route('departments.index')->with('success', 'تم حذف القسم بنجاح');
     }
 }

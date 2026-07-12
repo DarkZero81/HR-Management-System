@@ -352,7 +352,7 @@
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center">
-                <div class="relative transform overflow-hidden rounded-[28px] border border-white/10 bg-white/95 dark:bg-slate-900/95 px-4 py-5 text-right shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 scale-95" id="modalPanel">
+                <div class="relative transform overflow-hidden rounded-[28px] border border-slate-200 bg-white px-4 py-5 text-right shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl opacity-0 scale-95 dark:bg-slate-900 dark:border-slate-700" id="modalPanel">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
                         <div>
                             <h3 class="text-xl font-bold text-slate-900" id="modalTitle">تفاصيل الطلب</h3>
@@ -429,21 +429,21 @@
         const modalPanel = document.getElementById('modalPanel');
         const requestTransactions = <?php echo json_encode($transactions->map(function ($t) {
             return [
-                'id' => $t->id,
-                'type' => $t->transaction_type,
-                'status' => $t->status,
+                'id' => (int) $t->id,
+                'type' => (string) $t->transaction_type,
+                'status' => (string) $t->status,
                 'start' => \Carbon\Carbon::parse($t->start_date_time)->format('Y-m-d H:i'),
                 'end' => \Carbon\Carbon::parse($t->end_date_time)->format('Y-m-d H:i'),
                 'duration' => (int) (\Carbon\Carbon::parse($t->start_date_time)->diffInDays(\Carbon\Carbon::parse($t->end_date_time)) + 1),
                 'financial' => (float) $t->financial_impact,
-                'description' => $t->description ?? 'لا توجد ملاحظات.',
-                'employee_name' => $t->employee->full_name ?? '—',
-                'employee_email' => $t->employee->user->email ?? '—',
-                'employee_department' => $t->employee->department->name ?? 'غير معين',
-                'approver_name' => $t->approver->name ?? '—',
-                'approver_email' => $t->approver->email ?? '—',
-                'created_at' => $t->created_at?->format('Y-m-d H:i'),
-                'updated_at' => $t->updated_at?->format('Y-m-d H:i'),
+                'description' => (string) ($t->description ?? 'لا توجد ملاحظات.'),
+                'employee_name' => (string) ($t->employee->full_name ?? '—'),
+                'employee_email' => (string) ($t->employee->user->email ?? '—'),
+                'employee_department' => (string) ($t->employee->department->name ?? 'غير معين'),
+                'approver_name' => (string) ($t->approver->name ?? '—'),
+                'approver_email' => (string) ($t->approver->email ?? '—'),
+                'created_at' => $t->created_at?->format('Y-m-d H:i') ?? '—',
+                'updated_at' => $t->updated_at?->format('Y-m-d H:i') ?? '—',
             ];
         })->all(), JSON_UNESCAPED_UNICODE); ?>
 
@@ -475,7 +475,7 @@
 
             document.getElementById('modalStart').textContent = data.start;
             document.getElementById('modalEnd').textContent = data.end;
-            document.getElementById('modalDuration').innerHTML = parseInt(data.duration, 10) + ' <span class=\"text-xs text-slate-400\">يوم</span>';
+            document.getElementById('modalDuration').innerHTML = parseInt(data.duration, 10) + ' <span class="text-xs text-slate-400">يوم</span>';
             document.getElementById('modalFinancial').textContent = Number(data.financial).toFixed(2) + ' ل.س';
             document.getElementById('modalDescription').textContent = data.description;
 

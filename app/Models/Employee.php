@@ -26,7 +26,6 @@ class Employee extends Model
         'resign_date',
         'vacation_balance',
         'performance_score',
-        'avatar',
         'date_of_birth',
         'place_of_birth',
         'education_level',

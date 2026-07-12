@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,11 +13,13 @@ return new class extends Migration
             $table->unsignedBigInteger('role_id')->nullable()->change();
         });
 
-        $adminRole = \App\Models\RolePermission::where('role_name', 'admin')->first();
+        $adminRole = DB::table('roles_permissions')->where('role_name', 'admin')->first();
         if ($adminRole) {
-            \App\Models\User::whereHas('role', function ($q) {
-                $q->whereIn('role_name', ['hr', 'investor']);
-            })->update(['role_id' => $adminRole->id]);
+            DB::table('users')
+                ->whereIn('users.role_id', function ($query) {
+                    $query->select('id')->from('roles_permissions')->whereIn('role_name', ['hr', 'investor']);
+                })
+                ->update(['role_id' => $adminRole->id]);
         }
 
         Schema::table('users', function (Blueprint $table) {

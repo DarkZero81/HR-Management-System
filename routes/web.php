@@ -30,60 +30,60 @@ Route::middleware(['auth', 'user.active'])->group(function () {
 
     // departments
     Route::get('/departments', [DepartmentWebController::class, 'index'])->name('departments.index');
-    Route::get('/departments/{department}', [DepartmentWebController::class, 'show'])->name('departments.show');
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::post('/departments', [DepartmentWebController::class, 'store'])->name('departments.store');
         Route::get('/departments/create', [DepartmentWebController::class, 'create'])->name('departments.create');
+        Route::post('/departments', [DepartmentWebController::class, 'store'])->name('departments.store');
         Route::get('/departments/{department}/edit', [DepartmentWebController::class, 'edit'])->name('departments.edit');
         Route::put('/departments/{department}', [DepartmentWebController::class, 'update'])->name('departments.update');
         Route::delete('/departments/{department}', [DepartmentWebController::class, 'destroy'])->name('departments.destroy');
     });
+    Route::get('/departments/{department}', [DepartmentWebController::class, 'show'])->name('departments.show');
 
     // employees
     Route::get('/employees', [EmployeeWebController::class, 'index'])->name('employees.index');
-    Route::get('/employees/{employee}', [EmployeeWebController::class, 'show'])->name('employees.show');
-    Route::get('/employees/{employee}/pdf', [EmployeeWebController::class, 'downloadPdf'])->name('employees.pdf');
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::post('/employees', [EmployeeWebController::class, 'store'])->name('employees.store');
         Route::get('/employees/create', [EmployeeWebController::class, 'create'])->name('employees.create');
+        Route::post('/employees', [EmployeeWebController::class, 'store'])->name('employees.store');
         Route::get('/employees/{employee}/edit', [EmployeeWebController::class, 'edit'])->name('employees.edit');
         Route::put('/employees/{employee}', [EmployeeWebController::class, 'update'])->name('employees.update');
         Route::delete('/employees/{employee}', [EmployeeWebController::class, 'destroy'])->name('employees.destroy');
     });
+    Route::get('/employees/{employee}', [EmployeeWebController::class, 'show'])->name('employees.show');
+    Route::get('/employees/{employee}/pdf', [EmployeeWebController::class, 'downloadPdf'])->name('employees.pdf');
 
     // shifts
     Route::get('/shifts', [ShiftWebController::class, 'index'])->name('shifts.index');
-    Route::get('/shifts/{shift}', [ShiftWebController::class, 'show'])->name('shifts.show');
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::post('/shifts', [ShiftWebController::class, 'store'])->name('shifts.store');
         Route::get('/shifts/create', [ShiftWebController::class, 'create'])->name('shifts.create');
+        Route::post('/shifts', [ShiftWebController::class, 'store'])->name('shifts.store');
         Route::get('/shifts/{shift}/edit', [ShiftWebController::class, 'edit'])->name('shifts.edit');
         Route::put('/shifts/{shift}', [ShiftWebController::class, 'update'])->name('shifts.update');
         Route::delete('/shifts/{shift}', [ShiftWebController::class, 'destroy'])->name('shifts.destroy');
     });
+    Route::get('/shifts/{shift}', [ShiftWebController::class, 'show'])->name('shifts.show');
 
     // holidays
     Route::get('/holidays', [HolidayWebController::class, 'index'])->name('holidays.index');
     Route::get('/holidays/calendar', [HolidayWebController::class, 'calendar'])->name('holidays.calendar');
-    Route::get('/holidays/{holiday}', [HolidayWebController::class, 'show'])->name('holidays.show');
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::post('/holidays', [HolidayWebController::class, 'store'])->name('holidays.store');
         Route::get('/holidays/create', [HolidayWebController::class, 'create'])->name('holidays.create');
+        Route::post('/holidays', [HolidayWebController::class, 'store'])->name('holidays.store');
         Route::get('/holidays/{holiday}/edit', [HolidayWebController::class, 'edit'])->name('holidays.edit');
         Route::put('/holidays/{holiday}', [HolidayWebController::class, 'update'])->name('holidays.update');
         Route::delete('/holidays/{holiday}', [HolidayWebController::class, 'destroy'])->name('holidays.destroy');
     });
+    Route::get('/holidays/{holiday}', [HolidayWebController::class, 'show'])->name('holidays.show');
 
     // devices
     Route::get('/devices', [DeviceWebController::class, 'index'])->name('devices.index');
-    Route::get('/devices/{device}', [DeviceWebController::class, 'show'])->name('devices.show');
     Route::middleware(['role:admin,manager'])->group(function () {
-        Route::post('/devices', [DeviceWebController::class, 'store'])->name('devices.store');
         Route::get('/devices/create', [DeviceWebController::class, 'create'])->name('devices.create');
+        Route::post('/devices', [DeviceWebController::class, 'store'])->name('devices.store');
         Route::get('/devices/{device}/edit', [DeviceWebController::class, 'edit'])->name('devices.edit');
         Route::put('/devices/{device}', [DeviceWebController::class, 'update'])->name('devices.update');
         Route::delete('/devices/{device}', [DeviceWebController::class, 'destroy'])->name('devices.destroy');
     });
+    Route::get('/devices/{device}', [DeviceWebController::class, 'show'])->name('devices.show');
 
     // documents admin
     Route::get('/documents', [DocumentWebController::class, 'index'])->name('documents.index');
@@ -96,14 +96,13 @@ Route::middleware(['auth', 'user.active'])->group(function () {
 
     // requests
     Route::get('/requests', [RequestWebController::class, 'index'])->name('requests.index');
-    Route::get('/requests/{request}', [RequestWebController::class, 'show'])->name('requests.show');
     Route::get('/requests/create', [RequestWebController::class, 'create'])->name('requests.create');
-    Route::post('/requests', [RequestWebController::class, 'store'])->name('requests.store');
-    Route::delete('/requests/{request}', [RequestWebController::class, 'destroy'])->name('requests.destroy');
-    Route::post('/requests/{request}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
-    Route::patch('/requests/{request}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status.patch');
-    Route::post('/requests/{transaction}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status.post');
     Route::get('/requests/export-csv', [RequestWebController::class, 'downloadCsv'])->name('requests.export.csv');
+    Route::post('/requests', [RequestWebController::class, 'store'])->name('requests.store');
+    Route::get('/requests/{transaction}', [RequestWebController::class, 'show'])->name('requests.show');
+    Route::delete('/requests/{transaction}', [RequestWebController::class, 'destroy'])->name('requests.destroy');
+    Route::post('/requests/{transaction}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
+    Route::patch('/requests/{transaction}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status.patch');
     Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'downloadPdf'])->name('requests.pdf.employee');
 
     // payroll
@@ -125,6 +124,9 @@ Route::middleware(['auth', 'user.active'])->group(function () {
     // my area
     Route::prefix('my')->name('my.')->group(function () {
         Route::get('/attendance', [AttendanceWebController::class, 'myAttendance'])->name('attendance');
+        Route::post('/attendance/check-in', [AttendanceWebController::class, 'storeMy'])->name('attendance.checkin');
+        Route::post('/attendance/check-out', [AttendanceWebController::class, 'checkOutMy'])->name('attendance.checkout');
+        Route::get('/attendance/export-csv', [AttendanceWebController::class, 'exportMyCsv'])->name('attendance.export.csv');
         Route::get('/documents', [DocumentWebController::class, 'myDocuments'])->name('documents.index');
         Route::get('/documents/create', [DocumentWebController::class, 'myCreate'])->name('documents.create');
         Route::get('/documents/{document}', [DocumentWebController::class, 'myShow'])->name('documents.show');
@@ -136,9 +138,9 @@ Route::middleware(['auth', 'user.active'])->group(function () {
         Route::get('/requests', [RequestWebController::class, 'index'])->name('requests.index');
         Route::get('/requests/create', [RequestWebController::class, 'create'])->name('requests.create');
         Route::post('/requests', [RequestWebController::class, 'store'])->name('requests.store');
-        Route::get('/requests/{request}', [RequestWebController::class, 'show'])->name('requests.show');
-        Route::delete('/requests/{request}', [RequestWebController::class, 'destroy'])->name('requests.destroy');
-        Route::post('/requests/{request}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
+        Route::get('/requests/{transaction}', [RequestWebController::class, 'show'])->name('requests.show');
+        Route::delete('/requests/{transaction}', [RequestWebController::class, 'destroy'])->name('requests.destroy');
+        Route::post('/requests/{transaction}/status', [RequestWebController::class, 'updateStatus'])->name('requests.update_status');
         Route::get('/requests/export-csv', [RequestWebController::class, 'downloadCsv'])->name('requests.export.csv');
         Route::get('requests/{transaction}/pdf', [RequestWebController::class, 'downloadPdf'])->name('requests.pdf.employee');
     });

@@ -3,7 +3,7 @@
 @section('title', 'حضوري الشخصي')
 
 @section('content')
-    <div class="space-y-6">
+    <div class="space-y-6 my-4">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الدوام والحضور</p>
@@ -122,7 +122,7 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
-            <form method="GET" action="{{ route('my.attendance.my_index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <form method="GET" action="{{ route('my.attendance') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div class="flex-1">
                     <label class="block text-sm font-medium text-slate-700 mb-2">الشهر</label>
                     <input type="month" name="month" value="{{ request('month', now()->format('Y-m')) }}"

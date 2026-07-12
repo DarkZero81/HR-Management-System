@@ -103,12 +103,7 @@ class EmployeeWebController extends Controller
             'job_title'           => ['nullable', 'string', 'max:100'],
             'contract_end_date'   => ['nullable', 'date', 'after_or_equal:join_date'],
             'insurance_number'    => ['nullable', 'string', 'max:50'],
-            'avatar'             => ['nullable', 'image', 'max:2048'],
         ]);
-
-        if ($request->hasFile('avatar')) {
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
-        }
 
         $employee = Employee::create($validated);
 

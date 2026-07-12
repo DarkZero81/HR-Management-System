@@ -124,9 +124,19 @@ class AttendanceWebController extends Controller
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل وتحديث حركة الحضور بنظام الأمان والمطابقة بنجاح.');
     }
 
-    /**
-     * تسجيل حركة الانصراف (Check-Out) لسجل الحضور الحالي لهذا اليوم، مع احتساب العمل الإضافي تلقائياً.
-     */
+    public function storeMy(Request $request)
+    {
+        $employee = Auth::user()?->employee;
+
+        if (!$employee) {
+            return redirect()->route('my.attendance')->with('error', 'لا يمكن تسجيل الحضور لأن حسابك غير مربوط بملف موظف.');
+        }
+
+        $request->merge(['employee_id' => $employee->id]);
+
+        return $this->store($request);
+    }
+
     public function checkOut(Request $request)
     {
         $request->validate([
@@ -161,6 +171,19 @@ class AttendanceWebController extends Controller
         ]);
 
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل حركة الانصراف واحتساب العمل الإضافي بنجاح.');
+    }
+
+    public function checkOutMy(Request $request)
+    {
+        $employee = Auth::user()?->employee;
+
+        if (!$employee) {
+            return redirect()->route('my.attendance')->with('error', 'لا يمكن تسجيل الانصراف لأن حسابك غير مربوط بملف موظف.');
+        }
+
+        $request->merge(['employee_id' => $employee->id]);
+
+        return $this->checkOut($request);
     }
 
     public function edit(AttendanceLog $log)
