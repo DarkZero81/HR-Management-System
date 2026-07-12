@@ -119,11 +119,11 @@
                     <span class="text-xs font-bold text-slate-500 bg-slate-100 px-4 py-1 rounded-full">{{ $stats['total'] }} طلب</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="listViewBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition-all">
+                    <button id="listViewBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all">
                         <i data-lucide="list" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">قائمة</span>
                     </button>
-                    <button id="calendarViewBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-all hover:bg-slate-300">
+                    <button id="calendarViewBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-200 text-slate-500 rounded-xl text-sm font-semibold transition-all hover:bg-slate-300">
                         <i data-lucide="calendar" class="w-4 h-4"></i>
                         <span class="hidden sm:inline">تقويم</span>
                     </button>
