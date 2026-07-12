@@ -19,7 +19,7 @@ class PayrollOrderFactory extends Factory
 
         return [
             'employee_id' => $employee?->id ?? 1,
-            'salary_month' => now()->subMonth()->format('Y-m'),
+            'salary_month' => now()->format('Y-m'),
             'allowances' => $allowances,
             'deductions' => $deductions,
             'net_salary' => max($netSalary, 0),

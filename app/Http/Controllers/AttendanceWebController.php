@@ -15,37 +15,74 @@ class AttendanceWebController extends Controller
     {
         $query = AttendanceLog::with(['employee', 'device']);
 
-        if ($request->has('date') && $request->date != '') {
+        if ($request->filled('from_date')) {
+            $query->where('log_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->where('log_date', '<=', $request->to_date);
+        }
+        if ($request->filled('date') && $request->date != '') {
             $query->where('log_date', $request->date);
-        } else {
+        } elseif (!$request->filled('from_date') && !$request->filled('to_date')) {
             $query->where('log_date', Carbon::today()->format('Y-m-d'));
         }
 
-        if ($request->has('status') && $request->status != '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $logs = $query->latest()->paginate(8);
+        $logs = $query->latest()->paginate(10)->appends($request->query());
         $devices = AttendanceDevice::all();
 
-        return view('attendance.index', compact('logs', 'devices'));
+        $totalPresent = AttendanceLog::whereIn('id', $logs->getCollection()->pluck('id'))
+            ->where('status', 'present')->count();
+        $totalLate = AttendanceLog::whereIn('id', $logs->getCollection()->pluck('id'))
+            ->where('status', 'late')->count();
+        $totalAbsent = AttendanceLog::whereIn('id', $logs->getCollection()->pluck('id'))
+            ->where('status', 'absent')->count();
+
+        $stats = [
+            'total' => $logs->total(),
+            'present' => (clone $query)->where('status', 'present')->count(),
+            'late' => (clone $query)->where('status', 'late')->count(),
+            'absent' => (clone $query)->where('status', 'absent')->count(),
+        ];
+
+        return view('attendance.index', compact('logs', 'devices', 'stats'));
     }
 
     public function myAttendance(Request $request)
     {
-        // حماية أمنية: التأكد من أن المستخدم الحالي مرتبط بالموظف
         $employee = Auth::user()?->employee;
 
         if (!$employee) {
             return redirect()->route('dashboard')->with('error', 'هذا الحساب غير مربوط بملف موظف لعرض سجل الحضور الشخصي.');
         }
 
-        $logs = AttendanceLog::with(['device'])
-            ->where('employee_id', $employee->id)
-            ->latest('log_date')
-            ->paginate(8);
+        $query = AttendanceLog::with(['device'])
+            ->where('employee_id', $employee->id);
 
-        return view('attendance.my_index', compact('logs'));
+        if ($request->filled('month')) {
+            $query->whereMonth('log_date', Carbon::parse($request->month)->month)
+                ->whereYear('log_date', Carbon::parse($request->month)->year);
+        }
+
+        $logs = $query->latest('log_date')->paginate(10)->appends($request->query());
+
+        $stats = [
+            'total' => (clone $query)->count(),
+            'present' => (clone $query)->where('status', 'present')->count(),
+            'late' => (clone $query)->where('status', 'late')->count(),
+            'absent' => (clone $query)->where('status', 'absent')->count(),
+        ];
+
+        $today = Carbon::today()->format('Y-m-d');
+        $todayLog = AttendanceLog::where('employee_id', $employee->id)
+            ->where('log_date', $today)
+            ->first();
+        $devices = AttendanceDevice::all();
+
+        return view('attendance.my_index', compact('logs', 'stats', 'todayLog', 'devices'));
     }
 
     public function store(Request $request)
@@ -55,23 +92,19 @@ class AttendanceWebController extends Controller
             'device_id' => ['nullable', 'exists:attendance_devices,id'],
         ]);
 
-        $employee = Employee::find($request->employee_id);
+        $employee = Employee::with('shift')->findOrFail($request->employee_id);
         $today = Carbon::today()->format('Y-m-d');
         $now = Carbon::now();
 
-        // استخدام تحديث أو إنشاء (updateOrCreate) الآمنة لتجنب خطأ القيد الفريد لقاعدة البيانات في حال البصم المزدوج
-        $shift = $employee->shift;
         $lateMinutes = 0;
         $status = 'present';
 
-        if ($shift) {
-            $shiftStart = Carbon::parse($today . ' ' . $shift->start_time);
-            if ($now->gt($shiftStart)) {
-                $diffInMinutes = $now->diffInMinutes($shiftStart);
-                if ($diffInMinutes > $shift->grace_period_minutes) {
-                    $lateMinutes = $diffInMinutes;
-                    $status = 'late';
-                }
+        if ($employee->shift) {
+            $shiftStart = Carbon::parse($today . ' ' . $employee->shift->start_time);
+            $gracePeriod = $employee->shift->grace_period_minutes;
+            if ($now->gt($shiftStart->addMinutes($gracePeriod))) {
+                $lateMinutes = $now->diffInMinutes($shiftStart);
+                $status = 'late';
             }
         }
 
@@ -128,5 +161,45 @@ class AttendanceWebController extends Controller
         ]);
 
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل حركة الانصراف واحتساب العمل الإضافي بنجاح.');
+    }
+
+    public function edit(AttendanceLog $log)
+    {
+        $devices = AttendanceDevice::all();
+        return view('attendance.edit', compact('log', 'devices'));
+    }
+
+    public function update(Request $request, AttendanceLog $log)
+    {
+        $validated = $request->validate([
+            'check_in' => ['nullable', 'date_format:H:i'],
+            'check_out' => ['nullable', 'date_format:H:i'],
+            'late_minutes' => ['nullable', 'integer', 'min:0'],
+            'overtime_minutes' => ['nullable', 'integer', 'min:0'],
+            'status' => ['required', 'in:present,late,absent,holiday'],
+            'device_id' => ['nullable', 'exists:attendance_devices,id'],
+        ]);
+
+        $today = $log->log_date;
+        $checkIn = $validated['check_in'] ? Carbon::parse($today . ' ' . $validated['check_in']) : null;
+        $checkOut = $validated['check_out'] ? Carbon::parse($today . ' ' . $validated['check_out']) : null;
+
+        $log->update([
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'late_minutes' => $validated['late_minutes'] ?? 0,
+            'overtime_minutes' => $validated['overtime_minutes'] ?? 0,
+            'status' => $validated['status'],
+            'device_id' => $validated['device_id'],
+        ]);
+
+        return redirect()->route('attendance.index')->with('success', 'تم تحديث سجل الحضور بنجاح.');
+    }
+
+    public function destroy(AttendanceLog $log)
+    {
+        $log->delete();
+
+        return redirect()->route('attendance.index')->with('success', 'تم حذف سجل الحضور بنجاح.');
     }
 }

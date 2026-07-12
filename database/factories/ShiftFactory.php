@@ -11,11 +11,20 @@ class ShiftFactory extends Factory
 
     public function definition(): array
     {
+        $shiftNames = [
+            ['Morning Shift', '08:00:00', '16:00:00', false],
+            ['Evening Shift', '16:00:00', '00:00:00', true],
+            ['Night Shift', '00:00:00', '08:00:00', true],
+        ];
+
+        $shift = fake()->randomElement($shiftNames);
+
         return [
-            'shift_name' => fake()->randomElement(['Morning Shift', 'Evening Shift', 'Night Shift']),
-            'start_time' => fake()->randomElement(['08:00:00', '16:00:00', '00:00:00']),
-            'end_time' => fake()->randomElement(['16:00:00', '00:00:00', '08:00:00']),
+            'shift_name' => $shift[0],
+            'start_time' => $shift[1],
+            'end_time' => $shift[2],
             'grace_period_minutes' => 15,
+            'is_overnight' => $shift[3],
         ];
     }
 }

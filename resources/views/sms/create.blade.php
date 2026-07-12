@@ -20,7 +20,7 @@
 
         <div>
             <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">نوع المستلم <span class="text-rose-500">*</span></label>
-            <select name="type" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer" onchange="toggleRecipients(this.value)">
+            <select name="type" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer" onchange="toggleRecipients(this.value)">
                 <option value="individual" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">موظف محدد</option>
                 <option value="department" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">قسم محدد</option>
                 <option value="all" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">جميع الموظفين</option>
@@ -29,7 +29,7 @@
 
         <div id="individualRecipients">
             <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الموظفون</label>
-            <select name="recipients[]" multiple class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer h-48">
+            <select name="recipients[]" multiple class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer h-48">
                 @foreach($employees as $emp)
                     <option value="{{ $emp->id }}" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $emp->first_name }} {{ $emp->last_name }} - {{ $emp->phone ?? $emp->user->email }}</option>
                 @endforeach
@@ -38,7 +38,7 @@
 
         <div id="departmentRecipients" class="hidden">
             <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">القسم</label>
-            <select name="department_id" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+            <select name="department_id" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
                 @foreach(\App\Models\Department::all() as $dept)
                     <option value="{{ $dept->id }}" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $dept->name }}</option>
                 @endforeach
@@ -47,7 +47,7 @@
 
         <div>
             <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">نص الرسالة <span class="text-rose-500">*</span></label>
-            <textarea name="message" rows="5" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all resize-none" placeholder="اكتب رسالتك هنا..."></textarea>
+            <textarea name="message" rows="5" class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all resize-none" placeholder="اكتب رسالتك هنا..."></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-2.5 border-t border-slate-200 dark:border-white/5 pt-4">

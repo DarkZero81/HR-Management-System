@@ -14,12 +14,45 @@ class PayrollWebController extends Controller
     public function index(Request $request): View
     {
         $month = $request->get('month', \Carbon\Carbon::now()->format('Y-m'));
-        $payrolls = PayrollOrder::with('employee')
-            ->where('salary_month', $month)
-            ->latest()
-            ->paginate(10);
+
+        $query = PayrollOrder::with('employee')->where('salary_month', $month);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('employee', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('full_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        $payrolls = $query->latest()->paginate(10)->appends($request->query());
 
         return view('payroll.index', compact('payrolls', 'month'));
+    }
+
+    public function myPayroll(Request $request): View
+    {
+        $employeeId = Auth::user()?->employee?->id;
+
+        if (!$employeeId) {
+            abort(403, 'لا يوجد ملف موظف مرتبط بحسابك.');
+        }
+
+        $month = $request->get('month', \Carbon\Carbon::now()->format('Y-m'));
+
+        $payrolls = PayrollOrder::with('employee')
+            ->where('employee_id', $employeeId)
+            ->where('salary_month', $month)
+            ->latest()
+            ->paginate(10)
+            ->appends($request->query());
+
+        return view('payroll.my_index', compact('payrolls', 'month'));
     }
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
@@ -101,10 +134,13 @@ class PayrollWebController extends Controller
 
         $this->ensureMpdfAvailable();
 
+        $companyName = \App\Models\SystemSetting::where('setting_key', 'company_name')->value('setting_value') ?? 'المنقذ';
+
         $html = view('payroll.pdf_payslip', [
             'employee' => $employee,
             'payroll'  => $payroll,
             'date'     => now()->format('Y-m-d'),
+            'company_name' => $companyName,
         ])->render();
 
         $mpdf = $this->makeMpdf();
@@ -116,6 +152,18 @@ class PayrollWebController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    public function markAsPaid(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $payroll = PayrollOrder::findOrFail($id);
+
+        $payroll->update([
+            'payment_status' => 'paid',
+            'paid_at' => now(),
+        ]);
+
+        return back()->with('success', 'تم تحديث حالة الدفع إلى: مدفوع.');
     }
 
     private function ensureMpdfAvailable(): void

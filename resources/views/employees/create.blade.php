@@ -5,7 +5,7 @@
 <div class="max-w-4xl mx-auto space-y-6 px-4 py-4" dir="rtl">
     <div class="border-b border-white/5 pb-4">
         <p class="text-xs font-black uppercase tracking-[0.35em] text-teal-400">الموظفين</p>
-        <h1 class="text-2xl md:text-3xl font-black text-white mt-0.5">إنشاء ملف موظف جديد</h1>
+        <h1 class="text-3xl font-bold text-slate-800">إنشاء ملف موظف جديد</h1>
         <p class="text-xs text-slate-400 mt-1">إدخال البيانات الشخصية والمالية والتعاقدية للموظف الجديد بالنظام.</p>
     </div>
     @if ($errors->any())

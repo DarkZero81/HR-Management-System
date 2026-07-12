@@ -50,16 +50,20 @@ class AttendanceLogController extends Controller
                 }
             }
 
-            $attendanceLog = AttendanceLog::create([
-                'employee_id' => $validated['employee_id'],
-                'device_id' => $validated['device_id'],
-                'log_date' => $logDate,
-                'check_in' => $checkInTime,
-                'check_out' => null,
-                'late_minutes' => $lateMinutes,
-                'overtime_minutes' => 0,
-                'status' => $lateMinutes > 0 ? 'late' : 'present',
-            ]);
+            $attendanceLog = AttendanceLog::updateOrCreate(
+                [
+                    'employee_id' => $validated['employee_id'],
+                    'log_date' => $logDate,
+                ],
+                [
+                    'device_id' => $validated['device_id'],
+                    'check_in' => $checkInTime,
+                    'check_out' => null,
+                    'late_minutes' => $lateMinutes,
+                    'overtime_minutes' => 0,
+                    'status' => $lateMinutes > 0 ? 'late' : 'present',
+                ]
+            );
 
             return response()->json(['data' => $attendanceLog->load(['employee.user', 'device'])], 201);
         });

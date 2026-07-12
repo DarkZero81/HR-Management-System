@@ -19,15 +19,15 @@ class PayrollOrderSeeder extends Seeder
                 $baseSalary = 1000;
             }
 
-            $allowances = fake()->randomFloat(2, 100, 500);
-            $deductions = fake()->randomFloat(2, 0, 200);
+            $allowances = fake()->randomFloat(2, 100, 200);
+            $deductions = fake()->randomFloat(2, 0, 100);
             $netSalary = $baseSalary + $allowances - $deductions;
 
             PayrollOrder::firstOrCreate(
-                ['employee_id' => $employee->id, 'salary_month' => now()->subMonth()->format('Y-m')],
+                ['employee_id' => $employee->id, 'salary_month' => now()->format('Y-m')],
                 [
                     'employee_id' => $employee->id,
-                    'salary_month' => now()->subMonth()->format('Y-m'),
+                    'salary_month' => now()->format('Y-m'),
                     'allowances' => $allowances,
                     'deductions' => $deductions,
                     'net_salary' => max($netSalary, 0),

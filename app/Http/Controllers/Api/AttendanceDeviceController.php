@@ -67,6 +67,7 @@ class AttendanceDeviceController extends Controller
             $device = AttendanceDevice::findOrFail($id);
             $device->status = $device->status === 'online' ? 'offline' : 'online';
             $device->last_sync = $device->status === 'online' ? now() : null;
+            $device->last_sync_at = $device->status === 'online' ? now() : null;
             $device->save();
             return response()->json(['data' => $device], 200);
         });

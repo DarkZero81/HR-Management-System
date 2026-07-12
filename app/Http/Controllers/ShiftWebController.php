@@ -2,101 +2,88 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreShiftRequest;
+use App\Http\Requests\UpdateShiftRequest;
 use App\Models\Shift;
-use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ShiftWebController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $shifts = Shift::orderBy('shift_name')->paginate(8);
-        return view('shifts.index', compact('shifts'));
+        $query = Shift::query()->withCount('employees');
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('shift_name', 'like', '%' . $request->search . '%')
+                  ->orWhere('start_time', 'like', '%' . $request->search . '%')
+                  ->orWhere('end_time', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $shifts = $query->orderBy('shift_name')->paginate(10)->appends($request->query());
+
+        $shiftsWithCount = Shift::withCount('employees')->get();
+        $maxEmployeesShift = $shiftsWithCount->sortByDesc('employees_count')->first();
+
+        $stats = [
+            'total' => Shift::count(),
+            'total_employees' => $shiftsWithCount->sum('employees_count'),
+            'avg_employees' => $shiftsWithCount->avg('employees_count'),
+            'empty_shifts' => $shiftsWithCount->filter(fn($s) => $s->employees_count == 0)->count(),
+            'max_employees_shift' => $maxEmployeesShift?->employees_count ?? 0,
+            'max_employees_shift_name' => $maxEmployeesShift?->shift_name ?? null,
+            'overnight_shifts' => Shift::where('is_overnight', true)->count(),
+        ];
+
+        return view('shifts.index', compact('shifts', 'stats'));
     }
 
     public function create(): View
     {
-        return view('shifts.create');
+        return view('shifts.form');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreShiftRequest $request): RedirectResponse
     {
-        // تم التعديل ليدعم صيغة الوقت من المتصفح مباشرة (ساعة:دقيقة) أو (ساعة:دقيقة:ثانية)
-        $validated = $request->validate([
-            'shift_name' => ['required', 'string', 'max:100'],
-            'start_time' => ['required', 'date_format:H:i:s,H:i'],
-            'end_time' => ['required', 'date_format:H:i:s,H:i', 'after:start_time'],
-            'grace_period_minutes' => ['nullable', 'integer', 'min:0'],
-        ]);
-
-        $shift = Shift::create($validated);
-
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action_type' => 'create',
-            'table_name' => 'shifts',
-            'record_id' => $shift->id,
-            'new_values' => $shift->toArray(),
-            'performed_at' => now(),
-        ]);
+        $shift = Shift::create($request->validated());
 
         return redirect()->route('shifts.index')->with('success', 'تم إنشاء الوردية بنجاح');
     }
 
     public function edit(Shift $shift): View
     {
-        return view('shifts.edit', compact('shift'));
+        return view('shifts.form', compact('shift'));
     }
 
-    public function update(Request $request, Shift $shift): RedirectResponse
+    public function update(UpdateShiftRequest $request, Shift $shift): RedirectResponse
     {
-        // تم التعديل ليدعم صيغ الوقت المختلفة عند التعديل منعاً لخطأ التحقق المكسور
-        $validated = $request->validate([
-            'shift_name' => ['required', 'string', 'max:100'],
-            'start_time' => ['required', 'date_format:H:i:s,H:i'],
-            'end_time' => ['required', 'date_format:H:i:s,H:i', 'after:start_time'],
-            'grace_period_minutes' => ['nullable', 'integer', 'min:0'],
-        ]);
-
-        $oldValues = $shift->toArray();
-        $shift->update($validated);
-
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action_type' => 'update',
-            'table_name' => 'shifts',
-            'record_id' => $shift->id,
-            'old_values' => $oldValues,
-            'new_values' => $shift->fresh()->toArray(),
-            'performed_at' => now(),
-        ]);
+        $shift->update($request->validated());
 
         return redirect()->route('shifts.index')->with('success', 'تم تحديث الوردية بنجاح');
     }
 
     public function destroy(Shift $shift): RedirectResponse
     {
-        $shiftData = $shift->toArray();
-
-        // قاعدة بيانات مقيدة بـ restrict لمنع الحذف إذا كان هناك موظفون على الوردية
-        try {
-            $shift->delete();
-        } catch (\Exception $e) {
+        if ($shift->employees()->exists()) {
             return redirect()->route('shifts.index')->with('error', 'لا يمكن حذف هذه الوردية لارتباط موظفين بها حالياً.');
         }
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action_type' => 'delete',
-            'table_name' => 'shifts',
-            'record_id' => $shift->id,
-            'old_values' => $shiftData,
-            'performed_at' => now(),
-        ]);
+        $shift->delete();
 
         return redirect()->route('shifts.index')->with('success', 'تم حذف الوردية بنجاح');
+    }
+
+    public function show(Shift $shift): View
+    {
+        $shift->load(['employees' => function ($query) {
+            $query->orderByDesc('join_date');
+        }]);
+
+        return view('shifts.show', compact('shift'));
     }
 }

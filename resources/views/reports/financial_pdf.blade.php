@@ -5,7 +5,7 @@
     <title>التقرير المالي الرسمي للشركة</title>
     <style>
         body {
-            font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif;
+            font-family: dejavusans, sans-serif;
             direction: rtl;
             text-align: right;
             padding: 24px;
@@ -120,8 +120,8 @@
 <body>
 
     <div class="header">
-        <h2>شركة المنقذ لإدارة الموارد البشرية</h2>
-        <h3>التقرير المالي الرسمي</h3>
+        <h2>{{ \App\Models\SystemSetting::where('setting_key', 'company_name')->value('setting_value') ?? 'المنقذ' }}</h2>
+        <h3>التقرير المالي الرسمي - {{ $month }}</h3>
         <p>تاريخ الإصدار: {{ $date }}</p>
     </div>
 
@@ -165,6 +165,34 @@
                 @empty
                     <tr>
                         <td colspan="2" style="text-align: center;">لا توجد أقسام مضافة</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h4>الإجازات الرسمية:</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>من</th>
+                    <th>إلى</th>
+                    <th>النوع</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($holidays as $holiday)
+                    <tr>
+                        <td>{{ $holiday->holiday_name }}</td>
+                        <td>{{ \Carbon\Carbon::parse($holiday->start_date)->format('Y-m-d') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($holiday->end_date)->format('Y-m-d') }}</td>
+                        <td>{{ $holiday->is_recurring ? 'سنوية' : 'مرة واحدة' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" style="text-align: center;">لا توجد إجازات رسمية هذا الشهر</td>
                     </tr>
                 @endforelse
             </tbody>

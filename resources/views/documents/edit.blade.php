@@ -43,7 +43,7 @@
             @if($showEmployeeField)
             <div>
                 <label for="employee_id" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">الموظف <span class="text-rose-500">*</span></label>
-                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                <select name="employee_id" id="employee_id" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
                     <option value="">اختر الموظف...</option>
                     @foreach($employees as $employee)
                         <option value="{{ $employee->id }}" {{ (string) $oldVal('employee_id') === (string) $employee->id ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">{{ $employee->full_name }}</option>
@@ -60,7 +60,7 @@
 
             <div>
                 <label for="document_type" class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">نوع الوثيقة <span class="text-rose-500">*</span></label>
-                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-3 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
+                <select name="document_type" id="document_type" required class="employee-form-input w-full rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/60 text-sm text-slate-800 dark:text-slate-200 px-8 py-2.5 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition-all cursor-pointer">
                     <option value="">اختر النوع...</option>
                     <option value="identity" {{ $oldVal('document_type') === 'identity' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">هوية</option>
                     <option value="passport" {{ $oldVal('document_type') === 'passport' ? 'selected' : '' }} class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">جواز سفر</option>

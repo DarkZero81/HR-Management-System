@@ -14,12 +14,19 @@ class Shift extends Model
         'shift_name',
         'start_time',
         'end_time',
-        'grace_period_minutes'
+        'grace_period_minutes',
+        'is_overnight'
     ];
 
     protected $casts = [
-        'grace_period_minutes' => 'integer'
+        'grace_period_minutes' => 'integer',
+        'is_overnight' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::observe(\App\Observers\ShiftObserver::class);
+    }
 
     /**
      * علاقة خطة الدوام (الوردية) بالموظفين المدرجين تحتها.

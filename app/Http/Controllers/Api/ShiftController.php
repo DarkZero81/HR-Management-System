@@ -3,63 +3,79 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreShiftRequest;
+use App\Http\Requests\UpdateShiftRequest;
 use App\Models\Shift;
-use Illuminate\Http\JsonResponse;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class ShiftController extends Controller
 {
-    public function index(): JsonResponse
+    use ApiResponseTrait;
+
+    public function index(Request $request)
     {
-        $shifts = Shift::all();
-        return response()->json(['data' => $shifts], 200);
+        $shifts = Shift::withCount('employees')->paginate(15)->appends($request->query());
+
+        return $this->successResponse('تم جلب الورديات بنجاح', $shifts);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreShiftRequest $request)
     {
-        return DB::transaction(function () use ($request) {
-            $validated = $request->validate([
-                'shift_name' => ['required', 'string', 'max:100'],
-                'start_time' => ['required', 'date_format:H:i:s'],
-                'end_time' => ['required', 'date_format:H:i:s', 'after:start_time'],
-                'grace_period_minutes' => ['nullable', 'integer', 'min:0'],
-            ]);
+        $shift = Shift::create($request->validated());
 
-            $shift = Shift::create($validated);
-            return response()->json(['data' => $shift], 201);
-        });
+        $this->logAudit('create', 'shifts', $shift->id, null, $shift->toArray());
+
+        return $this->successResponse('تم إنشاء الوردية بنجاح', $shift, Response::HTTP_CREATED);
     }
 
-    public function show(int $id): JsonResponse
+    public function show($id)
+    {
+        $shift = Shift::withCount('employees')->findOrFail($id);
+
+        return $this->successResponse('تم جلب تفاصيل الوردية بنجاح', $shift);
+    }
+
+    public function update(UpdateShiftRequest $request, $id)
     {
         $shift = Shift::findOrFail($id);
-        return response()->json(['data' => $shift], 200);
+        $oldValues = $shift->toArray();
+
+        $shift->update($request->validated());
+
+        $this->logAudit('update', 'shifts', $shift->id, $oldValues, $shift->fresh()->toArray());
+
+        return $this->successResponse('تم تحديث الوردية بنجاح', $shift);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function destroy($id)
     {
-        return DB::transaction(function () use ($request, $id) {
-            $shift = Shift::findOrFail($id);
+        $shift = Shift::withCount('employees')->findOrFail($id);
 
-            $validated = $request->validate([
-                'shift_name' => ['sometimes', 'string', 'max:100'],
-                'start_time' => ['sometimes', 'date_format:H:i:s'],
-                'end_time' => ['sometimes', 'date_format:H:i:s', 'after:start_time'],
-                'grace_period_minutes' => ['sometimes', 'integer', 'min:0'],
-            ]);
+        if ($shift->employees_count > 0) {
+            return $this->errorResponse('لا يمكن حذف هذه الوردية لارتباط موظفين بها حالياً.', Response::HTTP_CONFLICT);
+        }
 
-            $shift->update($validated);
-            return response()->json(['data' => $shift], 200);
-        });
+        $shiftData = $shift->toArray();
+        $shift->delete();
+
+        $this->logAudit('delete', 'shifts', $shift->id, $shiftData, null);
+
+        return $this->successResponse('تم حذف الوردية بنجاح');
     }
 
-    public function destroy(int $id): JsonResponse
+    private function logAudit(string $action, string $tableName, int $recordId, ?array $oldValues, ?array $newValues): void
     {
-        return DB::transaction(function () use ($id) {
-            $shift = Shift::findOrFail($id);
-            $shift->delete();
-            return response()->json(['message' => 'Shift deleted successfully'], 200);
-        });
+        \App\Models\AuditLog::create([
+            'user_id' => Auth::id(),
+            'action_type' => $action,
+            'table_name' => $tableName,
+            'record_id' => $recordId,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
+            'performed_at' => now(),
+        ]);
     }
 }

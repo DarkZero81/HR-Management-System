@@ -13,12 +13,17 @@ class AttendanceDevice extends Model
     protected $fillable = [
         'device_name',
         'ip_address',
+        'location',
         'status',
+        'last_sync_at',
+        'last_seen_at',
         'last_sync'
     ];
 
     protected $casts = [
-        'last_sync' => 'datetime'
+        'last_sync' => 'datetime',
+        'last_sync_at' => 'datetime',
+        'last_seen_at' => 'datetime',
     ];
 
     /**

@@ -26,7 +26,7 @@
     @endphp
 
     <div class="employee-form-card rounded-[28px] border border-white/10 dark:border-white/5 p-6 space-y-6 shadow-2xl backdrop-blur-md">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="mb-12 grid grid-cols-1 sm:grid-cols-2   ">
             <div>
                 <p class="text-xs font-bold text-slate-500 mb-1">نوع الوثيقة</p>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700">

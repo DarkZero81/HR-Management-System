@@ -20,10 +20,7 @@ class RequestWebController extends Controller
 
     private const ADMIN_ROLES = ['admin', 'manager'];
 
-     /**
-      * يعرض قائمة الطلبات: الموظف العادي يرى طلباته فقط، والإداري (admin/manager) يرى كل الطلبات.
-      * هذا الميثود الواحد يخدم كلاً من راوت "my.requests.index" وراوت "requests.index" الإداري.
-      */
+
     public function index(Request $request): View
     {
         $employee = Auth::user()?->employee;
@@ -285,71 +282,6 @@ class RequestWebController extends Controller
         ]);
 
         return back()->with('success', 'تم إلغاء الطلب بنجاح.');
-    }
-
-    public function show(HrTransaction $transaction): View
-    {
-        $employee = Auth::user()?->employee;
-        $isAdmin = $this->isAdminUser();
-
-        if (! $isAdmin && $transaction->employee_id !== $employee?->id) {
-            abort(403, 'عذراً، لا يمكنك عرض طلب لا ينتمي إليك.');
-        }
-
-        $transaction->load('employee.user', 'employee.department', 'employee.shift', 'approver');
-
-        $timeline = collect([
-            [
-                'label' => 'تم إنشاء الطلب',
-                'description' => 'تم تقديم الطلب وهو قيد المراجعة',
-                'date' => $transaction->created_at,
-                'icon' => 'plus-circle',
-                'color' => 'blue',
-            ],
-        ]);
-
-        if ($transaction->approved_by) {
-            $actionLabel = $transaction->status === 'approved' ? 'تم اعتماد الطلب' : 'تم رفض الطلب';
-            $actionDescription = $transaction->status === 'approved' ? 'تمت الموافقة على الطلب وتطبيق التأثيرات' : 'تم رفض الطلب بدون تطبيق تأثيرات';
-            $actionIcon = $transaction->status === 'approved' ? 'check-circle' : 'x-circle';
-            $actionColor = $transaction->status === 'approved' ? 'emerald' : 'rose';
-
-            $timeline->push([
-                'label' => $actionLabel,
-                'description' => $actionDescription.' بواسطة '.($transaction->approver->name ?? 'النظام'),
-                'date' => $transaction->updated_at,
-                'icon' => $actionIcon,
-                'color' => $actionColor,
-            ]);
-        }
-
-        $editHistory = AuditLog::query()
-            ->where('table_name', 'hr_transactions')
-            ->where('record_id', $transaction->id)
-            ->orderByDesc('performed_at')
-            ->take(20)
-            ->get();
-
-        $previousRequests = HrTransaction::query()
-            ->where('employee_id', $transaction->employee_id)
-            ->where('id', '!=', $transaction->id)
-            ->orderByDesc('created_at')
-            ->take(5)
-            ->get();
-
-        $shareUrl = url($isAdmin ? '/requests/'.$transaction->id : '/my/requests/'.$transaction->id);
-
-        return view('requests.show', [
-            'transaction' => $transaction,
-            'timeline' => $timeline,
-            'editHistory' => $editHistory,
-            'previousRequests' => $previousRequests,
-            'shareUrl' => $shareUrl,
-            'isAdmin' => $isAdmin,
-            'isPending' => $transaction->status === 'pending',
-            'basePath' => $isAdmin ? '/requests' : '/my/requests',
-            'pdfUrl' => $transaction->id ? route($isAdmin ? 'requests.pdf.admin' : 'my.requests.pdf.employee', $transaction->id) : '#',            'csvUrl' => url(($isAdmin ? '/requests' : '/my/requests').'/export-csv?'.http_build_query(request()->only(['status', 'transaction_type', 'from_date', 'to_date', 'search']))),
-        ]);
     }
 
     public function downloadPdf(HrTransaction $transaction): Response

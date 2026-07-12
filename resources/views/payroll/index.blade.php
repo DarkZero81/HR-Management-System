@@ -25,6 +25,37 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+            <form method="GET" action="{{ route('payroll.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">بحث</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="بحث باسم الموظف..."
+                        class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-800">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">حالة الدفع</label>
+                    <select name="payment_status" class="w-full px-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-800">
+                        <option value="">كل الحالات</option>
+                        <option value="draft" {{ request('payment_status') == 'draft' ? 'selected' : '' }}>مسودة</option>
+                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>مدفوع</option>
+                        <option value="cancelled" {{ request('payment_status') == 'cancelled' ? 'selected' : '' }}>ملغي</option>
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                        class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-teal-400 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg transition-all whitespace-nowrap">
+                        <i data-lucide="search" class="w-4 h-4 inline-block ml-1"></i>
+                        بحث
+                    </button>
+                    <a href="{{ route('payroll.index') }}"
+                        class="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl transition-all whitespace-nowrap">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 inline-block ml-1"></i>
+                        إعادة تعيين
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
             <form action="{{ route('payroll.generate') }}" method="POST"
                 class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 @csrf
@@ -38,8 +69,10 @@
                 @enderror
                 <div class="flex items-end">
                     <button type="submit"
-                        class="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 bg-blue-600 p-2 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg transition-all whitespace-nowrap">
-                        استعلام </button>
+                        class="px-6 py-3 mt-6 bg-gradient-to-r from-blue-500 to-teal-400 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg transition-all whitespace-nowrap">
+                        <i data-lucide="calculator" class="w-4 h-4 inline-block ml-1"></i>
+                        توليد الكشف
+                    </button>
                 </div>
             </form>
         </div>
@@ -101,6 +134,7 @@
                             <th class="px-6 py-4 text-slate-600 text-right font-medium">البدلات</th>
                             <th class="px-6 py-4 text-slate-600 text-right font-medium">الخصومات</th>
                             <th class="px-6 py-4 text-slate-600 text-right font-medium">صافي الراتب</th>
+                            <th class="px-6 py-4 text-slate-600 text-right font-medium">حالة الدفع</th>
                             <th class="px-6 py-4 text-slate-600 text-right font-medium">الإجراءات</th>
                         </tr>
                     </thead>
@@ -125,7 +159,34 @@
                                 <td class="px-6 py-4 text-slate-800 font-bold">{{ number_format($payroll->net_salary, 2) }}
                                     ل.س</td>
                                 <td class="px-6 py-4">
+                                    @php
+                                        $statusClasses = [
+                                            'draft' => 'bg-slate-100 text-slate-700',
+                                            'paid' => 'bg-emerald-100 text-emerald-700',
+                                            'cancelled' => 'bg-red-100 text-red-700',
+                                        ];
+                                        $statusLabels = [
+                                            'draft' => 'مسودة',
+                                            'paid' => 'مدفوع',
+                                            'cancelled' => 'ملغي',
+                                        ];
+                                    @endphp
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$payroll->payment_status] ?? 'bg-slate-100 text-slate-700' }}">
+                                        {{ $statusLabels[$payroll->payment_status] ?? $payroll->payment_status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
+                                        @if($payroll->employee && $payroll->payment_status !== 'paid')
+                                            <form action="{{ route('payroll.mark_paid', $payroll->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors"
+                                                    title="تعيين كمدفوع">
+                                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                         @if($payroll->employee)
                                             <a href="{{ route('payroll.download_pdf', ['employeeId' => $payroll->employee->id, 'month' => $payroll->salary_month]) }}"
                                                class="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition-colors"
@@ -143,8 +204,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-slate-500">لا توجد كشوف رواتب لهذا
-                                    الشهر.</td>
+                            <td colspan="7" class="px-6 py-10 text-center text-slate-500">لا توجد كشوف رواتب لهذا
+                                الشهر.</td>
                             </tr>
                         @endforelse
                     </tbody>
