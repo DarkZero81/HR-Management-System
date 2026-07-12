@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -82,65 +83,41 @@ class Employee extends Model
         };
     }
 
-    /**
-     * الحصول على الاسم الكامل للموظف.
-     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /**
-     * علاقة الموظف بحساب المستخدم الخاص به.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * علاقة الموظف بالوردية وخطة الدوام المحددة له.
-     */
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class, 'shift_id');
     }
 
-    /**
-     * علاقة الموظف بالقسم التابع له.
-     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    /**
-     * علاقة الموظف بالوثائق والأوراق الثابتة الخاصة به.
-     */
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class, 'employee_id');
     }
 
-    /**
-     * علاقة الموظف بسجلات الدوام والحضور اليومية.
-     */
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class, 'employee_id');
     }
 
-    /**
-     * علاقة الموظف بجميع الوقوعات والطلبات الحركية (إجازات، أذونات، سلف).
-     */
     public function hrTransactions(): HasMany
     {
         return $this->hasMany(HrTransaction::class, 'employee_id');
     }
 
-    /**
-     * علاقة الموظف بأوامر وكشوف صرف الرواتب الشهرية.
-     */
     public function payrollOrders(): HasMany
     {
         return $this->hasMany(PayrollOrder::class, 'employee_id');

@@ -16,8 +16,10 @@ class EnsureUserIsActive
         if ($user && (int) $user->is_active !== 1) {
             Auth::logout();
 
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             return redirect()->route('login')->with('error', 'تم تعطيل حسابك. يرجى التواصل مع مدير النظام.');
         }

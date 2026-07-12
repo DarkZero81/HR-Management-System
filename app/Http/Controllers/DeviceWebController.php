@@ -75,13 +75,12 @@ class DeviceWebController extends Controller
 
     public function destroy(AttendanceDevice $device): RedirectResponse
     {
-        $deviceData = $device->toArray();
-
-        try {
-            $device->delete();
-        } catch (\Exception $e) {
+        if ($device->attendanceLogs()->exists()) {
             return redirect()->route('devices.index')->with('error', 'لا يمكن حذف الجهاز لوجود سجلات حضور مرتبطة به.');
         }
+
+        $deviceData = $device->toArray();
+        $device->delete();
 
         AuditLog::create([
             'user_id'     => Auth::id(),

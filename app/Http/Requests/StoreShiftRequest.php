@@ -26,8 +26,8 @@ class StoreShiftRequest extends FormRequest
     {
         $validator->after(function ($validator) {
             if ($this->filled('start_time') && $this->filled('end_time')) {
-                $start = \Carbon\Carbon::createFromFormat('H:i:s', $this->start_time);
-                $end = \Carbon\Carbon::createFromFormat('H:i:s', $this->end_time);
+                $start = \Carbon\Carbon::createFromFormat('H:i', $this->start_time);
+                $end = \Carbon\Carbon::createFromFormat('H:i', $this->end_time);
 
                 if ($this->boolean('is_overnight')) {
                     if ($end->lessThan($start)) {

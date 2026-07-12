@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AuditLog extends Model
 {
+    use SoftDeletes;
     // تعطيل الـ timestamps الافتراضية لأننا نستخدم حقل performed_at مخصص في المايجريشن
     public $timestamps = false;
 

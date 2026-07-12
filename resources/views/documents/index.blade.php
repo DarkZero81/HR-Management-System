@@ -3,7 +3,7 @@
 @section('title', $myMode ? 'وثائقي' : 'سجل المستندات')
 
 @section('content')
-<div class="space-y-6" dir="rtl">
+<div class="space-y-6 mb-4" dir="rtl">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الوثائق</p>

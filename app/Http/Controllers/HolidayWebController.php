@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class HolidayWebController extends Controller
 {
@@ -19,7 +20,13 @@ class HolidayWebController extends Controller
 
     public function calendar(): View
     {
-        $holidays = Holiday::all()->map(function ($holiday) {
+        $holidays = Cache::remember('holidays.all', 3600, fn() => Holiday::all());
+
+        if (! $holidays instanceof \Illuminate\Support\Collection) {
+            $holidays = Holiday::all();
+        }
+
+        $events = $holidays->map(function ($holiday) {
             return [
                 'id' => $holiday->id,
                 'title' => $holiday->holiday_name,
@@ -34,7 +41,7 @@ class HolidayWebController extends Controller
             ];
         });
 
-        return view('holidays.calendar', compact('holidays'));
+        return view('holidays.calendar', compact('events'));
     }
 
     public function create(): View
@@ -52,6 +59,8 @@ class HolidayWebController extends Controller
         ]);
 
         $holiday = Holiday::create($validated);
+
+        Cache::forget('holidays.all');
 
         AuditLog::create([
             'user_id' => Auth::id(),
@@ -82,6 +91,8 @@ class HolidayWebController extends Controller
         $oldValues = $holiday->toArray();
         $holiday->update($validated);
 
+        Cache::forget('holidays.all');
+
         AuditLog::create([
             'user_id' => Auth::id(),
             'action_type' => 'update',
@@ -99,6 +110,8 @@ class HolidayWebController extends Controller
     {
         $holidayData = $holiday->toArray();
         $holiday->delete();
+
+        Cache::forget('holidays.all');
 
         AuditLog::create([
             'user_id' => Auth::id(),

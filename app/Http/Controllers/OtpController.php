@@ -94,8 +94,8 @@ class OtpController extends Controller
             return back()->with('error', "تم قفل الحساب مؤقتاً بسبب المحاولات الفاشلة المتكررة. يرجى الانتظار {$minutes} دقيقة قبل المحاولة مرة أخرى.");
         }
 
-        $user = User::whereHas('employee', fn($q) => $q->where('email', $request->email))
-            ->orWhere('email', $request->email)
+        $user = User::where('email', $request->email)
+            ->orWhereHas('employee', fn($q) => $q->where('phone', $request->email))
             ->first();
 
         if (!$user) {
@@ -184,8 +184,8 @@ class OtpController extends Controller
             'email' => 'required|string|email',
         ]);
 
-        $user = User::whereHas('employee', fn($q) => $q->where('email', $request->email))
-            ->orWhere('email', $request->email)
+        $user = User::where('email', $request->email)
+            ->orWhereHas('employee', fn($q) => $q->where('phone', $request->email))
             ->first();
 
         if (!$user) {

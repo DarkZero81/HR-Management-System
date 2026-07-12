@@ -39,7 +39,8 @@ class ProfileController extends Controller
             $data['avatar'] = $path;
         }
 
-        $user->fill($data);
+        $allowedFields = ['name', 'email', 'password', 'avatar'];
+        $user->fill(array_intersect_key($data, array_flip($allowedFields)));
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

@@ -5,14 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Department extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['name', 'description'];
 
-    // علاقة القسم بالموظفين (القسم الواحد يحتوي على الكثير من الموظفين)
+    protected static function booted(): void
+    {
+        static::observe(\App\Observers\DepartmentObserver::class);
+    }
+
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);

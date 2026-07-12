@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Shift extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'shift_name',
@@ -28,9 +29,6 @@ class Shift extends Model
         static::observe(\App\Observers\ShiftObserver::class);
     }
 
-    /**
-     * علاقة خطة الدوام (الوردية) بالموظفين المدرجين تحتها.
-     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'shift_id');

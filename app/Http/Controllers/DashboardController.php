@@ -9,10 +9,12 @@ use App\Models\Employee;
 use App\Models\HrTransaction;
 use App\Models\PayrollOrder;
 use App\Models\Shift;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DashboardController extends Controller
 {
@@ -159,7 +161,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
         $today = today();
         $currentMonth = $today->format('Y-m');
@@ -173,12 +175,21 @@ class DashboardController extends Controller
 
         $salaryData = PayrollOrder::with('employee')
             ->where('salary_month', $currentMonth)
-            ->get()
-            ->take(5);
+            ->orderByDesc('salary_month')
+            ->paginate(10)
+            ->appends($request->query());
 
         $departments = Department::withCount(['employees' => function ($q) {
             $q->whereNull('resign_date');
         }])->get();
+
+        $monthStart = \Carbon\Carbon::createFromFormat('Y-m', $currentMonth)->startOfMonth();
+        $monthEnd = \Carbon\Carbon::createFromFormat('Y-m', $currentMonth)->endOfMonth();
+
+        $holidays = Holiday::where(function ($q) use ($monthStart, $monthEnd) {
+            $q->whereBetween('start_date', [$monthStart, $monthEnd])
+              ->orWhereBetween('end_date', [$monthStart, $monthEnd]);
+        })->orWhere('is_recurring', 1)->get();
 
         return view('reports.index', [
             'totalEmployees' => Employee::query()->count('*'),
@@ -197,6 +208,7 @@ class DashboardController extends Controller
             ],
             'salaryData' => $salaryData,
             'departments' => $departments,
+            'holidays' => $holidays,
         ]);
     }
 
@@ -218,10 +230,17 @@ class DashboardController extends Controller
             $q->whereNull('resign_date');
         }])->get();
 
-        $this->ensureMpdfAvailable();
+        $monthStart = \Carbon\Carbon::createFromFormat('Y-m', $currentMonth)->startOfMonth();
+        $monthEnd = \Carbon\Carbon::createFromFormat('Y-m', $currentMonth)->endOfMonth();
+
+        $holidays = Holiday::where(function ($q) use ($monthStart, $monthEnd) {
+            $q->whereBetween('start_date', [$monthStart, $monthEnd])
+              ->orWhereBetween('end_date', [$monthStart, $monthEnd]);
+        })->orWhere('is_recurring', 1)->get();
 
         $html = view('reports.financial_pdf', [
             'date' => now()->format('Y-m-d'),
+            'month' => $currentMonth,
             'financialData' => [
                 'totalBaseSalary' => $totalBaseSalary,
                 'totalNetSalary' => $totalNetSalary,
@@ -230,13 +249,68 @@ class DashboardController extends Controller
             ],
             'salaryData' => $salaryData,
             'departments' => $departments,
+            'holidays' => $holidays,
         ])->render();
+
 
         $mpdf = $this->makeMpdf();
         $mpdf->WriteHTML($html);
 
         return new \Illuminate\Http\Response($mpdf->Output('financial-report-' . $currentMonth . '.pdf', 'D'), 200, [
             'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $month = $request->query('month', now()->format('Y-m'));
+
+        $salaryData = PayrollOrder::with('employee.department')
+            ->where('salary_month', $month)
+            ->get();
+
+        $headers = [
+            'الموظف',
+            'البريد الإلكتروني',
+            'القسم',
+            'الراتب الأساسي',
+            'البدلات',
+            'الخصومات',
+            'صافي الراتب',
+            'حالة الدفع',
+            'الشهر',
+        ];
+
+        $callback = function () use ($salaryData, $headers, $month) {
+            $file = fopen('php://output', 'w');
+            fwrite($file, "\xEF\xBB\xBF");
+            fputcsv($file, $headers, ',');
+
+            foreach ($salaryData as $payroll) {
+                fputcsv($file, [
+                    $payroll->employee->full_name ?? '—',
+                    $payroll->employee->user->email ?? '',
+                    $payroll->employee->department->name ?? '—',
+                    number_format($payroll->employee->base_salary ?? 0, 2),
+                    number_format($payroll->allowances, 2),
+                    number_format($payroll->deductions, 2),
+                    number_format($payroll->net_salary, 2),
+                    match ($payroll->payment_status) {
+                        'paid' => 'مدفوع',
+                        'draft' => 'مسودة',
+                        'cancelled' => 'ملغي',
+                        default => $payroll->payment_status,
+                    },
+                    $month,
+                ], ',');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="reports-' . now()->format('Y-m-d-H-i') . '.csv"',
         ]);
     }
 

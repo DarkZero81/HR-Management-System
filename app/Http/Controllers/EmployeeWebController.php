@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
 
@@ -46,16 +47,33 @@ class EmployeeWebController extends Controller
         }
 
         $employees = $query->paginate(15);
-        $departments = Department::orderBy('name')->get();
-        $shifts = Shift::orderBy('shift_name')->get();
+        $departments = Cache::remember('departments.all', 3600, fn() => Department::orderBy('name')->get());
+        $shifts = Cache::remember('shifts.all', 3600, fn() => Shift::orderBy('shift_name')->get());
+
+        if (! $departments instanceof \Illuminate\Support\Collection) {
+            $departments = Department::orderBy('name')->get();
+        }
+
+        if (! $shifts instanceof \Illuminate\Support\Collection) {
+            $shifts = Shift::orderBy('shift_name')->get();
+        }
+
         return view('employees.index', compact('employees', 'departments', 'shifts'));
     }
 
     public function create(): View
     {
-        $departments = Department::orderBy('name')->get();
-        $shifts = Shift::orderBy('shift_name')->get();
+        $departments = Cache::remember('departments.all', 3600, fn() => Department::orderBy('name')->get());
+        $shifts = Cache::remember('shifts.all', 3600, fn() => Shift::orderBy('shift_name')->get());
         $users = User::whereDoesntHave('employee')->get();
+
+        if (! $departments instanceof \Illuminate\Support\Collection) {
+            $departments = Department::orderBy('name')->get();
+        }
+
+        if (! $shifts instanceof \Illuminate\Support\Collection) {
+            $shifts = Shift::orderBy('shift_name')->get();
+        }
 
         return view('employees.create', compact('departments', 'shifts', 'users'));
     }
@@ -109,8 +127,17 @@ class EmployeeWebController extends Controller
 
     public function edit(Employee $employee): View
     {
-        $departments = Department::orderBy('name')->get();
-        $shifts = Shift::orderBy('shift_name')->get();
+        $departments = Cache::remember('departments.all', 3600, fn() => Department::orderBy('name')->get());
+        $shifts = Cache::remember('shifts.all', 3600, fn() => Shift::orderBy('shift_name')->get());
+
+        if (! $departments instanceof \Illuminate\Support\Collection) {
+            $departments = Department::orderBy('name')->get();
+        }
+
+        if (! $shifts instanceof \Illuminate\Support\Collection) {
+            $shifts = Shift::orderBy('shift_name')->get();
+        }
+
         return view('employees.edit', compact('employee', 'departments', 'shifts'));
     }
 
@@ -167,16 +194,17 @@ class EmployeeWebController extends Controller
 
     public function destroy(Employee $employee): RedirectResponse
     {
+        if ($employee->attendanceLogs()->exists() || $employee->hrTransactions()->exists() || $employee->payrollOrders()->exists()) {
+            return redirect()->route('employees.index')->with('error', 'لا يمكن حذف هذا الموظف لارتباطه بسجلات حضور أو طلبات أو رواتب تاريخية. يفضل تعيين تاريخ استقالة.');
+        }
+
         $employeeData = $employee->toArray();
 
-        try {
-            if ($employee->avatar && Storage::disk('public')->exists($employee->avatar)) {
-                Storage::disk('public')->delete($employee->avatar);
-            }
-            $employee->delete();
-        } catch (\Exception $e) {
-            return redirect()->route('employees.index')->with('error', 'لا يمكن حذف الموظف لارتباطه بسجلات رواتب أو حضور تاريخية في قاعدة البيانات، يفضل تعيين تاريخ استقالة بدلاً من الحذف.');
+        if ($employee->avatar && Storage::disk('public')->exists($employee->avatar)) {
+            Storage::disk('public')->delete($employee->avatar);
         }
+
+        $employee->delete();
 
         AuditLog::create([
             'user_id'     => Auth::id(),

@@ -21,8 +21,7 @@ class PayrollWebController extends Controller
             $search = $request->search;
             $query->whereHas('employee', function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('full_name', 'like', "%{$search}%");
+                  ->orWhere('last_name', 'like', "%{$search}%");
             });
         }
 
