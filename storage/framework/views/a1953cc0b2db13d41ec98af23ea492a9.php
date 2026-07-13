@@ -1,7 +1,7 @@
 <?php $__env->startSection('title', 'تسجيل الحضور'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="space-y-6 mb-4">
+<div class="space-y-6 my-4">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.35em] text-slate-400">الدوام والحضور</p>

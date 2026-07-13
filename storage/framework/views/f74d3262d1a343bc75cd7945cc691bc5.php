@@ -193,7 +193,7 @@
                         <i data-lucide="filter" class="w-4 h-4"></i>
                         تطبيق
                     </button>
-                    <a href="<?php echo e(route('my.requests.index')); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-all">
+                    <a href="<?php echo e(route('my.requests.index')); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl text-sm font-semibold transition-all">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                         إعادة تعيين
                     </a>
