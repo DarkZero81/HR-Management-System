@@ -11,8 +11,23 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for attendance logs management.
+ *
+ * Handles:
+ * - Listing attendance logs with filters
+ * - Recording check-in with late calculation
+ * - Recording check-out with overtime calculation
+ * - Getting daily attendance status
+ */
 class AttendanceLogController extends Controller
 {
+    /**
+     * Display a listing of attendance logs with filters.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $query = AttendanceLog::with(['employee.user', 'device']);
@@ -29,6 +44,14 @@ class AttendanceLogController extends Controller
         return response()->json(['data' => $logs], 200);
     }
 
+    /**
+     * Record check-in for an employee.
+     *
+     * Calculates late minutes based on the employee's shift and grace period.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storeCheckIn(Request $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
@@ -69,6 +92,15 @@ class AttendanceLogController extends Controller
         });
     }
 
+    /**
+     * Record check-out for an attendance log.
+     *
+     * Calculates overtime minutes based on the employee's shift end time.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateCheckOut(Request $request, int $id): JsonResponse
     {
         return DB::transaction(function () use ($request, $id) {
@@ -94,6 +126,12 @@ class AttendanceLogController extends Controller
         });
     }
 
+    /**
+     * Get daily attendance status for all employees.
+     *
+     * @param  string  $date
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getDailyAttendanceStatus(string $date): JsonResponse
     {
         $logs = AttendanceLog::with('employee.user')

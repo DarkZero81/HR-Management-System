@@ -7,15 +7,33 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
+/**
+ * Controller for department management.
+ *
+ * Handles:
+ * - Listing departments with employee counts
+ * - Creating, editing, updating, and deleting departments
+ * - Viewing department details with employee stats
+ */
 class DepartmentWebController extends Controller
 {
-    // عرض جميع الأقسام
-    public function index()
+    /**
+     * Display a listing of all departments.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index(): View
     {
         $departments = Department::withCount('employees')->get();
         return view('departments.index', compact('departments'));
     }
 
+    /**
+     * Display the specified department with its employees and stats.
+     *
+     * @param  \App\Models\Department  $department
+     * @return \Illuminate\View\View
+     */
     public function show(Department $department): View
     {
         $department->load(['employees' => function ($query) {
@@ -35,13 +53,22 @@ class DepartmentWebController extends Controller
         return view('departments.show', compact('department', 'stats', 'employees'));
     }
 
-    // واجهة إنشاء قسم جديد
-    public function create()
+    /**
+     * Show the form for creating a new department.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function create(): View
     {
         return view('departments.create');
     }
 
-    // حفظ القسم الجديد في قاعدة البيانات
+    /**
+     * Store a newly created department in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -54,13 +81,24 @@ class DepartmentWebController extends Controller
         return redirect()->route('departments.index')->with('success', 'تم إنشاء القسم بنجاح');
     }
 
-    // واجهة تعديل القسم
-    public function edit(Department $department)
+    /**
+     * Show the form for editing the specified department.
+     *
+     * @param  \App\Models\Department  $department
+     * @return \Illuminate\View\View
+     */
+    public function edit(Department $department): View
     {
         return view('departments.edit', compact('department'));
     }
 
-    // تحديث بيانات القسم
+    /**
+     * Update the specified department in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Department  $department
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Department $department)
     {
         $validated = $request->validate([
@@ -73,7 +111,14 @@ class DepartmentWebController extends Controller
         return redirect()->route('departments.index')->with('success', 'تم تحديث بيانات القسم بنجاح');
     }
 
-    // حذف القسم
+    /**
+     * Remove the specified department from storage.
+     *
+     * Prevents deletion if employees are assigned to the department.
+     *
+     * @param  \App\Models\Department  $department
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Department $department): RedirectResponse
     {
         if ($department->employees()->exists()) {

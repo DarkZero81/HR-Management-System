@@ -1,3 +1,5 @@
+{{-- Reports dashboard with financial metrics, charts, and export options --}}
+
 @extends('layouts.app')
 
 @section('title', 'التقارير والإحصائيات')

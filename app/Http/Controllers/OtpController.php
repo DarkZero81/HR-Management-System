@@ -11,18 +11,44 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Controller for OTP-based authentication.
+ *
+ * Handles:
+ * - Sending OTP codes to user email
+ * - Verifying OTP codes
+ * - Resending OTP codes with rate limiting
+ * - Account lockout after multiple failed attempts
+ * - Welcome email after successful login
+ */
 class OtpController extends Controller
 {
+    /**
+     * Get maximum allowed OTP verification attempts.
+     *
+     * @return int
+     */
     private function getMaxAttempts(): int
     {
         return (int) config('auth.otp_max_attempts', 5);
     }
 
+    /**
+     * Get lockout duration in minutes after exceeding max attempts.
+     *
+     * @return int
+     */
     private function getLockoutMinutes(): int
     {
         return (int) config('auth.otp_lockout_minutes', 15);
     }
 
+    /**
+     * Check if the given email is currently locked out.
+     *
+     * @param  string  $email
+     * @return bool
+     */
     private function isLockedOut(string $email): bool
     {
         $key = "otp_lockout:{$email}";
@@ -41,6 +67,13 @@ class OtpController extends Controller
         return true;
     }
 
+    /**
+     * Increment failed OTP attempts for the given email.
+     * Locks out the account if max attempts are reached.
+     *
+     * @param  string  $email
+     * @return void
+     */
     private function incrementFailedAttempts(string $email): void
     {
         $maxAttempts = $this->getMaxAttempts();
@@ -57,12 +90,24 @@ class OtpController extends Controller
         }
     }
 
+    /**
+     * Clear failed attempts and lockout for the given email.
+     *
+     * @param  string  $email
+     * @return void
+     */
     private function clearFailedAttempts(string $email): void
     {
         Cache::forget("otp_attempts:{$email}");
         Cache::forget("otp_lockout:{$email}");
     }
 
+    /**
+     * Get remaining lockout time in seconds for the given email.
+     *
+     * @param  string  $email
+     * @return int
+     */
     private function getRemainingLockoutSeconds(string $email): int
     {
         $lockoutTimestamp = Cache::get("otp_lockout:{$email}");
@@ -76,11 +121,22 @@ class OtpController extends Controller
         return max(0, $remaining);
     }
 
+    /**
+     * Display the OTP login form.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showLoginForm()
     {
         return view('auth.otp-login');
     }
 
+    /**
+     * Send an OTP code to the user's email.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -120,6 +176,12 @@ class OtpController extends Controller
             ->with('success', 'تم إرسال الرمز إلى بريدك الإلكتروني');
     }
 
+    /**
+     * Display the OTP verification form.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function showVerifyForm(Request $request)
     {
         $email = $request->email;
@@ -127,6 +189,12 @@ class OtpController extends Controller
         return view('auth.otp-verify', compact('email'));
     }
 
+    /**
+     * Verify the OTP code and log the user in.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -178,6 +246,12 @@ class OtpController extends Controller
             ->with('success', 'مرحباً بك! تم تسجيل دخولك بنجاح.');
     }
 
+    /**
+     * Resend the OTP code to the user's email.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function resendOtp(Request $request)
     {
         $request->validate([
@@ -223,6 +297,12 @@ class OtpController extends Controller
         return back()->with('success', 'تم إعادة إرسال الرمز');
     }
 
+    /**
+     * Send a welcome email to the newly logged-in user.
+     *
+     * @param  \App\Models\User  $user
+     * @return void
+     */
     private function sendWelcomeMessage(User $user): void
     {
         $employee = $user->employee;

@@ -1,3 +1,5 @@
+{{-- Payroll orders listing with filters and payment status management --}}
+
 @extends('layouts.app')
 
 @section('title', 'الرواتب')

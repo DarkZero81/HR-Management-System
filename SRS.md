@@ -1,361 +1,379 @@
-# وثيقة متطلبات البرمجيات (Software Requirements Specification — SRS)
-## نظام HR Engine — نظام إدارة الموارد البشرية الذاتية
+# HR Engine — مواصفات المشروع
 
-> تم استخراج هذه الوثيقة بالكامل من قراءة ملفات المشروع الفعلية: `composer.json`, `package.json`, `routes/*.php`, `app/Models/*`, `app/Http/Controllers/**`, `database/migrations/*`, `database/seeders/*`, `resources/views/*`.
+## 1. نظرة عامة
 
----
+### المشكلة
+تعاني الشركات متوسطة الحجم من إدارة ورقية بطيئة للطلبات، حساب يدوي للرواتب، متابعة حضور غير موثوقة، ضياع الوثائق، وغياب الرقابة على بيانات النظام.
 
-## 1. اسم المشروع (Project Name)
+### الحل
+نظام ويب متكامل (Intranet) لأتمتة الموارد البشرية مبني على Laravel 13، يعتمد على الخدمة الذاتية Self-Service حيث يدير كل موظف بياناته بنفسه.
 
-**HR Engine** — نظام إدارة الموارد البشرية الذاتية (Employee Self-Service HR Management System).
+### الأهداف
+- أتمتة دورة الطلبات من التقديم حتى الاعتماد.
+- حساب الراتب الصافي تلقائياً من الحضور والبدلات والخصومات.
+- ربط الحضور بأجهزة البصمة مع احتساب تأخير/إضافي آلي.
+- أرشيف رقمي مركزي لوثائق الموظفين.
+- سجل تدقيق شامل لكل عمليات النظام.
 
-- **المجلد البرمجي:** `employer_mange`
-- **نوع التطبيق:** Monolith Laravel (بدون فصل واجهة SPA)
-- **الإطار:** Laravel 13 + PHP 8.3+
-- **المطوّر:** عبد الرحمن المصطفى (مشروع تخرّج في هندسة البرمجيات)
-
----
-
-## 2. تعريف المشروع (Definition)
-
-نظام ويب داخلي (Intranet System) يُحوّل العمليات الإدارية اليومية للموارد البشرية — الحضور والانصراف، الرواتب، الإجازات، الوثائق الرسمية — من معاملات ورقية بطيئة إلى **بوابة رقمية موحّدة** قائمة على مبدأ **الخدمة الذاتية (Self-Service)**.
-
-المبادئ الأساسية:
-- **لكل موظف بوابته الخاصة:** يدير بياناته، يتابع مستحقاته، يوثّق طلباته بنفسه.
-- **لكل مدير لوحته:** يراجع ويُعتمد طلبات فريقه مباشرة.
-- **للإدارة سجل تدقيق كامل (Audit Trail):** من أضاف/عدّل/حذف، وماذا، ومتى، والقيم القديمة والجديدة.
-
-النظام مبني كتطبيق Monolith (Blade + Tailwind CSS) خفيف وسريع النشر على أي استضافة PHP تقليدية، وبنيته جاهزة للتوسّع مستقبلاً نحو واجهة API/موبايل منفصلة.
-
-**المشكلة التي يحلّها النظام:**
-
-| قبل النظام | بعد النظام |
-|---|---|
-| طلبات إجازة عبر واتساب/ورق، بلا أرشفة | طلب رقمي موثّق بحالة (قيد المراجعة / موافق / مرفوض) مع مسار اعتماد واضح |
-| حساب الرواتب يدوياً كل شهر | محرك رواتب يحتسب الصافي تلقائياً من الحضور + البدلات − الخصومات |
-| متابعة الحضور بدفاتر/إكسل مبعثرة | ربط مباشر مع أجهزة البصمة واحتساب التأخير/الإضافي آلياً |
-| ضياع وثائق الموظفين | أرشفة رقمية مركزية لكل وثيقة مرتبطة بتاريخ انتهاء |
-| لا يوجد سجل لمن عدّل ماذا | Audit Log كامل لكل عملية إضافة/تعديل/حذف |
+### الميزات الأساسية
+- مصادقة OTP مع حماية Lockout
+- محرك حضور وانصراف + أجهزة بصمة
+- محرك رواتب + قسائم PDF عربي
+- دورة طلبات (إجازة، إذن، سلفة، ترقية)
+- أرشيف وثائق مع إشعارات انتهاء
+- سجل تدقيق Audit Log
+- تقارير مالية وتشغيلية (PDF, CSV)
+- رسائل SMS/WhatsApp جماعية
+- وضع داكن/فاتح + تصميم متجاوب
 
 ---
 
-## 3. أهداف النظام (Objectives)
+## 2. الأدوار والصلاحيات
 
-1. **أتمتة دورة حياة الموظف** بالكامل: تسجيل، حضور، طلبات، رواتب، وثائق.
-2. **إلغاء المعاملات الورقية** عبر بوابة رقمية موحّدة مع أرشفة كاملة.
-3. **احتساب الرواتب تلقائياً (Payroll Engine):** `الصافي = الأساسي + البدلات − الخصومات` اعتماداً على الحضور والوقوعات المعتمدة.
-4. **ربط الحضور بأجهزة البصمة** مع احتساب آلي لدقائق التأخير والعمل الإضافي حسب وردية كل موظف (بما فيها الورديات الليلية).
-5. **توفير سجل تدقيق (Audit Log)** يسجّل كل Create/Update/Delete مع القيم القديمة والجديدة.
-6. **تمكين الخدمة الذاتية:** كل موظف يستخرج قسيمة راتبه وطلباته ووثائقه بنفسه بصيغة PDF عربية.
-7. **تطبيق صلاحيات قائمة على الأدوار (RBAC):** فصل صارم بين الموظف والمدير والإدارة.
-8. **حماية البيانات:** SoftDeletes، تعطيل الحسابات (`is_active`)، وقفل المعالجة المتزامنة (`lockForUpdate`).
+| الدور | الوصف |
+|-------|-------|
+| Admin | صلاحيات كاملة على جميع الميزات |
+| Manager | إدارة قسمه، اعتماد طلبات فريقه، تعديل حضور فريقه |
+| Employee | بوابة الخدمة الذاتية: حضور شخصي، طلبات، وثائق، راتب |
 
 ---
 
-## 4. مميزات النظام (Features)
+## 3. واجهات المستخدم والتدفقات
 
-- 🔐 **مصادقة وصلاحيات كاملة** — تسجيل دخول، تحقق بريد إلكتروني (Breeze)، ميدل وير صلاحيات لكل مسار.
-- 🔢 **دخول برمز OTP** — نظام رموز تحقق مؤقتة (`OtpCode`) عبر البريد، مع قفل بعد محاولات فاشلة (5 افتراضياً) وحماية إعادة الإرسال.
-- 🕐 **محرك حضور وانصراف** مرتبط بأجهزة بصمة، مع احتساب آلي لدقائق التأخير والإضافي حسب وردية الموظف وفترة السماح (Grace Period).
-- 🌙 **دعم الورديات الليلية (Overnight Shifts)** — ورديات تعبر منتصف الليل (Evening/Night) عبر حقل `is_overnight`.
-- 💰 **محرك رواتب (Payroll Engine)** يحسب الصافي تلقائياً ويولّد أوامر صرف شهرية للجميع دفعة واحدة.
-- 📄 **تصدير PDF عربي كامل** (عبر mPDF مع RTL وربط الحروف) لقسائم الرواتب، ملفات الموظفين، تفاصيل الطلبات، والتقارير المالية.
-- 📝 **دورة طلبات متكاملة (HR Transactions):** تقديم → مراجعة المدير → اعتماد/رفض → خصم أو إعادة رصيد الإجازة تلقائياً (مع `DB::transaction` و `lockForUpdate`).
-- 📁 **أرشفة وثائق رقمية** لكل موظف (هوية/جواز/عقد/شهادة صحية) مع تتبّع تاريخ الانتهاء وفهرس فريد.
-- 🏢 **إدارة كاملة** للأقسام، الورديات، العطل الرسمية (المتكررة سنوياً)، وأجهزة البصمة (حالة اتصال/مزامنة).
-- 🧾 **سجل تدقيق (Audit Log)** يسجّل كل عملية مع القيم القديمة/الجديدة والزمن (`performed_at`).
-- 🌓 **وضع داكن/فاتح (Dark/Light Theme)** محفوظ لكل مستخدم.
-- 📱 **تصميم متجاوب بالكامل (Responsive)** مع قائمة جانبية مخصصة للهواتف.
-- 🔔 **Modal تفاصيل الطلب** — عرض تفاصيل أي طلب بنافذة منبثقة بدون مغادرة الصفحة.
-- 📊 **تقويم الطلبات** — عرض الوقوعات كأحداث ملوّنة حسب الحالة عبر FullCalendar.
-- 📤 **تصدير CSV** للطلبات والتقارير المالية بترميز UTF-8 (BOM).
-- 💬 **وحدة رسائل SMS** (مرتكزة على Notification) لإرسال رسائل فردية/لأقسام/للجميع.
-- ⚡ **تحسينات أداء:** Cache للبيانات الثابتة (`departments.all`, `shifts.all`)، Pagination، SoftDeletes، Observers لحفظ Audit Log تلقائياً.
+### الواجهات (8 واجهات رئيسية):
+1. **اللوحة الرئيسية Dashboard** — مؤشرات عامة
+2. **الحضور Attendance** — إدارة وتعديل سجل الحضور + My Attendance شخصي
+3. **الموظفين Employees** — CRUD ملفات الموظفين + PDF
+4. **الطلبات Requests** — تقديم واعتماد الطلبات + Modal تفاصيل + CSV
+5. **الرواتب Payroll** — توليد أوامر الرواتب + قسائم PDF
+6. **الوثائق Documents** — أرشيف وثائق + My Documents شخصي
+7. **الأقسام/الورديات/العطل/أجهزة البصمة** — إعدادات النظام
+8. **التقارير Reports** — تقارير مالية PDF + CSV
+
+### التدفقات الرئيسية (4 تدفقات):
+1. **تدفق الحضور:** تسجيل دخول ← بصمة/يدوي ← احتساب تأخير ← تسجيل خروج ← احتساب إضافي
+2. **تدفق الطلبات:** تقديم ← مراجعة مدير ← اعتماد إدارة ← تنفيذ/خصم تلقائي
+3. **تدفق الرواتب:** توليد أوامر ← مراجعة ← اعتماد ← صرف ← قسيمة PDF
+4. **تدفق الوثائق:** رفع ← تتبع انتهاء ← إشعار ← تجديد/حذف
 
 ---
 
-## 5. الأدوات والمتطلبات والمكتبات (Tools, Requirements & Libraries)
+## 4. بنية قاعدة البيانات
 
-### 5.1 المتطلبات التشغيلية (Requirements)
-| المتطلب | القيمة |
-|---|---|
-| PHP | 8.3+ |
-| Composer | أحدث إصدار |
-| Node.js / npm | 20+ |
-| قاعدة البيانات | MySQL / MariaDB (متوافق مع SQLite للتطوير المحلي) |
-| خادم الويب | أي استضافة PHP (التطوير: `php artisan serve`) |
-| خطوط/مكتبة PDF | mPDF + خط `dejavusans` لدعم العربية |
-
-### 5.2 المكتبات الخلفية (Backend — Composer `require`)
-- `laravel/framework` ^13.8 — إطار العمل
-- `laravel/sanctum` ^4.3 — مصادقة API (Token-based)
-- `laravel/tinker` ^3.0 — أداة سطر الأوامر التفاعلية
-- `mpdf/mpdf` ^8.3 — محرك تصدير PDF بدعم عربي/RTL
-
-### 5.3 أدوات التطوير (Dev)
-- `laravel/breeze` ^2.4 — توليد نظام المصادقة
-- `fruitcake/laravel-debugbar` ^4.4 — تنقيح
-- `laravel/pail` / `laravel/pao` — مراقبة اللوج
-- `laravel/pint` ^1.27 — تنسيق الكود (PSR-12)
-- `phpunit/phpunit` ^12.5 + `mockery/mockery` + `nunomaduro/collision` — اختبارات
-- `fakerphp/faker` — بيانات وهمية للـ Seeders
-
-### 5.4 الواجهة الأمامية (Frontend — `package.json`)
-- **Blade Templates** + **Tailwind CSS** ^3.1 (+ `@tailwindcss/forms`)
-- **Alpine.js** ^3.4 — تفاعلية خفيفة (Modals, Theme)
-- **Vite** ^8 + `laravel-vite-plugin` — أداة البناء
-- **Lucide Icons** — الأيقونات
-- `autoprefixer` / `postcss` — معالجة CSS
-- `concurrently` — تشغيل خادم + Vite + Queue + Pail معاً (`composer run dev`)
-
-### 5.5 نصوص التشغيل (Composer Scripts)
-- `composer setup` — تثبيت + `.env` + مفاتيح + migrate + npm build
-- `composer run dev` — تشغيل server/queue/logs/vite بالتوازي
-- `composer test` — `php artisan test`
-
----
-
-## 6. واجهات المشروع (Interfaces / UI)
-
-جميع الواجهات مبنية بـ Blade داخل `resources/views/`، وتُقسَّم إلى **لوحة إدارة** (محمية بصلاحيات) و**منطقة "my"** (خدمة ذاتية للموظف). القوالب الرئيسية:
-
-| المجلد/الملف | الوصف |
-|---|---|
-| `layouts/` | التخطيط العام (شريط جانبي، وضع داكن/فاتح، قائمة جوال) |
-| `dashboard.blade.php` | لوحة التحكم: وضع `admin` (مؤشرات شاملة + رسم أسبوعي) أو `employee` (بطاقة أداء + رسم ربع سنوي) |
-| `employees/` | `index` (جدول + فلترة + فرز + Pagination)، `create`, `edit`, `show`, `pdf` |
-| `attendance/` | `index` (إدارة)، `my_index` (حضوري + تسجيل دخول/خروج)، `edit` |
-| `requests/` | `index` (جدول + فلاتر + تقويم + KPIs + Modal)، `create`, `show`, `pdf` |
-| `payroll/` | `index` (أوامر الصرف)، `my_index`، `pdf_payslip` |
-| `departments/`, `shifts/`, `holidays/`, `devices/` | CRUD لكل وحدة تنظيمية |
-| `documents/` | `index`, `create`, `show`, `edit` (الإدارة + "وثائقي") |
-| `reports/` | `index` (تقارير تشغيلية/مالية)، `financial_pdf` |
-| `sms/` | `index`, `create` |
-| `auth/` | `login`, `otp-login`, `otp-verify`, `register`, `reset-password`, `verify-email` |
-| `profile/` | تعديل الملف الشخصي |
-| `emails/` | قوالب البريد (`OtpMail`, `WelcomeMail`) |
-| `components/` | مكوّنات Blade المُعاد استخدامها |
-| `errors/` | صفحات الخطأ (403/404/500) |
-
-**مكوّن الواجهة النشط حالياً:** `resources/views/requests/index.blade.php` — يعرض إحصائيات (الإجمالي/قيد المراجعة/معتمد/مرفوض)، جدول الطلبات مع فلاتر (الحالة/النوع/التاريخ/البحث)، تقويم FullCalendar، وزر "تفاصيل" يفتح Modal عبر Alpine.js.
-
----
-
-## 7. قاعدة البيانات (Database)
-
-قاعدة البيانات تعتمد **14 جدولاً أساسياً** (بالإضافة إلى `sessions`, `cache`, `jobs`) مع علاقات مترابطة، وجميع الجداول الأساسية تدعم **SoftDeletes**، وجميع الحقول العددية/التاريخية مُحوّلة عبر `$casts`.
-
-### 7.1 العلاقة بين الجداول (Table Relationships)
-
+### الجداول والعلاقات:
 ```
-roles_permissions (1) ──< (N) users (1) ──< (1) employees (1) ──< (N) documents
-                                                     │
-                                                     ├──< (N) attendance_logs >── (N) attendance_devices
-                                                     │
-                                                     ├──< (N) hr_transactions ──> (N) users (approved_by)
-                                                     │
-                                                     └──< (N) payroll_orders
-
-shifts (1) ──< (N) employees
-departments (1) ──< (N) employees
-holidays (مستقل — جدول مرجعي للعطل)
-audit_logs (N) ──> (1) users
-system_settings (مستقل — مفاتيح/قيم)
-otp_codes (N) ──> (1) users
+[roles_permissions] 1 --- * [users]
+[users] 1 --- 1 [employees] (اختياري)
+[departments] 1 --- * [employees]
+[shifts] 1 --- * [employees]
+[employees] 1 --- * [documents]
+[employees] 1 --- * [attendance_logs]
+[employees] 1 --- * [hr_transactions]
+[employees] 1 --- * [payroll_orders]
+[users] 1 --- * [hr_transactions] (approved_by)
+[users] 1 --- * [audit_logs]
+[users] 1 --- * [otp_codes]
+[attendance_devices] 1 --- * [attendance_logs]
+[holidays] (standalone)
+[system_settings] (standalone)
 ```
 
-| الجدول | العلاقة | عبر الحقل | سلوك الحذف |
-|---|---|---|---|
-| `roles_permissions` → `users` | 1:N | `users.role_id` | `restrictOnDelete` |
-| `users` → `employees` | 1:1 | `employees.user_id` (unique) | `set null` |
-| `shifts` → `employees` | 1:N | `employees.shift_id` | `restrictOnDelete` |
-| `departments` → `employees` | 1:N | `employees.department_id` | `set null` |
-| `employees` → `documents` | 1:N | `documents.employee_id` | `cascadeOnDelete` |
-| `employees` → `attendance_logs` | 1:N | `attendance_logs.employee_id` | `cascadeOnDelete` |
-| `attendance_devices` → `attendance_logs` | 1:N | `attendance_logs.device_id` | `set null` |
-| `employees` → `hr_transactions` | 1:N | `hr_transactions.employee_id` | `cascadeOnDelete` |
-| `users` → `hr_transactions` (المعتمد) | 1:N | `hr_transactions.approved_by` | `set null` |
-| `employees` → `payroll_orders` | 1:N | `payroll_orders.employee_id` | `cascadeOnDelete` |
-| `users` → `audit_logs` | 1:N | `audit_logs.user_id` | `set null` |
-| `users` → `otp_codes` | 1:N | `otp_codes.user_id` | `cascadeOnDelete` |
-
-**قيود فريدة:** `employees(user_id)`, `employees(national_id)`, `attendance_logs(employee_id, log_date)`, `payroll_orders(employee_id, salary_month)`, `documents(employee_id, document_type)` (مؤشر فريد مضاف لاحقاً).
-
-### 7.2 Views والـ Routes
-
-ملفات المسارات: `routes/web.php` (الواجهة)، `routes/api.php` (REST API)، `routes/auth.php` (المصادقة)، `routes/console.php` (أوامر Artisan).
-
-**مجموعة الويب المحمية** `[auth, user.active]` في `web.php`:
-
-| المسار | Controller@method | الاسم |
-|---|---|---|
-| `/` | `DashboardController@index` | `dashboard` |
-| `/attendance` (index, check-in, check-out, edit, update, destroy) | `AttendanceWebController` | `attendance.*` |
-| `/departments` (index/show + CRUD محمي `role:admin,manager`) | `DepartmentWebController` | `departments.*` |
-| `/employees` (index/show + CRUD محمي، `/employees/{employee}/pdf`) | `EmployeeWebController` | `employees.*` |
-| `/shifts` (index/show + CRUD محمي) | `ShiftWebController` | `shifts.*` |
-| `/holidays` (index/calendar/show + CRUD محمي) | `HolidayWebController` | `holidays.*` |
-| `/devices` (index/show + CRUD محمي) | `DeviceWebController` | `devices.*` |
-| `/documents` (index/create/show/edit/update/destroy) | `DocumentWebController` | `documents.*` |
-| `/requests` (index/create/store/show/destroy, `update_status` POST+PATCH, `export-csv`, `pdf`) | `RequestWebController` | `requests.*` |
-| `/payroll` (index, `generate`, `{employeeId}/download-pdf`, `{payroll}/mark-paid`) | `PayrollWebController` | `payroll.*` |
-| `/reports` (index, `financial-pdf`, `export-csv`) | `DashboardController` | `reports.*` |
-| `/sms` (index/create/store) | `SmsMessageController` | `sms.*` |
-| `/my/*` (حضوري، وثائقي، طلباتي — منطقة الخدمة الذاتية) | Web Controllers | `my.*` |
-| `/profile` (edit/update/destroy) | `ProfileController` | `profile.*` |
-
-**مسارات OTP العامة** `otp/`: `login` (نموذج)، `send`, `verify` (نموذج + معالجة)، `resend`.
-
-**مسارات المصادقة** `auth.php`: `login`, `forgot-password`, `reset-password`, `register` (محمي `role:admin`)، `verify-email`, `confirm-password`, `password`, `logout`.
-
-### 7.3 الـ Controllers الرئيسية (Main Controllers)
-
-**ويب (`app/Http/Controllers/`):**
-- `DashboardController` — `index` (لوحة حسب الدور)، `reports`، `downloadFinancialReportPdf`، `exportCsv`.
-- `AttendanceWebController` — `index`, `myAttendance`, `store`/`storeMy` (حضور + حساب تأخير)، `checkOut`/`checkOutMy` (انصراف + حساب إضافي)، `edit`, `update`, `destroy`.
-- `EmployeeWebController` — `index` (فلترة/فرز/Pagination + Cache)، `create`, `store`, `edit`, `update` (رفع صورة)، `destroy` (يمنع الحذف إن له سجلات)، `show`, `downloadPdf`.
-- `DepartmentWebController`, `ShiftWebController`, `HolidayWebController`, `DeviceWebController`, `DocumentWebController` — CRUD قياسي لكل وحدة.
-- `PayrollWebController` — `index`, `myPayroll`, `store` (توليد شهري + تسجيل Audit)، `downloadPayslipPdf`, `markAsPaid`.
-- `RequestWebController` — `index` (إحصائيات + تقويم + فلاتر)، `create`, `store` (تحقق رصيد إجازة)، `updateStatus` (خصم/إعادة رصيد)، `destroy`, `downloadPdf`, `downloadCsv`.
-- `SmsMessageController` — `index`, `create`, `store` (تجميع المستلمين حسب النوع).
-- `OtpController` — `showLoginForm`, `sendOtp`, `showVerifyForm`, `verifyOtp`, `resendOtp` (مع قفل المحاولات).
-- `ProfileController`, ومجلد `Auth/` (Breeze)، `OtpController`.
-
-**API (`app/Http/Controllers/Api/`):** `AuthController`, `EmployeeController`, `DepartmentApiController`, `ShiftController`, `HolidayController`, `DocumentController`, `AttendanceDeviceController`, `AttendanceLogController`, `HrTransactionController`, `PayrollOrderController`, `AuditLogController`, `RolePermissionController`, `SystemSettingController`.
-
-**Middleware مخصص:** `RoleMiddleware` (`role:admin,manager,...`)، `EnsureUserIsActive` (`user.active`).
-
-**مكونات مساعدة:** `app/Http/Controllers/Traits/`، `app/Observers/` (`ShiftObserver`, `DepartmentObserver`, `HolidayObserver` — تسجيل Audit تلقائي)، `app/Policies/`, `app/Mail/` (`OtpMail`, `WelcomeMail`)، `app/Notifications/` (`CustomMessageNotification`)، `app/Packages/`.
-
-### 7.4 الـ Models (14 نموذج)
-
-#### `RolePermission` (الجدول `roles_permissions`)
-`id`, `role_name` (unique), `description` — العلاقة: `users()` 1:N.
-
-#### `User` (الجدول `users`)
-`id`, `name`, `email` (unique), `password`, `avatar`, `role_id` (FK), `is_active` (tinyint 1/0), `remember_token` — يستخدم `HasApiTokens` (Sanctum). العلاقات: `role()`، `employee()` (1:1)، `approvedTransactions()`، `auditLogs()`.
-
-#### `Employee` (الجدول `employees`)
-الحقول (أهمها): `user_id` (unique, nullable), `shift_id`, `department_id`, `first_name`, `last_name`, `national_id` (unique), `phone`, `base_salary` (decimal 15,2), `bank_account_iban`, `join_date`, `resign_date`, `vacation_balance` (int, افتراضي 21), `performance_score` (decimal 3,2), `job_title`, `education_level` (enum), `marital_status` (enum), `nationality`, `address`, `emergency_contact_*`, `date_of_birth`, `place_of_birth`, `contract_end_date`, `insurance_number`, `last_promotion_date`, `avatar`. **Accessors:** `age`, `education_label`, `marital_status_label`, `full_name`. العلاقات: `user()`, `shift()`, `department()`, `documents()`, `attendanceLogs()`, `hrTransactions()`, `payrollOrders()`.
-
-#### `Shift` (الجدول `shifts`)
-`shift_name`, `start_time` (time), `end_time` (time), `grace_period_minutes` (int, افتراضي 15), `is_overnight` (bool). العلاقة: `employees()` 1:N + `ShiftObserver`.
-
-#### `Department` (الجدول `departments`)
-`name` (unique), `description`. العلاقة: `employees()` 1:N + `DepartmentObserver`.
-
-#### `Holiday` (الجدول `holidays`)
-`holiday_name`, `start_date`, `end_date`, `is_recurring` (tinyint). + `HolidayObserver`.
-
-#### `AttendanceDevice` (الجدول `attendance_devices`)
-`device_name`, `ip_address` (45), `location`, `status` (enum online/offline)، `last_seen_at`, `last_sync_at`, `last_sync`. العلاقة: `attendanceLogs()` 1:N.
-
-#### `AttendanceLog` (الجدول `attendance_logs`)
-`employee_id`, `device_id` (nullable), `log_date` (date), `check_in`, `check_out`, `late_minutes` (int), `overtime_minutes` (int), `status` (enum present/absent/late/holiday). **مؤشر فريد** `(employee_id, log_date)`. العلاقات: `employee()`, `device()`.
-
-#### `HrTransaction` (الجدول `hr_transactions`)
-`employee_id`, `transaction_type` (enum leave/permission/promotion/penalty/transfer), `start_date_time`, `end_date_time`, `description`, `financial_impact` (decimal 10,2), `status` (enum pending/approved/rejected)، `approved_by` (FK nullable). العلاقات: `employee()`, `approver()` (User).
-
-#### `Document` (الجدول `documents`)
-`employee_id`, `document_type` (enum identity/passport/contract/health_certificate), `document_number`, `expiry_date`, `file_path`. **مؤشر فريد** `(employee_id, document_type)`. العلاقة: `employee()`.
-
-#### `PayrollOrder` (الجدول `payroll_orders`)
-`employee_id`, `salary_month` (YYYY-MM), `allowances` (decimal 15,2), `deductions` (decimal 15,2), `net_salary` (decimal 15,2), `payment_status` (enum draft/approved/paid)، `paid_at`. **مؤشر فريد** `(employee_id, salary_month)`. العلاقة: `employee()`.
-
-#### `AuditLog` (الجدول `audit_logs`)
-`user_id` (nullable), `action_type` (enum create/update/delete)، `table_name`, `record_id`, `old_values` (JSON/text)، `new_values` (JSON/text)، `performed_at` (يستخدم `useCurrent`، ويعطّل `$timestamps`). العلاقة: `user()`.
-
-#### `SystemSetting` (الجدول `system_settings`)
-`setting_key` (unique), `setting_value`. (مثال: `company_name` = "المنقذ").
-
-#### `OtpCode` (الجدول `otp_codes`)
-`email`, `user_id` (nullable), `code` (مُجزّأ), `type` (افتراضي login)، `expires_at` (5 دقائق)، `used_at`, `failed_attempts`, `locked_until`. العلاقة: `user()` + `isValid()`.
-
-### 7.5 الـ APIs (REST Endpoints)
-
-محمية بـ `Authenticate` (Sanctum) + `user.active` في `routes/api.php`، وتُرجع JSON منسّق (`data`).
-
-**المصادقة:**
-- `POST /api/login` (عام) — يُرجع `token` عبر `createToken`.
-- `POST /api/logout` — حذف التوكن الحالي.
-- `GET /api/me` — بيانات المستخدم + الدور + ملف الموظف.
-
-**الموارد (apiResource مع بادئة `api.`):**
-- `/api/departments` — index/show/store/update/destroy
-- `/api/shifts` — index/show/store/update/destroy
-- `/api/holidays` — index/show/store/update/destroy
-- `/api/employees` — index/show/store/update/destroy
-- `/api/documents` — index/show/store/update/destroy
-
-**مخصصة:**
-- `GET/POST /api/devices`، `GET/PUT/DELETE /api/devices/{id}`، `PATCH /api/devices/{id}/toggle-status`
-- `GET /api/roles`، `GET /api/roles/{id}`
-- `GET /api/settings`، `PUT /api/settings`
-- `GET /api/documents/expiring/{days?}` — الوثائق قرب الانتهاء
-- `GET /api/attendance-logs`، `POST /api/attendance-logs/check-in`، `PATCH /api/attendance-logs/{id}/check-out`، `GET /api/attendance-logs/daily/{date}`
-- `GET /api/hr-transactions`، `POST /api/hr-transactions` (تقديم)، `POST /api/hr-transactions/{id}/process-approval`
-- `GET /api/payroll-orders`، `POST /api/payroll-orders/generate/{salaryMonth}`، `GET /api/payroll-orders/employee/{employeeId}`
-- `GET /api/audit-logs`
-
-### 7.6 ملاحظات إضافية (Additional Notes)
-
-- **الأدوار الفعلية:** بعد دمج `hr`/`investor` ضمن `admin` (مايجريشن `consolidate_roles` في 2026‑07‑11)، الأدوار المتبقية هي **`admin`, `manager`, `employee`** فقط (مُخزّنة في `roles_permissions`).
-- **الأمان:** `is_active` لتعطيل الحسابات، `SoftDeletes` لحماية البيانات (مضافة عبر مايجريشنَين في 2026‑07‑11 و2026‑07‑12)، `lockForUpdate()` عند معالجة الطلبات لمنع التعارض، و`AuditLog` مُسجَّل عبر Observers (Shift/Department/Holiday) وعبر يدوي في بقية الـ Controllers.
-- **منع حذف الموظف:** `EmployeeWebController@destroy` يرفض الحذف إن كان له سجلات حضور/طلبات/رواتب، وينصح بتعيين `resign_date`.
-- **حساب الرواتب:** `lateDeductions = (lateMinutes/60) × (base_salary/30/8)`، ويُجمع مع خصومات `penalty` المعتمدة، ويُطرح من `base + allowances(promotion)` لإنتاج `net_salary`؛ يُنشأ بـ `payment_status = draft`.
-- **الورديات الليلية:** حقل `is_overnight` يدعم الورديات التي تعبر منتصف الليل (أضيف في 2026‑07‑11).
-- **تعديل دقّة الرواتب:** مايجريشن `update_payroll_orders_decimals` (2026‑07‑07) رفع خانات `allowances/deductions/net_salary` إلى `decimal(15,2)`.
-- **قائمة الانتظار (Queue):** معرّفة في `composer run dev` (`queue:listen`) لكن توليد الرواتب حالياً متزامن (مخطط نقله لـ Queue لمعالجة أعداد كبيرة).
-- **الإشعارات SMS:** وحدة `SmsMessageController` موجودة والمنطق يعمل، لكن استدعاء `Notification::route('sms', ...)` **مُعلّق بالتعليق** (معطّل حالياً) — بانتظار بوابة SMS.
-- **البريد:** `OtpMail` و`WelcomeMail` يعملان عبر `Mail::to(...)->send(...)`.
-- **الاختبارات:** PHPUnit مُهيّأ لكن تغطية Feature Tests للمسارات الحساسة (الرواتب/الاعتماد) مخطط لها لاحقاً.
-- **Seeders:** 14 مُولّد بيانات (Users, Employees=20, Departments, Shifts, Holidays, Devices, Documents, AttendanceLogs, HrTransactions, PayrollOrders, AuditLogs, Roles, SystemSettings). حسابات تجريبية: `admin@hr.com`, `hr@hr.com` (كلمة المرور `password`).
-
 ---
 
-## 8. تصدير تقارير PDF (PDF Reports Export)
-
-النظام يعتمد مكتبة **mPDF** (`mpdf/mpdf`) لتوليد تقارير PDF بدعم كامل للغة العربية واتجاه RTL، بالإعدادات الموحّدة:
-
-```php
-new \Mpdf\Mpdf([
-    'mode' => 'utf-8',
-    'format' => 'A4',
-    'default_font' => 'dejavusans',   // خط يدعم تشكيل الحروف العربية
-]);
+### 4.1 roles_permissions
+```
+id PK BIGINT UNSIGNED AI
+role_name VARCHAR(50) UNIQUE NOT NULL  -- admin, manager, employee
+description TEXT NULL
+created_at, updated_at
+deleted_at (soft delete)
 ```
 
-يُمرَّر قالب Blade عبر `view('...')->render()` ثم `WriteHTML()`، ويُعاد الملف للتنزيل بـ `Output($filename, 'D')` وترويسات `Content-Type: application/pdf`.
+### 4.2 users
+```
+id PK BIGINT UNSIGNED AI
+name VARCHAR(255) NULL
+email VARCHAR(191) UNIQUE NOT NULL
+password VARCHAR(255) NOT NULL  -- hashed
+avatar VARCHAR(255) NULL
+role_id FK -> roles_permissions(id) ON DELETE RESTRICT
+is_active TINYINT DEFAULT 1  -- 1=نشط, 0=معطل
+remember_token VARCHAR(100) NULL
+created_at, updated_at
+deleted_at (soft delete)
+```
 
-**نقاط التصدير المتاحة:**
+### 4.3 departments
+```
+id PK BIGINT UNSIGNED AI
+name VARCHAR(255) UNIQUE NOT NULL  -- اسم القسم
+description TEXT NULL
+created_at, updated_at
+deleted_at (soft delete)
+```
 
-| المسار | الوصف | الـ Controller@method | قالب Blade |
-|---|---|---|---|
-| `GET /payroll/{employeeId}/download-pdf?month=` | قسيمة راتب (Payslip) للموظف | `PayrollWebController@downloadPayslipPdf` | `payroll/pdf_payslip` |
-| `GET /employees/{employee}/pdf` | ملف الموظف الكامل PDF | `EmployeeWebController@downloadPdf` | `employees/pdf` |
-| `GET /requests/{transaction}/pdf` | تفاصيل الطلب PDF | `RequestWebController@downloadPdf` | `requests/pdf` |
-| `GET /reports/financial-pdf` | التقرير المالي الشامل PDF | `DashboardController@downloadFinancialReportPdf` | `reports/financial_pdf` |
+### 4.4 shifts
+```
+id PK BIGINT UNSIGNED AI
+shift_name VARCHAR(100) NOT NULL
+start_time TIME NOT NULL
+end_time TIME NOT NULL
+grace_period_minutes INT DEFAULT 15  -- فترة السماح
+is_overnight BOOLEAN DEFAULT FALSE  -- وردية ليلية
+created_at, updated_at
+deleted_at (soft delete)
+```
 
-**إجراءات الحماية المطبّقة:**
-- التحقق من وجود كلاس mPDF (`ensureMpdfAvailable`) قبل التوليد.
-- فرض الصلاحيات: مثلاً لا يمكن للموظف تصدير طلب لا يخصه (`abort(403)` في `RequestWebController@downloadPdf`).
-- استخدام اسم الشركة من `SystemSetting` (`company_name`) في رأس القسيمة.
+### 4.5 employees
+```
+id PK BIGINT UNSIGNED AI
+user_id FK -> users(id) ON DELETE SET NULL  -- ربط بحساب المستخدم
+shift_id FK -> shifts(id) ON DELETE RESTRICT
+department_id FK -> departments(id) ON DELETE SET NULL
+avatar VARCHAR(255) NULL
+first_name VARCHAR(50) NOT NULL
+last_name VARCHAR(50) NOT NULL
+national_id VARCHAR(50) UNIQUE NOT NULL  -- الرقم الوطني
+phone VARCHAR(20) NULL
+base_salary DECIMAL(15,2) NOT NULL  -- الراتب الأساسي
+bank_account_iban VARCHAR(50) NULL
+join_date DATE NOT NULL  -- تاريخ التعيين
+date_of_birth DATE NULL
+place_of_birth VARCHAR(100) NULL
+education_level ENUM(high_school, diploma, bachelor, master, phd, other) NULL
+marital_status ENUM(single, married, divorced, widowed) NULL
+nationality VARCHAR(50) NULL
+address TEXT NULL
+emergency_contact_name VARCHAR(100) NULL
+emergency_contact_phone VARCHAR(20) NULL
+job_title VARCHAR(100) NULL
+resign_date DATE NULL  -- تاريخ الاستقالة
+contract_end_date DATE NULL  -- انتهاء العقد
+last_promotion_date DATE NULL
+insurance_number VARCHAR(50) NULL
+vacation_balance INT DEFAULT 21  -- رصيد الإجازات
+performance_score DECIMAL(3,2) DEFAULT 0.00  -- تقييم الأداء
+created_at, updated_at
+deleted_at (soft delete)
+```
 
-**تصدير مكمِّل (CSV):** التقارير والطلبات تدعم تصدير CSV بترميز UTF-8 (BOM) لفتح صحيح في Excel العربي:
-- `GET /requests/export-csv` و `GET /my/requests/export-csv` (طلبات)
-- `GET /reports/export-csv` (رواتب شهرية)
+### 4.6 holidays
+```
+id PK BIGINT UNSIGNED AI
+holiday_name VARCHAR(150) NOT NULL
+start_date DATE NOT NULL
+end_date DATE NOT NULL
+is_recurring TINYINT DEFAULT 0  -- تتكرر سنوياً
+created_at, updated_at
+deleted_at (soft delete)
+```
+
+### 4.7 attendance_devices
+```
+id PK BIGINT UNSIGNED AI
+device_name VARCHAR(100) NOT NULL
+ip_address VARCHAR(45) NOT NULL  -- IPv4/IPv6
+location VARCHAR(100) NULL
+last_seen_at TIMESTAMP NULL
+last_sync_at TIMESTAMP NULL
+status ENUM(online, offline) DEFAULT 'offline'
+last_sync TIMESTAMP NULL
+created_at, updated_at
+deleted_at (soft delete)
+```
+
+### 4.8 documents
+```
+id PK BIGINT UNSIGNED AI
+employee_id FK -> employees(id) ON DELETE CASCADE
+document_type ENUM(identity, passport, contract, health_certificate) NOT NULL
+document_number VARCHAR(100) NOT NULL
+expiry_date DATE NOT NULL  -- تاريخ انتهاء الوثيقة
+file_path VARCHAR(255) NOT NULL
+created_at, updated_at
+deleted_at (soft delete)
+```
+
+### 4.9 attendance_logs
+```
+id PK BIGINT UNSIGNED AI
+employee_id FK -> employees(id) ON DELETE CASCADE
+device_id FK -> attendance_devices(id) ON DELETE SET NULL
+log_date DATE NOT NULL  -- تاريخ اليوم
+check_in TIMESTAMP NULL  -- وقت الدخول
+check_out TIMESTAMP NULL  -- وقت الخروج
+late_minutes INT DEFAULT 0  -- دقائق التأخير
+overtime_minutes INT DEFAULT 0  -- دقائق إضافية
+status ENUM(present, absent, late, holiday) DEFAULT 'absent'
+created_at, updated_at
+deleted_at (soft delete)
+INDEX: unique_employee_log_date(employee_id, log_date)
+```
+
+### 4.10 hr_transactions
+```
+id PK BIGINT UNSIGNED AI
+employee_id FK -> employees(id) ON DELETE CASCADE
+transaction_type ENUM(leave, permission, promotion, penalty, transfer) NOT NULL
+start_date_time TIMESTAMP NULL
+end_date_time TIMESTAMP NULL
+description TEXT NULL  -- تفاصيل الطلب
+financial_impact DECIMAL(10,2) DEFAULT 0.00  -- الأثر المالي
+status ENUM(pending, approved, rejected) DEFAULT 'pending'
+approved_by FK -> users(id) ON DELETE SET NULL  -- من وافق
+created_at, updated_at
+deleted_at (soft delete)
+```
+
+### 4.11 payroll_orders
+```
+id PK BIGINT UNSIGNED AI
+employee_id FK -> employees(id) ON DELETE CASCADE
+salary_month VARCHAR(7) NOT NULL  -- YYYY-MM
+allowances DECIMAL(15,2) DEFAULT 0.00  -- البدلات
+deductions DECIMAL(15,2) DEFAULT 0.00  -- الخصومات
+net_salary DECIMAL(15,2) NOT NULL  -- الراتب الصافي
+payment_status ENUM(draft, approved, paid) DEFAULT 'draft'
+paid_at TIMESTAMP NULL  -- تاريخ الصرف
+created_at, updated_at
+deleted_at (soft delete)
+INDEX: unique_employee_salary_month(employee_id, salary_month)
+```
+
+### 4.12 audit_logs
+```
+id PK BIGINT UNSIGNED AI
+user_id FK -> users(id) ON DELETE SET NULL  -- من قام بالعملية
+action_type ENUM(create, update, delete) NOT NULL
+table_name VARCHAR(50) NOT NULL  -- الجدول المتأثر
+record_id BIGINT UNSIGNED NOT NULL  -- رقم السجل
+old_values TEXT NULL  -- القيم القديمة JSON
+new_values TEXT NULL  -- القيم الجديدة JSON
+performed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+created_at, updated_at
+deleted_at (soft delete)
+```
+
+### 4.13 otp_codes
+```
+id PK BIGINT UNSIGNED AI
+email VARCHAR(255) NULL
+user_id FK -> users(id) ON DELETE CASCADE
+code VARCHAR(255) NOT NULL  -- مشفر
+type VARCHAR(20) DEFAULT 'login'
+expires_at TIMESTAMP NOT NULL  -- وقت الانتهاء
+used_at TIMESTAMP NULL  -- وقت الاستخدام
+failed_attempts INT DEFAULT 0  -- المحاولات الفاشلة
+locked_until TIMESTAMP NULL  -- وقت القفل
+created_at, updated_at
+INDEX: idx_email_code(email, code)
+INDEX: idx_expires_at(expires_at)
+```
+
+### 4.14 system_settings
+```
+id PK BIGINT UNSIGNED AI
+setting_key VARCHAR(100) UNIQUE NOT NULL
+setting_value TEXT NOT NULL
+created_at, updated_at
+deleted_at (soft delete)
+```
 
 ---
 
-## 9. سيناريوهات استخدام رئيسية (Use-Case Summary)
+## 5. المكونات البرمجية
 
-1. **الموظف يقدّم إجازة:** `/my/requests/create` → `RequestWebController@store` (يتحقق من `vacation_balance`) → الحالة `pending` + تسجيل Audit.
-2. **المدير يعتمد:** `requests.update_status` → تحقق القسم + `lockForUpdate` + خصم الرصيد عند الاعتماد + Audit.
-3. **الإدارة تولّد الرواتب:** `payroll.generate` → حلقة على الموظفين النشطين + احتساب التأخير/العقوبات/الترقيات → `PayrollOrder` بحالة `draft` + Audit.
-4. **تسجيل حضور:** `attendance.check-in` → مقارنة بوردية الموظف + فترة السماح → `late_minutes`/الحالة.
-5. **تصدير قسيمة:** `payroll.download_pdf` → قالب `pdf_payslip` + mPDF → تنزيل RTL.
-6. **دخول OTP:** `otp.send` → بريد الرمز (5 دقائق) → `otp.verify` (مع قفل بعد 5 محاولات فاشلة).
+### Models (14 Model):
+```
+RolePermission, User, Department, Shift, Employee,
+Holiday, AttendanceDevice, Document, AttendanceLog,
+HrTransaction, PayrollOrder, AuditLog, OtpCode, SystemSetting
+```
+
+### Controllers (13 Web Controller):
+```
+AttendanceWebController, DashboardController, DepartmentWebController,
+DeviceWebController, DocumentWebController, EmployeeWebController,
+HolidayWebController, OtpController, PayrollWebController,
+ProfileController, RequestWebController, ShiftWebController, SmsMessageController
+```
+
+### API Controllers (11 Api Controller):
+```
+AuthController, EmployeeController, DepartmentApiController,
+ShiftController, AttendanceLogController, AttendanceDeviceController,
+HolidayController, DocumentController, HrTransactionController,
+PayrollOrderController, AuditLogController, SystemSettingController,
+RolePermissionController
+```
+
+### Middleware (2 custom):
+```
+EnsureUserIsActive -- يمنع دخول الحسابات المعطلة
+RoleMiddleware -- يتحقق من صلاحية الدور
+```
+
+### Observers (3):
+```
+DepartmentObserver, ShiftObserver, HolidayObserver
+```
+
+### Notifications (4):
+```
+WelcomeNotification, OtpNotification, DocumentExpiryNotification, CustomMessageNotification
+```
+
+### Console Commands (2):
+```
+SendDocumentExpiryNotifications -- إشعارات انتهاء الوثائق
+MarkAbsentDaily -- تسجيل الغياب اليومي تلقائياً
+```
 
 ---
 
-*نهاية الوثيقة — مبنية على فحص شيفرة المصدر في 2026-07-12.*
+## 6. التقنيات المستخدمة
+
+| الطبقة | التقنية | الإصدار |
+|--------|---------|--------|
+| Backend | Laravel | 13.x |
+| لغة البرمجة | PHP | 8.5+ |
+| Frontend | Blade + Tailwind CSS + Alpine.js | - |
+| Build Tool | Vite | - |
+| PDF Engine | mPDF | - |
+| Database | MySQL / MariaDB | 8.x+ |
+| أيقونات | Lucide Icons | - |
+| المصادقة | Laravel Breeze + OTP | - |
+| API | Laravel Sanctum | - |
+| Notifications | Laravel Notifications + SMS/WhatsApp | - |
+| Cache | Redis / File | - |
+
+---
+
+## 7. خارطة الطريق
+
+### مكتمل:
+- مصادقة OTP + حماية Lockout
+- إدارة الحضور والانصراف + أجهزة بصمة
+- محرك رواتب + PDF
+- دورة طلبات متكاملة
+- أرشيف وثائق
+- Audit Log
+- تصدير CSV
+- رسائل SMS/WhatsApp
+- إعدادات النظام
+- API RESTful موحّد
+- My Area (بوابة الموظف)
+
+### مخطط مستقبلاً:
+- Push Notifications
+- Queue للعمليات الثقيلة
+- Feature Tests شاملة
+- واجهة موبايل مستقلة
+
+---
+
+**المشروع:** HR Engine  
+**الإصدار:** 1.0  
+**المطوّر:** عبد الرحمن المصطفى  
+**الرخصة:** MIT  
+**المستودع:** https://github.com/DarkZero81/HR-Management-System

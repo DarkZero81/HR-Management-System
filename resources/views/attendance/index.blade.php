@@ -1,3 +1,5 @@
+{{-- Attendance management page - admin view with filters, stats cards, and attendance logs table --}}
+
 @extends('layouts.app')
 
 @section('title', 'تسجيل الحضور')

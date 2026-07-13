@@ -4,13 +4,32 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * FormRequest for updating an existing employee document.
+ *
+ * Validates document update input including:
+ * - Employee association
+ * - Document type and number (unique except current record)
+ * - Expiry date (must be in the future)
+ * - Optional file upload (PDF, JPG, PNG, max 5MB)
+ */
 class UpdateDocumentRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [

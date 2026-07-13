@@ -8,14 +8,32 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for holidays management.
+ *
+ * Handles:
+ * - CRUD operations for holidays via API
+ * - Support for recurring annual holidays
+ */
 class HolidayController extends Controller
 {
+    /**
+     * Display a listing of all holidays.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(): JsonResponse
     {
         $holidays = Holiday::all();
         return response()->json(['data' => $holidays], 200);
     }
 
+    /**
+     * Store a newly created holiday.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
@@ -31,12 +49,25 @@ class HolidayController extends Controller
         });
     }
 
+    /**
+     * Display the specified holiday.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $holiday = Holiday::findOrFail($id);
         return response()->json(['data' => $holiday], 200);
     }
 
+    /**
+     * Update the specified holiday.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         return DB::transaction(function () use ($request, $id) {
@@ -54,6 +85,12 @@ class HolidayController extends Controller
         });
     }
 
+    /**
+     * Remove the specified holiday.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id): JsonResponse
     {
         return DB::transaction(function () use ($id) {

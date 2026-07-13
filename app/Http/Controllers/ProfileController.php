@@ -10,10 +10,21 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Controller for user profile management.
+ *
+ * Handles:
+ * - Displaying the user's profile form
+ * - Updating profile information (name, email, avatar)
+ * - Deleting the user's account
+ */
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
      */
     public function edit(Request $request): View
     {
@@ -24,6 +35,12 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
+     *
+     * Handles avatar upload/update with automatic deletion of old avatar.
+     * Resets email verification if email is changed.
+     *
+     * @param  \App\Http\Requests\ProfileUpdateRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -53,6 +70,9 @@ class ProfileController extends Controller
 
     /**
      * Delete the user's account.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Request $request): RedirectResponse
     {

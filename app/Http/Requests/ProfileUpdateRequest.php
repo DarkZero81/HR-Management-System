@@ -7,6 +7,14 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * FormRequest for updating the authenticated user's profile.
+ *
+ * Validates profile update input including:
+ * - User name
+ * - Email address (unique except current user)
+ * - Optional avatar image (max 2MB)
+ */
 class ProfileUpdateRequest extends FormRequest
 {
     /**

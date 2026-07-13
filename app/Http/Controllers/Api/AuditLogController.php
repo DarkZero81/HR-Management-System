@@ -7,8 +7,21 @@ use App\Models\AuditLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * API controller for audit logs management.
+ *
+ * Handles:
+ * - Listing audit logs with search and filters
+ * - Paginated responses
+ */
 class AuditLogController extends Controller
 {
+    /**
+     * Display a listing of audit logs with filters.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $query = AuditLog::with('user');

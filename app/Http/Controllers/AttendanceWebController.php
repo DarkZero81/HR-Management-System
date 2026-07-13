@@ -9,8 +9,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
+/**
+ * Controller for attendance management (admin/manager view).
+ *
+ * Handles:
+ * - Attendance logs listing with filters (date, status)
+ * - Manual check-in/check-out for employees
+ * - Editing and deleting attendance records
+ * - My Attendance page for employees
+ */
 class AttendanceWebController extends Controller
 {
+    /**
+     * Display all attendance logs with filters.
+     *
+     * Supports filtering by:
+     * - Single date, date range, or today by default
+     * - Attendance status (present, late, absent, holiday)
+     * - Paginated results with stats summary
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request)
     {
         $query = AttendanceLog::with(['employee', 'device']);
@@ -51,6 +71,12 @@ class AttendanceWebController extends Controller
         return view('attendance.index', compact('logs', 'devices', 'stats'));
     }
 
+    /**
+     * Display the authenticated employee's personal attendance records.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
     public function myAttendance(Request $request)
     {
         $employee = Auth::user()?->employee;
@@ -85,6 +111,15 @@ class AttendanceWebController extends Controller
         return view('attendance.my_index', compact('logs', 'stats', 'todayLog', 'devices'));
     }
 
+    /**
+     * Record check-in for an employee.
+     *
+     * Calculates late minutes based on the employee's shift and grace period.
+     * Creates or updates the attendance log for today.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -124,6 +159,12 @@ class AttendanceWebController extends Controller
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل وتحديث حركة الحضور بنظام الأمان والمطابقة بنجاح.');
     }
 
+    /**
+     * Record check-in for the authenticated employee (My Area).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function storeMy(Request $request)
     {
         $employee = Auth::user()?->employee;
@@ -137,6 +178,14 @@ class AttendanceWebController extends Controller
         return $this->store($request);
     }
 
+    /**
+     * Record check-out for an employee.
+     *
+     * Calculates overtime minutes based on the employee's shift end time.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function checkOut(Request $request)
     {
         $request->validate([
@@ -173,6 +222,12 @@ class AttendanceWebController extends Controller
         return redirect()->route('attendance.index')->with('success', 'تم تسجيل حركة الانصراف واحتساب العمل الإضافي بنجاح.');
     }
 
+    /**
+     * Record check-out for the authenticated employee (My Area).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function checkOutMy(Request $request)
     {
         $employee = Auth::user()?->employee;
@@ -186,12 +241,25 @@ class AttendanceWebController extends Controller
         return $this->checkOut($request);
     }
 
+    /**
+     * Show the edit form for an attendance log.
+     *
+     * @param  \App\Models\AttendanceLog  $log
+     * @return \Illuminate\View\View
+     */
     public function edit(AttendanceLog $log)
     {
         $devices = AttendanceDevice::all();
         return view('attendance.edit', compact('log', 'devices'));
     }
 
+    /**
+     * Update an existing attendance log.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\AttendanceLog  $log
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, AttendanceLog $log)
     {
         $validated = $request->validate([
@@ -219,6 +287,12 @@ class AttendanceWebController extends Controller
         return redirect()->route('attendance.index')->with('success', 'تم تحديث سجل الحضور بنجاح.');
     }
 
+    /**
+     * Delete an attendance log.
+     *
+     * @param  \App\Models\AttendanceLog  $log
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(AttendanceLog $log)
     {
         $log->delete();

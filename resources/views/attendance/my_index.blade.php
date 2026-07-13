@@ -1,3 +1,5 @@
+{{-- Employee personal attendance page - monthly history and quick check-in/out --}}
+
 @extends('layouts.app')
 
 @section('title', 'حضوري الشخصي')

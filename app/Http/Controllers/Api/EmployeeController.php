@@ -8,8 +8,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for employee management.
+ *
+ * Handles:
+ * - CRUD operations for employees via API
+ * - Search, filter, and sort functionality
+ * - Paginated responses
+ */
 class EmployeeController extends Controller
 {
+    /**
+     * Display a listing of employees with search, filter, and sort.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Employee::with(['user', 'shift']);
@@ -39,6 +53,12 @@ class EmployeeController extends Controller
         return response()->json(['data' => $employees], 200);
     }
 
+    /**
+     * Store a newly created employee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
@@ -61,12 +81,25 @@ class EmployeeController extends Controller
         });
     }
 
+    /**
+     * Display the specified employee with all relations.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $employee = Employee::with(['user', 'shift', 'documents', 'attendanceLogs', 'hrTransactions', 'payrollOrders'])->findOrFail($id);
         return response()->json(['data' => $employee], 200);
     }
 
+    /**
+     * Update the specified employee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         return DB::transaction(function () use ($request, $id) {
@@ -92,6 +125,12 @@ class EmployeeController extends Controller
         });
     }
 
+    /**
+     * Remove the specified employee.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id): JsonResponse
     {
         return DB::transaction(function () use ($id) {

@@ -5,10 +5,21 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * FormRequest for creating a new employee document (admin/HR side).
+ *
+ * Validates document creation input including:
+ * - Employee association
+ * - Document type and number (must be unique)
+ * - Expiry date (must be in the future)
+ * - Document file (required, PDF/JPG/PNG, max 5MB)
+ */
 class DocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -17,6 +28,8 @@ class DocumentRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

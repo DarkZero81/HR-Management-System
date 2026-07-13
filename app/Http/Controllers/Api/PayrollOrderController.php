@@ -11,8 +11,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for payroll orders management.
+ *
+ * Handles:
+ * - Listing payroll orders with filters
+ * - Generating monthly payroll for all employees
+ * - Getting employee payslip history
+ */
 class PayrollOrderController extends Controller
 {
+    /**
+     * Display a listing of payroll orders.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $query = PayrollOrder::with('employee.user');
@@ -29,6 +43,18 @@ class PayrollOrderController extends Controller
         return response()->json(['data' => $payrolls], 200);
     }
 
+    /**
+     * Generate monthly payroll for all active employees.
+     *
+     * Calculates:
+     * - Fixed allowances (transport + housing)
+     * - Late deductions based on attendance
+     * - Penalty deductions from approved HR transactions
+     * - Net salary = base_salary + allowances - deductions
+     *
+     * @param  string  $salaryMonth
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function generateMonthlyPayroll(string $salaryMonth): JsonResponse
     {
         return DB::transaction(function () use ($salaryMonth) {
@@ -80,6 +106,12 @@ class PayrollOrderController extends Controller
         });
     }
 
+    /**
+     * Get payslip history for a specific employee.
+     *
+     * @param  int  $employeeId
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getEmployeePayslip(int $employeeId): JsonResponse
     {
         $payrolls = PayrollOrder::where('employee_id', $employeeId)

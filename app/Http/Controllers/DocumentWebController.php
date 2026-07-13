@@ -15,9 +15,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
+/**
+ * Controller for document management.
+ *
+ * Handles:
+ * - CRUD operations for employee documents
+ * - Document filtering by type, status, date range
+ * - Personal document upload for employees (My Documents)
+ * - Document expiry tracking and notifications
+ * - Audit logging via Auditable trait
+ */
 class DocumentWebController extends Controller
 {
     use Auditable;
+
+    /**
+     * Apply common document filters to the query.
+     *
+     * Filters by: document type, expiry status, date range, employee
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Illuminate\Http\Request  $request
+     * @param  bool  $isMyPage
+     * @return void
+     */
     protected function applyDocumentFilters($query, Request $request, bool $isMyPage = false): void
     {
         $query->when($request->filled('document_type'), function ($q) use ($request) {
@@ -63,6 +84,12 @@ class DocumentWebController extends Controller
         }
     }
 
+    /**
+     * Display a listing of all documents (admin view).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $baseQuery = Document::with('employee.user')->orderBy('expiry_date');
@@ -94,11 +121,22 @@ class DocumentWebController extends Controller
         return view('documents.index', compact('documents', 'stats', 'expiringDocuments', 'employees', 'myMode'));
     }
 
+    /**
+     * Redirect to my documents page.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function myFiles(): RedirectResponse
     {
         return redirect()->route('my.documents.index');
     }
 
+    /**
+     * Display the authenticated employee's personal documents.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function myDocuments(Request $request): View
     {
         $employeeId = Auth::user()?->employee?->id;
@@ -134,6 +172,12 @@ class DocumentWebController extends Controller
             ->with('myMode', true);
     }
 
+    /**
+     * Display the specified document.
+     *
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\View\View
+     */
     public function show(Document $document): View
     {
         $document->load('employee.user');
@@ -141,6 +185,12 @@ class DocumentWebController extends Controller
         return view('documents.show', compact('document'));
     }
 
+    /**
+     * Display the specified document (personal view with authorization).
+     *
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\View\View
+     */
     public function myShow(Document $document): View
     {
         $this->authorizeEdit($document);
@@ -150,12 +200,24 @@ class DocumentWebController extends Controller
         return view('documents.show', compact('document'));
     }
 
+    /**
+     * Show the form for creating a new personal document.
+     *
+     * @return \Illuminate\View\View
+     */
     public function myCreate(): View
     {
         $employees = Employee::orderBy('first_name')->get();
         return view('documents.create', compact('employees'))->with('myMode', true);
     }
 
+    /**
+     * Check if the authenticated user can edit the given document.
+     *
+     * @param  \App\Models\Document  $document
+     * @return void
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
     protected function authorizeEdit(Document $document): void
     {
         $user = Auth::user();
@@ -169,6 +231,12 @@ class DocumentWebController extends Controller
         }
     }
 
+    /**
+     * Show the form for editing the specified personal document.
+     *
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\View\View
+     */
     public function myEdit(Document $document): View
     {
         $this->authorizeEdit($document);
@@ -182,6 +250,13 @@ class DocumentWebController extends Controller
         ]);
     }
 
+    /**
+     * Update the specified personal document.
+     *
+     * @param  \App\Http\Requests\UpdateDocumentRequest  $request
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function myUpdate(UpdateDocumentRequest $request, Document $document): RedirectResponse
     {
         $this->authorizeEdit($document);
@@ -204,6 +279,12 @@ class DocumentWebController extends Controller
         return redirect()->route('my.documents.index')->with('success', 'تم تحديث بيانات الوثيقة بنجاح.');
     }
 
+    /**
+     * Store a new personal document uploaded by the employee.
+     *
+     * @param  \App\Http\Requests\MyDocumentRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function storeMy(MyDocumentRequest $request): RedirectResponse
     {
         $user = Auth::user();
@@ -228,12 +309,23 @@ class DocumentWebController extends Controller
         return redirect()->route('my.documents.index')->with('success', 'تم رفع الوثيقة بنجاح.');
     }
 
+    /**
+     * Show the form for creating a new document (admin view).
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         $employees = Employee::orderBy('first_name')->get();
         return view('documents.create', compact('employees'))->with('myMode', false);
     }
 
+    /**
+     * Store a newly created document (admin view).
+     *
+     * @param  \App\Http\Requests\DocumentRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(DocumentRequest $request): RedirectResponse
     {
         $user = Auth::user();
@@ -261,12 +353,25 @@ class DocumentWebController extends Controller
         return redirect()->route('documents.index')->with('success', 'تم رفع الوثيقة بنجاح.');
     }
 
+    /**
+     * Show the form for editing the specified document (admin view).
+     *
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\View\View
+     */
     public function edit(Document $document): View
     {
         $employees = Employee::orderBy('first_name')->get();
         return view('documents.edit', compact('document', 'employees'))->with('myMode', false);
     }
 
+    /**
+     * Update the specified document (admin view).
+     *
+     * @param  \App\Http\Requests\UpdateDocumentRequest  $request
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(UpdateDocumentRequest $request, Document $document): RedirectResponse
     {
         $validated = $request->validated();
@@ -288,6 +393,13 @@ class DocumentWebController extends Controller
         return redirect()->route('documents.index')->with('success', 'تم تحديث بيانات الوثيقة بنجاح.');
     }
 
+    /**
+     * Remove the specified document from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Document  $document
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Request $request, Document $document): RedirectResponse
     {
         $user = Auth::user();
@@ -304,6 +416,13 @@ class DocumentWebController extends Controller
         return $this->deleteDocument($document, 'documents.index');
     }
 
+    /**
+     * Delete the document and its file from storage.
+     *
+     * @param  \App\Models\Document  $document
+     * @param  string  $redirectRoute
+     * @return \Illuminate\Http\RedirectResponse
+     */
     protected function deleteDocument(Document $document, string $redirectRoute): RedirectResponse
     {
         $documentData = $document->toArray();

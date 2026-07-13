@@ -15,8 +15,24 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
 
+/**
+ * Controller for employee management.
+ *
+ * Handles:
+ * - CRUD operations for employee records
+ * - Employee search, filter, and sort
+ * - Avatar upload/update
+ * - PDF export for employee profile
+ * - Prevents deletion of employees with historical records
+ */
 class EmployeeWebController extends Controller
 {
+    /**
+     * Display a listing of all employees with search, filter, and sort.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $query = Employee::with(['shift', 'user', 'department']);
@@ -61,6 +77,11 @@ class EmployeeWebController extends Controller
         return view('employees.index', compact('employees', 'departments', 'shifts'));
     }
 
+    /**
+     * Show the form for creating a new employee.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         $departments = Cache::remember('departments.all', 3600, fn() => Department::orderBy('name')->get());
@@ -78,6 +99,12 @@ class EmployeeWebController extends Controller
         return view('employees.create', compact('departments', 'shifts', 'users'));
     }
 
+    /**
+     * Store a newly created employee in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -120,6 +147,12 @@ class EmployeeWebController extends Controller
         return redirect()->route('employees.index')->with('success', 'تم إضافة الموظف بنجاح وإنشاء الملف الوظيفي.');
     }
 
+    /**
+     * Show the form for editing the specified employee.
+     *
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\View\View
+     */
     public function edit(Employee $employee): View
     {
         $departments = Cache::remember('departments.all', 3600, fn() => Department::orderBy('name')->get());
@@ -136,6 +169,13 @@ class EmployeeWebController extends Controller
         return view('employees.edit', compact('employee', 'departments', 'shifts'));
     }
 
+    /**
+     * Update the specified employee in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Employee $employee): RedirectResponse
     {
         $validated = $request->validate([
@@ -187,6 +227,14 @@ class EmployeeWebController extends Controller
         return redirect()->route('employees.index')->with('success', 'تم تحديث بيانات ملف الموظف بنجاح.');
     }
 
+    /**
+     * Remove the specified employee from storage.
+     *
+     * Prevents deletion if the employee has attendance logs, transactions, or payroll records.
+     *
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Employee $employee): RedirectResponse
     {
         if ($employee->attendanceLogs()->exists() || $employee->hrTransactions()->exists() || $employee->payrollOrders()->exists()) {
@@ -214,11 +262,23 @@ class EmployeeWebController extends Controller
         return redirect()->route('employees.index')->with('success', 'تم حذف ملف الموظف نهائياً من النظام.');
     }
 
+    /**
+     * Display the specified employee profile.
+     *
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\View\View
+     */
     public function show(Employee $employee): View
     {
         return view('employees.show', compact('employee'));
     }
 
+    /**
+     * Download the employee profile as PDF.
+     *
+     * @param  \App\Models\Employee  $employee
+     * @return \Illuminate\Http\Response
+     */
     public function downloadPdf(Employee $employee): \Illuminate\Http\Response
     {
         if (!class_exists(Mpdf::class)) {

@@ -8,14 +8,32 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for attendance devices management.
+ *
+ * Handles:
+ * - CRUD operations for attendance devices via API
+ * - Toggling device online/offline status
+ */
 class AttendanceDeviceController extends Controller
 {
+    /**
+     * Display a listing of all attendance devices.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(): JsonResponse
     {
         $devices = AttendanceDevice::all();
         return response()->json(['data' => $devices], 200);
     }
 
+    /**
+     * Store a newly created attendance device.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
@@ -30,12 +48,25 @@ class AttendanceDeviceController extends Controller
         });
     }
 
+    /**
+     * Display the specified attendance device.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $device = AttendanceDevice::findOrFail($id);
         return response()->json(['data' => $device], 200);
     }
 
+    /**
+     * Update the specified attendance device.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         return DB::transaction(function () use ($request, $id) {
@@ -52,6 +83,12 @@ class AttendanceDeviceController extends Controller
         });
     }
 
+    /**
+     * Remove the specified attendance device.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id): JsonResponse
     {
         return DB::transaction(function () use ($id) {
@@ -61,6 +98,12 @@ class AttendanceDeviceController extends Controller
         });
     }
 
+    /**
+     * Toggle the attendance device status between online/offline.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function toggleStatus(int $id): JsonResponse
     {
         return DB::transaction(function () use ($id) {

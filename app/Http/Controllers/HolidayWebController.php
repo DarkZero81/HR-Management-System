@@ -10,14 +10,36 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Controller for holidays management.
+ *
+ * Handles:
+ * - CRUD operations for official holidays
+ * - Holiday calendar view
+ * - Support for recurring annual holidays
+ * - Cache invalidation on changes
+ * - Audit logging for all operations
+ */
 class HolidayWebController extends Controller
 {
+    /**
+     * Display a paginated listing of all holidays.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index(): View
     {
         $holidays = Holiday::orderBy('start_date', 'desc')->paginate(8);
         return view('holidays.index', compact('holidays'));
     }
 
+    /**
+     * Display the holiday calendar view.
+     *
+     * Holidays are cached for 1 hour and formatted for the calendar component.
+     *
+     * @return \Illuminate\View\View
+     */
     public function calendar(): View
     {
         $holidays = Cache::remember('holidays.all', 3600, fn() => Holiday::all());
@@ -44,11 +66,24 @@ class HolidayWebController extends Controller
         return view('holidays.calendar', compact('holidays'));
     }
 
+    /**
+     * Show the form for creating a new holiday.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         return view('holidays.create');
     }
 
+    /**
+     * Store a newly created holiday in storage.
+     *
+     * Invalidates the holidays cache after creation.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -74,11 +109,26 @@ class HolidayWebController extends Controller
         return redirect()->route('holidays.index')->with('success', 'تم إنشاء الإجازة بنجاح');
     }
 
+    /**
+     * Show the form for editing the specified holiday.
+     *
+     * @param  \App\Models\Holiday  $holiday
+     * @return \Illuminate\View\View
+     */
     public function edit(Holiday $holiday): View
     {
         return view('holidays.edit', compact('holiday'));
     }
 
+    /**
+     * Update the specified holiday in storage.
+     *
+     * Invalidates the holidays cache after update.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Holiday  $holiday
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Holiday $holiday): RedirectResponse
     {
         $validated = $request->validate([
@@ -106,6 +156,14 @@ class HolidayWebController extends Controller
         return redirect()->route('holidays.index')->with('success', 'تم تحديث الإجازة بنجاح');
     }
 
+    /**
+     * Remove the specified holiday from storage.
+     *
+     * Invalidates the holidays cache after deletion.
+     *
+     * @param  \App\Models\Holiday  $holiday
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Holiday $holiday): RedirectResponse
     {
         $holidayData = $holiday->toArray();

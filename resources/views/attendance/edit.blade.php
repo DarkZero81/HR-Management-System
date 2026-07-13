@@ -11,7 +11,7 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
-            <form method="POST" action="{{ route('attendance.update', $log->id) }}" class="space-y-4">
+            <form method="POST" action="{{ route('attendance.update', ['attendance' => $log->id]) }}" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

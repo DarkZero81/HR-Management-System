@@ -1,3 +1,5 @@
+{{-- Main dashboard - role-based view (admin/manager/employee) with stats and charts --}}
+
 @extends('layouts.app')
 
 @section('title', 'الرئيسية')

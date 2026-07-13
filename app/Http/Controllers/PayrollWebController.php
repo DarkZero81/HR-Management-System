@@ -9,8 +9,24 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
+/**
+ * Controller for payroll management.
+ *
+ * Handles:
+ * - Monthly payroll listing for admin/manager
+ * - Personal payroll history for employees
+ * - Bulk payroll generation for all active employees
+ * - Payslip PDF download with Arabic support
+ * - Marking payroll orders as paid
+ */
 class PayrollWebController extends Controller
 {
+    /**
+     * Display payroll orders for the selected month (admin view).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $month = $request->get('month', \Carbon\Carbon::now()->format('Y-m'));
@@ -34,6 +50,12 @@ class PayrollWebController extends Controller
         return view('payroll.index', compact('payrolls', 'month'));
     }
 
+    /**
+     * Display payroll history for the authenticated employee (My Area).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function myPayroll(Request $request): View
     {
         $employeeId = Auth::user()?->employee?->id;
@@ -54,6 +76,18 @@ class PayrollWebController extends Controller
         return view('payroll.my_index', compact('payrolls', 'month'));
     }
 
+    /**
+     * Generate payroll orders for all active employees for the selected month.
+     *
+     * Calculates:
+     * - Late deductions based on attendance logs
+     * - HR deductions from approved penalty transactions
+     * - Allowances from approved promotion transactions
+     * - Net salary = base_salary + allowances - deductions
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
@@ -119,19 +153,22 @@ class PayrollWebController extends Controller
             ->with('success', 'تم توليد احتساب الرواتب للشهر المحدد بناءً على الحضور والوقوعات المالية المعتمدة.');
     }
 
+    /**
+     * Download the payslip PDF for a specific employee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $employeeId
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function downloadPayslipPdf(Request $request, int $employeeId): SymfonyResponse
     {
         $employee = Employee::with(['department', 'shift'])->findOrFail($employeeId);
 
-        $payrollQuery = PayrollOrder::where('employee_id', $employee->id);
+        $month = $request->query('month', \Carbon\Carbon::now()->format('Y-m'));
 
-        if ($month = $request->query('month')) {
-            $payrollQuery->where('salary_month', $month);
-        }
-
-        $payroll = $payrollQuery->latest('salary_month')->firstOrFail();
-
-        $this->ensureMpdfAvailable();
+        $payroll = PayrollOrder::where('employee_id', $employeeId)
+            ->where('salary_month', $month)
+            ->firstOrFail();
 
         $companyName = \App\Models\SystemSetting::where('setting_key', 'company_name')->value('setting_value') ?? 'المنقذ';
 
@@ -153,6 +190,13 @@ class PayrollWebController extends Controller
         ]);
     }
 
+    /**
+     * Mark a payroll order as paid.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function markAsPaid(Request $request, int $id): \Illuminate\Http\RedirectResponse
     {
         $payroll = PayrollOrder::findOrFail($id);
@@ -165,6 +209,12 @@ class PayrollWebController extends Controller
         return back()->with('success', 'تم تحديث حالة الدفع إلى: مدفوع.');
     }
 
+    /**
+     * Check if mPDF library is available.
+     *
+     * @return void
+     * @throws \RuntimeException
+     */
     private function ensureMpdfAvailable(): void
     {
         if (!class_exists(\Mpdf\Mpdf::class)) {
@@ -172,6 +222,11 @@ class PayrollWebController extends Controller
         }
     }
 
+    /**
+     * Create a configured mPDF instance.
+     *
+     * @return \Mpdf\Mpdf
+     */
     private function makeMpdf(): \Mpdf\Mpdf
     {
         return new \Mpdf\Mpdf([

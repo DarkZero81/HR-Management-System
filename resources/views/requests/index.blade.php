@@ -1,3 +1,5 @@
+{{-- Requests management page with filters, stats, and calendar events --}}
+
 @extends('layouts.app')
 
 @section('title', 'الإجازات والطلبات')

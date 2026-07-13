@@ -1,3 +1,5 @@
+{{-- Documents listing with filters, expiry tracking, and admin/employee modes --}}
+
 @extends('layouts.app')
 
 @section('title', $myMode ? 'وثائقي' : 'سجل المستندات')

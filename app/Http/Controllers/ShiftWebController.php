@@ -11,8 +11,23 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Controller for shift management.
+ *
+ * Handles:
+ * - CRUD operations for work shifts
+ * - Support for overnight shifts
+ * - Shift statistics and employee counts
+ * - Search functionality
+ */
 class ShiftWebController extends Controller
 {
+    /**
+     * Display a listing of all shifts with search and stats.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $query = Shift::query()->withCount('employees');
@@ -43,11 +58,22 @@ class ShiftWebController extends Controller
         return view('shifts.index', compact('shifts', 'stats'));
     }
 
+    /**
+     * Show the form for creating a new shift.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         return view('shifts.form');
     }
 
+    /**
+     * Store a newly created shift in storage.
+     *
+     * @param  \App\Http\Requests\StoreShiftRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(StoreShiftRequest $request): RedirectResponse
     {
         $shift = Shift::create($request->validated());
@@ -55,11 +81,24 @@ class ShiftWebController extends Controller
         return redirect()->route('shifts.index')->with('success', 'تم إنشاء الوردية بنجاح');
     }
 
+    /**
+     * Show the form for editing the specified shift.
+     *
+     * @param  \App\Models\Shift  $shift
+     * @return \Illuminate\View\View
+     */
     public function edit(Shift $shift): View
     {
         return view('shifts.form', compact('shift'));
     }
 
+    /**
+     * Update the specified shift in storage.
+     *
+     * @param  \App\Http\Requests\UpdateShiftRequest  $request
+     * @param  \App\Models\Shift  $shift
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(UpdateShiftRequest $request, Shift $shift): RedirectResponse
     {
         $shift->update($request->validated());
@@ -67,6 +106,14 @@ class ShiftWebController extends Controller
         return redirect()->route('shifts.index')->with('success', 'تم تحديث الوردية بنجاح');
     }
 
+    /**
+     * Remove the specified shift from storage.
+     *
+     * Prevents deletion if employees are assigned to the shift.
+     *
+     * @param  \App\Models\Shift  $shift
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Shift $shift): RedirectResponse
     {
         if ($shift->employees()->exists()) {
@@ -78,6 +125,12 @@ class ShiftWebController extends Controller
         return redirect()->route('shifts.index')->with('success', 'تم حذف الوردية بنجاح');
     }
 
+    /**
+     * Display the specified shift with its employees.
+     *
+     * @param  \App\Models\Shift  $shift
+     * @return \Illuminate\View\View
+     */
     public function show(Shift $shift): View
     {
         $shift->load(['employees' => function ($query) {

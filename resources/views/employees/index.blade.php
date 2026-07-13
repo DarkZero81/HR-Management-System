@@ -1,3 +1,5 @@
+{{-- Employees listing with search, filters, sorting, and pagination --}}
+
 @extends('layouts.app')
 @section('title', 'إدارة الموظفين')
 @section('content')

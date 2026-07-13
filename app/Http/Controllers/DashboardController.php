@@ -16,8 +16,25 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Controller for dashboard and reports.
+ *
+ * Handles:
+ * - Admin/Manager dashboard with attendance, payroll, and request stats
+ * - Employee personal dashboard with performance charts
+ * - Financial reports (PDF/CSV export)
+ */
 class DashboardController extends Controller
 {
+    /**
+     * Display the dashboard based on user role.
+     *
+     * Admin/Manager: Shows company-wide stats, weekly attendance, payroll data
+     * Employee: Shows personal attendance, vacation balance, performance charts
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $user = Auth::user();
@@ -161,6 +178,12 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Display the reports page with financial and operational data.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function reports(Request $request): View
     {
         $today = today();
@@ -212,6 +235,11 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Generate and download the financial report as PDF.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function downloadFinancialReportPdf(): \Illuminate\Http\Response
     {
         $today = today();
@@ -261,6 +289,12 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Export financial data as CSV.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
     public function exportCsv(Request $request): StreamedResponse
     {
         $month = $request->query('month', now()->format('Y-m'));
@@ -314,6 +348,12 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Check if mPDF library is available.
+     *
+     * @return void
+     * @throws \RuntimeException
+     */
     private function ensureMpdfAvailable(): void
     {
         if (!class_exists(\Mpdf\Mpdf::class)) {
@@ -321,6 +361,11 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Create a configured mPDF instance.
+     *
+     * @return \Mpdf\Mpdf
+     */
     private function makeMpdf(): \Mpdf\Mpdf
     {
         return new \Mpdf\Mpdf([

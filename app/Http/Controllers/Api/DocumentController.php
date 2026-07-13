@@ -11,8 +11,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for documents management.
+ *
+ * Handles:
+ * - CRUD operations for documents via API
+ * - Authorization check for admin/manager roles only
+ * - Getting expiring documents
+ */
 class DocumentController extends Controller
 {
+    /**
+     * Ensure the authenticated user is authorized (admin or manager).
+     *
+     * @return void
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     */
     protected function ensureAuthorized(): void
     {
         if (! Auth::check()) {
@@ -26,6 +40,11 @@ class DocumentController extends Controller
         }
     }
 
+    /**
+     * Display a listing of all documents.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(): JsonResponse
     {
         $this->ensureAuthorized();
@@ -34,6 +53,12 @@ class DocumentController extends Controller
         return response()->json(['data' => $documents], 200);
     }
 
+    /**
+     * Store a newly created document.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         $this->ensureAuthorized();
@@ -52,6 +77,12 @@ class DocumentController extends Controller
         });
     }
 
+    /**
+     * Display the specified document.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $this->ensureAuthorized();
@@ -60,6 +91,13 @@ class DocumentController extends Controller
         return response()->json(['data' => $document], 200);
     }
 
+    /**
+     * Update the specified document.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         $this->ensureAuthorized();
@@ -80,6 +118,12 @@ class DocumentController extends Controller
         });
     }
 
+    /**
+     * Remove the specified document.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id): JsonResponse
     {
         $this->ensureAuthorized();
@@ -91,6 +135,12 @@ class DocumentController extends Controller
         });
     }
 
+    /**
+     * Get documents expiring within the specified number of days.
+     *
+     * @param  int  $days
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getExpiringDocuments(int $days = 30): JsonResponse
     {
         $this->ensureAuthorized();

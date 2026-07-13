@@ -7,19 +7,50 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
+/**
+ * Controller for SMS/WhatsApp messaging.
+ *
+ * Handles:
+ * - Displaying the messaging interface
+ * - Sending bulk messages to all employees, a department, or individual employees
+ * - Recipient filtering based on type selection
+ */
 class SmsMessageController extends Controller
 {
+    /**
+     * Display the messaging index page.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         return view('sms.index');
     }
 
+    /**
+     * Show the form for composing a new message.
+     *
+     * Loads all employees with their user data for recipient selection.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create()
     {
         $employees = Employee::with('user')->get();
         return view('sms.create', compact('employees'));
     }
 
+    /**
+     * Store and send a new message.
+     *
+     * Recipients are determined by type:
+     * - individual: selected employee IDs
+     * - department: all employees in the selected department
+     * - all: all employees in the system
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -28,7 +59,6 @@ class SmsMessageController extends Controller
             'type' => 'required|in:individual,department,all',
         ]);
 
-        // جلب المستلمين حسب النوع
         $users = collect();
 
         if ($request->type === 'individual') {
@@ -39,7 +69,6 @@ class SmsMessageController extends Controller
             $users = User::whereHas('employee')->get();
         }
 
-        // إرسال الرسائل عبر Notification
         foreach ($users as $user) {
             // \Notification::route('sms', $user->employee->phone)
             //     ->notify(new \App\Notifications\CustomMessageNotification($request->message));

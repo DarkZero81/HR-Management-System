@@ -17,13 +17,37 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * Controller for user registration.
+ *
+ * Handles:
+ * - Displaying the registration form
+ * - Creating new user accounts with employee role
+ * - Creating corresponding employee profile
+ * - Sending OTP verification email
+ */
 class RegisteredUserController extends Controller
 {
+    /**
+     * Show the registration form.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         return view('auth.register');
     }
 
+    /**
+     * Handle a new user registration request.
+     *
+     * Creates the user account and employee profile,
+     * then sends an OTP verification email.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([

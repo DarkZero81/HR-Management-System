@@ -4,13 +4,32 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * FormRequest for uploading a new personal document by the employee.
+ *
+ * Validates personal document upload input including:
+ * - Document type (identity, passport, contract, health_certificate)
+ * - Document number (must be unique)
+ * - Expiry date (must be in the future)
+ * - Document file (required, PDF/JPG/PNG, max 5MB)
+ */
 class MyDocumentRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
@@ -21,6 +40,11 @@ class MyDocumentRequest extends FormRequest
         ];
     }
 
+    /**
+     * Custom validation messages in Arabic.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

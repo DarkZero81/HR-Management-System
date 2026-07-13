@@ -8,14 +8,33 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * API controller for HR transactions (requests) management.
+ *
+ * Handles:
+ * - Listing all HR transactions
+ * - Submitting new requests
+ * - Processing approval/rejection
+ */
 class HrTransactionController extends Controller
 {
+    /**
+     * Display a listing of all HR transactions.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(): JsonResponse
     {
         $transactions = HrTransaction::with(['employee.user', 'approver'])->get();
         return response()->json(['data' => $transactions], 200);
     }
 
+    /**
+     * Submit a new HR transaction request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function submitRequest(Request $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
@@ -33,6 +52,13 @@ class HrTransactionController extends Controller
         });
     }
 
+    /**
+     * Process approval or rejection of an HR transaction.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function processApproval(Request $request, int $id): JsonResponse
     {
         return DB::transaction(function () use ($request, $id) {

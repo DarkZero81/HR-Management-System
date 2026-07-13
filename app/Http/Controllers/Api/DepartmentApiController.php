@@ -7,9 +7,20 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+/**
+ * API controller for department management.
+ *
+ * Handles:
+ * - CRUD operations for departments via API
+ * - Returns JSON responses with Arabic messages
+ */
 class DepartmentApiController extends Controller
 {
-    // عرض جميع الأقسام عبر الـ API
+    /**
+     * Display a listing of all departments.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $departments = Department::withCount('employees')->get();
@@ -21,7 +32,12 @@ class DepartmentApiController extends Controller
         ], Response::HTTP_OK);
     }
 
-    // حفظ قسم جديد عبر الـ API
+    /**
+     * Store a newly created department.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,7 +54,12 @@ class DepartmentApiController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    // عرض تفاصيل قسم محدد مع موظفيه
+    /**
+     * Display the specified department with its employees.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         $department = Department::with('employees')->find($id);
@@ -57,7 +78,13 @@ class DepartmentApiController extends Controller
         ], Response::HTTP_OK);
     }
 
-    // تحديث بيانات القسم عبر الـ API
+    /**
+     * Update the specified department.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $department = Department::find($id);
@@ -83,7 +110,12 @@ class DepartmentApiController extends Controller
         ], Response::HTTP_OK);
     }
 
-    // حذف القسم عبر الـ API
+    /**
+     * Remove the specified department.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $department = Department::find($id);

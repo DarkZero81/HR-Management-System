@@ -14,13 +14,40 @@ use Illuminate\View\View;
 use Mpdf\Mpdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Controller for HR transactions (requests) management.
+ *
+ * Handles:
+ * - Listing requests with advanced filters and sorting
+ * - Creating new requests (leave, permission, promotion, penalty, transfer)
+ * - Approving/rejecting requests with automatic vacation balance adjustment
+ * - Deleting pending requests
+ * - PDF export for individual requests
+ * - CSV export for bulk data
+ * - Calendar events for request visualization
+ */
 class RequestWebController extends Controller
 {
+    /**
+     * Supported transaction types.
+     *
+     * @var array<int, string>
+     */
     private const TRANSACTION_TYPES = ['leave', 'permission', 'promotion', 'penalty', 'transfer'];
 
+    /**
+     * Roles that have admin/manager access.
+     *
+     * @var array<int, string>
+     */
     private const ADMIN_ROLES = ['admin', 'manager'];
 
-
+    /**
+     * Display a listing of HR transactions with filters.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request): View
     {
         $employee = Auth::user()?->employee;
@@ -124,6 +151,11 @@ class RequestWebController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a new request.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create(): View
     {
         return view('requests.create', [
@@ -131,6 +163,14 @@ class RequestWebController extends Controller
         ]);
     }
 
+    /**
+     * Store a newly created request.
+     *
+     * For leave requests, validates that the employee has enough vacation balance.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -175,12 +215,18 @@ class RequestWebController extends Controller
             'performed_at' => now(),
         ]);
 
-        // مهم: الموظف العادي يرجع لصفحة "طلباتي" وليس صفحة الإدارة (المحمية بصلاحيات admin/manager)
         return redirect()->route('my.requests.index')->with('success', 'تم تقديم الطلب بنجاح وهو قيد المراجعة حالياً.');
     }
 
     /**
-     * اعتماد أو رفض الطلب (صلاحية إدارية فقط). يستخدم Route Model Binding مباشرة.
+     * Update the status of an HR transaction (approve/reject).
+     *
+     * Uses database transaction and row locking to prevent race conditions.
+     * Automatically adjusts vacation balance for leave requests.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\HrTransaction  $transaction
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, HrTransaction $transaction): RedirectResponse
     {
@@ -191,7 +237,6 @@ class RequestWebController extends Controller
             return back()->with('error', 'عذراً، لا تمتلك الصلاحيات الإدارية الكافية لتعديل حالة الطلبات.');
         }
 
-        // Manager can only manage requests from their own department
         if ($isManager && ! $isAdmin) {
             $managerDepartmentId = Auth::user()?->employee?->department_id;
             $employeeDepartmentId = $transaction->employee?->department_id;
@@ -206,7 +251,6 @@ class RequestWebController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated, $transaction) {
-            // قفل الصف لمنع تعارض معالجة نفس الطلب من طلبين متزامنين
             $transaction = HrTransaction::with('employee')->lockForUpdate()->findOrFail($transaction->id);
 
             $previousStatus = $transaction->status;
@@ -221,7 +265,6 @@ class RequestWebController extends Controller
             if ($transaction->transaction_type === 'leave' && $employee) {
                 $days = $this->calculateDaysRequested($transaction->start_date_time, $transaction->end_date_time);
 
-                // خصم الرصيد عند الاعتماد لأول مرة
                 if ($newStatus === 'approved' && $previousStatus !== 'approved') {
                     if ($days > $employee->vacation_balance) {
                         return back()->with('error', 'لا يمكن الموافقة: رصيد إجازات الموظف الحالي غير كافٍ.');
@@ -229,7 +272,6 @@ class RequestWebController extends Controller
                     $employee->decrement('vacation_balance', $days);
                 }
 
-                // إعادة الرصيد عند التراجع عن موافقة سابقة
                 if ($previousStatus === 'approved' && $newStatus !== 'approved') {
                     $employee->increment('vacation_balance', $days);
                 }
@@ -256,6 +298,16 @@ class RequestWebController extends Controller
         });
     }
 
+    /**
+     * Delete an HR transaction.
+     *
+     * Only pending requests can be deleted. Admin can delete any pending request.
+     * Employees can only delete their own pending requests.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\HrTransaction  $transaction
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Request $request, HrTransaction $transaction): RedirectResponse
     {
         $employee = Auth::user()?->employee;
@@ -284,6 +336,12 @@ class RequestWebController extends Controller
         return back()->with('success', 'تم إلغاء الطلب بنجاح.');
     }
 
+    /**
+     * Download a request as PDF.
+     *
+     * @param  \App\Models\HrTransaction  $transaction
+     * @return \Illuminate\Http\Response
+     */
     public function downloadPdf(HrTransaction $transaction): Response
     {
         if (! class_exists(Mpdf::class)) {
@@ -314,6 +372,12 @@ class RequestWebController extends Controller
         ]);
     }
 
+    /**
+     * Export requests as CSV.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
     public function downloadCsv(Request $request): StreamedResponse
     {
         $employee = Auth::user()?->employee;
@@ -416,6 +480,13 @@ class RequestWebController extends Controller
         ]);
     }
 
+    /**
+     * Update the status of a request via form submission.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\HrTransaction  $transaction
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateStatus(Request $request, HrTransaction $transaction): RedirectResponse
     {
         $validated = $request->validate([
@@ -486,6 +557,11 @@ class RequestWebController extends Controller
         });
     }
 
+    /**
+     * Check if the authenticated user is an admin or manager.
+     *
+     * @return bool
+     */
     private function isAdminUser(): bool
     {
         $role = strtolower(Auth::user()?->role?->role_name ?? '');
@@ -493,13 +569,24 @@ class RequestWebController extends Controller
         return in_array($role, self::ADMIN_ROLES, true);
     }
 
+    /**
+     * Check if the authenticated user is a manager.
+     *
+     * @return bool
+     */
     private function isManagerUser(): bool
     {
         return strtolower(Auth::user()?->role?->role_name ?? '') === 'manager';
     }
 
     /**
-     * يحسب عدد أيام الإجازة المطلوبة شاملاً يوم البداية والنهاية.
+     * Calculate the number of days requested for a leave/request.
+     *
+     * Includes both the start and end dates.
+     *
+     * @param  string  $start
+     * @param  string  $end
+     * @return int
      */
     private function calculateDaysRequested(string $start, string $end): int
     {
