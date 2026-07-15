@@ -153,6 +153,16 @@ php artisan migrate:fresh --seed
 
 # 5. تشغيل المشروع (سيرفر + تصميم في نفس الوقت)
 composer run dev
+# 6. تعديل جزئية البريد في .env لتصبح 
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password-here
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="your-email@gmail.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
 ```
 
 سيفتح المشروع تلقائياً على `http://127.0.0.1:8000`.
